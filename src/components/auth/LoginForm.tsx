@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogIn } from 'lucide-react';
-import { AxiosError } from 'axios';
+import { FirebaseError } from 'firebase/app';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +11,23 @@ const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  const getFirebaseErrorMessage = (error: FirebaseError) => {
+    switch (error.code) {
+      case 'auth/user-not-found':
+        return 'No account found with this email address';
+      case 'auth/wrong-password':
+        return 'Invalid password';
+      case 'auth/invalid-email':
+        return 'Invalid email address';
+      case 'auth/user-disabled':
+        return 'This account has been disabled';
+      case 'auth/too-many-requests':
+        return 'Too many failed attempts. Please try again later';
+      default:
+        return 'An error occurred during sign in. Please try again';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,10 +40,10 @@ const LoginForm: React.FC = () => {
         navigate('/');
       }
     } catch (err) {
-      if (err instanceof AxiosError) {
-        setError(err.response?.data?.message || 'Invalid email or password');
+      if (err instanceof FirebaseError) {
+        setError(getFirebaseErrorMessage(err));
       } else {
-        setError('An error occurred. Please try again.');
+        setError('An unexpected error occurred. Please try again.');
       }
       console.error(err);
     } finally {
@@ -36,13 +53,18 @@ const LoginForm: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     try {
+      setError('');
       const success = await loginWithGoogle();
       if (success) {
         navigate('/');
       }
-    } catch (error) {
-      setError('Failed to sign in with Google. Please try again.');
-      console.error(error);
+    } catch (err) {
+      if (err instanceof FirebaseError) {
+        setError(getFirebaseErrorMessage(err));
+      } else {
+        setError('Failed to sign in with Google. Please try again.');
+      }
+      console.error(err);
     }
   };
 
