@@ -1,4 +1,14 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User as FirebaseUser, UserCredential } from 'firebase/auth';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signInWithPopup, 
+  signOut, 
+  updateProfile,
+  onAuthStateChanged
+} from 'firebase/auth';
+import { auth, googleProvider } from '../config/firebase';
 import { User } from '../types';
 
 interface AuthContextType {
@@ -11,21 +21,47 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        setUser({
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || firebaseUser.email || '',
+          email: firebaseUser.email || '',
+          problemsSolved: 0,
+          dailyStreak: 0
+        });
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      // Mock login
+      const result: UserCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = result.user;
+      
       setUser({
-        id: '1',
-        name: 'Test User',
-        email: email,
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName || email,
+        email: firebaseUser.email || email,
         problemsSolved: 0,
         dailyStreak: 0
       });
@@ -33,7 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return true;
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -42,11 +78,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      // Mock registration
+      const result: UserCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = result.user;
+
+      await updateProfile(firebaseUser, { displayName: name });
+      
       setUser({
-        id: '1',
+        id: firebaseUser.uid,
         name: name,
-        email: email,
+        email: firebaseUser.email || email,
         problemsSolved: 0,
         dailyStreak: 0
       });
@@ -54,7 +94,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return true;
     } catch (error) {
       console.error('Registration error:', error);
-      return false;
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -63,11 +103,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loginWithGoogle = async (): Promise<boolean> => {
     try {
       setLoading(true);
-      // Mock Google login
+      const result: UserCredential = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      
       setUser({
-        id: '1',
-        name: 'Google User',
-        email: 'google@example.com',
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName || "Google User",
+        email: firebaseUser.email || '',
         problemsSolved: 0,
         dailyStreak: 0
       });
@@ -75,7 +117,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return true;
     } catch (error) {
       console.error('Google login error:', error);
-      return false;
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -84,10 +126,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
+      await signOut(auth);
       setUser(null);
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Logout error:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
