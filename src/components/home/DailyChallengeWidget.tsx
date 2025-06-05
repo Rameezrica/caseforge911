@@ -4,7 +4,7 @@ import {
   Calendar, Clock, Users, Trophy, 
   Flame, ArrowRight, TrendingUp, MessageSquare 
 } from 'lucide-react';
-import { DailyChallenge } from '../../types';
+import { DailyChallenge } from '../../services/api';
 
 interface DailyChallengeWidgetProps {
   challenge: DailyChallenge;
@@ -55,11 +55,11 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
             </div>
             <div className="flex items-center text-dark-400">
               <Clock className="h-4 w-4 mr-2" />
-              ~{challenge.averageTime} min avg
+              ~{challenge.problem.time_limit || 60} min avg
             </div>
             <div className="flex items-center text-dark-400">
               <TrendingUp className="h-4 w-4 mr-2" />
-              {challenge.completionRate}% completion
+              {(challenge.completion_rate * 100).toFixed(1)}% completion
             </div>
             <div className="flex items-center text-dark-400">
               <MessageSquare className="h-4 w-4 mr-2" />
@@ -69,14 +69,14 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
 
           <div className="flex flex-wrap gap-4">
             <Link
-              to={`/problem/${challenge.problemId}/solve`}
+              to={`/solve/${challenge.problem.id}`}
               className="px-6 py-3 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200 flex items-center"
             >
               Start Challenge
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
             <Link
-              to="/daily-challenges/leaderboard"
+              to="/leaderboard"
               className="px-6 py-3 bg-dark-700 text-dark-200 rounded-lg hover:bg-dark-600 transition-colors duration-200 flex items-center"
             >
               <Trophy className="mr-2 h-4 w-4" />
@@ -107,7 +107,7 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
 
           <div className="mt-6 pt-6 border-t border-dark-600">
             <Link
-              to="/daily-challenges/history"
+              to="/community"
               className="text-emerald-500 hover:text-emerald-400 text-sm flex items-center justify-center"
             >
               View Previous Solutions
