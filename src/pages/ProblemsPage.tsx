@@ -15,10 +15,12 @@ const ProblemsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredProblems, setFilteredProblems] = useState(problems);
-  const [selectedCategory, setSelectedCategory] = useState<Category | ''>('');
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [filteredProblems, setFilteredProblems] = useState<Problem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | ''>('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
