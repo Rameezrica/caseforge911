@@ -38,20 +38,20 @@ const HomePage = () => {
     );
   }
 
-  // Mock data for Quick Start section
-  const lastProblem = {
-    id: '2',
-    title: 'Tech Startup Market Entry Strategy',
+  // Mock data for Quick Start section - will be replaced with recent user activity
+  const lastProblem = problems.length > 0 ? {
+    id: problems[0].id,
+    title: problems[0].title,
     progress: 65,
     timeRemaining: '45 minutes'
-  };
+  } : null;
 
-  const recommendedProblem = {
-    id: '5',
-    title: 'Tech Company Merger Analysis',
-    difficulty: 'Hard',
-    category: 'Finance & Investment'
-  };
+  const recommendedProblem = problems.length > 1 ? {
+    id: problems[1].id,
+    title: problems[1].title,
+    difficulty: problems[1].difficulty,
+    category: problems[1].category
+  } : null;
 
   const domains = [
     {
