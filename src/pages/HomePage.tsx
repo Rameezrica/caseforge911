@@ -11,17 +11,24 @@ import { useDailyChallenge } from '../hooks/useDailyChallenge';
 import { useProblems } from '../hooks/useProblems';
 
 const HomePage = () => {
-  const totalProblems = 2847;
-  const solvedCount = 0;
+  const { stats, loading: statsLoading } = useStats();
+  const { challenge, loading: challengeLoading } = useDailyChallenge();
+  const { problems, loading: problemsLoading } = useProblems({ limit: 10 });
+  
+  const totalProblems = stats?.total_problems || 0;
+  const solvedCount = 0; // Will be replaced with user-specific data
   const currentStreak = 7;
   const skillLevel = "Beginner";
   const nextMilestone = 25;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800); // Simulate loading
-    return () => clearTimeout(timer);
-  }, []);
+    // Set loading to false when all data is loaded
+    if (!statsLoading && !challengeLoading && !problemsLoading) {
+      const timer = setTimeout(() => setLoading(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [statsLoading, challengeLoading, problemsLoading]);
 
   if (loading) {
     return (
