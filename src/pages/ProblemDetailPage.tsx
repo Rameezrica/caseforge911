@@ -97,12 +97,14 @@ const ProblemDetailPage: React.FC = () => {
           </span>
           <span className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
             <Clock className="mr-1 h-4 w-4" />
-            {problem.timeLimit} min
+            {problem.time_limit || 60} min
           </span>
-          <span className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
-            <Briefcase className="mr-1 h-4 w-4" />
-            {problem.companyContext}
-          </span>
+          {problem.company && (
+            <span className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
+              <Briefcase className="mr-1 h-4 w-4" />
+              {problem.company}
+            </span>
+          )}
         </div>
       </div>
 
