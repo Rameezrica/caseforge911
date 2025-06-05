@@ -27,10 +27,17 @@ const ProblemsPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState<number | null>(null);
 
   const categories = {
+    'Strategy & Consulting': [
+      'Market Analysis',
+      'Growth Strategy', 
+      'Digital Transformation',
+      'Competitive Strategy',
+      'Business Model Design'
+    ],
     'Finance & Investment': [
       'Financial Modeling',
       'Investment Analysis',
-      'Corporate Finance',
+      'Corporate Finance', 
       'Personal Finance',
       'Quantitative Finance'
     ],
@@ -38,22 +45,8 @@ const ProblemsPage: React.FC = () => {
       'Supply Chain Optimization',
       'Process Improvement',
       'Quality Management',
-      'Project Management',
+      'Project Management', 
       'Production Planning'
-    ],
-    'Management': [
-      'Organizational Design',
-      'Leadership Scenarios',
-      'HR Analytics',
-      'Decision Making',
-      'Performance Management'
-    ],
-    'Strategy & Consulting': [
-      'Market Analysis',
-      'Growth Strategy',
-      'Digital Transformation',
-      'Competitive Strategy',
-      'Business Model Design'
     ],
     'Marketing & Growth': [
       'Customer Segmentation',
@@ -61,11 +54,36 @@ const ProblemsPage: React.FC = () => {
       'Campaign Optimization',
       'Brand Strategy',
       'Digital Marketing'
+    ],
+    'Data Analytics': [
+      'Business Intelligence',
+      'Data Analysis',
+      'Performance Metrics',
+      'Reporting',
+      'Analytics'
     ]
   };
 
-  const difficulties: Difficulty[] = ['Easy', 'Medium', 'Hard'];
+  const difficulties: string[] = ['Easy', 'Medium', 'Hard'];
   const timeRanges = [30, 45, 60, 90, 120];
+
+  // Fetch problems on initial load
+  useEffect(() => {
+    const fetchProblems = async () => {
+      try {
+        setIsLoading(true);
+        const problemData = await apiService.getProblems();
+        setProblems(problemData);
+        setFilteredProblems(problemData);
+      } catch (error) {
+        console.error('Error fetching problems:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProblems();
+  }, []);
 
   // Get search term from URL on initial load
   useEffect(() => {
