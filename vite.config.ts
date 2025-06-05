@@ -5,10 +5,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 3000,
     host: true, // This will make the server accessible from all network interfaces
-    strictPort: true, // This will fail if port 5173 is not available
-    open: true // This will automatically open the browser
+    strictPort: true, // This will fail if port 3000 is not available
+    open: false // Disable auto-opening browser in container environment
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
