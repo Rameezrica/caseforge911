@@ -243,46 +243,54 @@ const HomePage = () => {
         <h2 className="text-xl font-bold text-dark-50 mb-6">Quick Start</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Resume Card */}
-          <Link
-            to={`/problem/${lastProblem.id}`}
-            className="bg-dark-800 border border-dark-700 rounded-xl p-6 hover:border-dark-600 transition-all duration-200"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Clock className="h-6 w-6 text-blue-500" />
+          {lastProblem && (
+            <Link
+              to={`/problem/${lastProblem.id}`}
+              className="bg-dark-800 border border-dark-700 rounded-xl p-6 hover:border-dark-600 transition-all duration-200"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <Clock className="h-6 w-6 text-blue-500" />
+                </div>
+                <span className="text-blue-500 font-medium">{lastProblem.timeRemaining}</span>
               </div>
-              <span className="text-blue-500 font-medium">{lastProblem.timeRemaining}</span>
-            </div>
-            <h3 className="text-lg font-medium text-dark-50 mb-2">Resume Last Problem</h3>
-            <p className="text-dark-400 text-sm mb-4">{lastProblem.title}</p>
-            <div className="w-full bg-dark-700 rounded-full h-2">
-              <div 
-                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${lastProblem.progress}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-dark-400 mt-2">{lastProblem.progress}% complete</p>
-          </Link>
+              <h3 className="text-lg font-medium text-dark-50 mb-2">Resume Last Problem</h3>
+              <p className="text-dark-400 text-sm mb-4">{lastProblem.title}</p>
+              <div className="w-full bg-dark-700 rounded-full h-2">
+                <div 
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${lastProblem.progress}%` }}
+                ></div>
+              </div>
+              <p className="text-sm text-dark-400 mt-2">{lastProblem.progress}% complete</p>
+            </Link>
+          )}
 
           {/* AI Recommended Card */}
-          <Link
-            to={`/problem/${recommendedProblem.id}`}
-            className="bg-dark-800 border border-dark-700 rounded-xl p-6 hover:border-dark-600 transition-all duration-200"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-purple-500/10 rounded-lg">
-                <Target className="h-6 w-6 text-purple-500" />
+          {recommendedProblem && (
+            <Link
+              to={`/problem/${recommendedProblem.id}`}
+              className="bg-dark-800 border border-dark-700 rounded-xl p-6 hover:border-dark-600 transition-all duration-200"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <Target className="h-6 w-6 text-purple-500" />
+                </div>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  recommendedProblem.difficulty === 'Easy' ? 'bg-green-900 text-green-200' :
+                  recommendedProblem.difficulty === 'Medium' ? 'bg-yellow-900 text-yellow-200' :
+                  'bg-red-900 text-red-200'
+                }`}>
+                  {recommendedProblem.difficulty}
+                </span>
               </div>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full bg-red-900 text-red-200`}>
-                {recommendedProblem.difficulty}
-              </span>
-            </div>
-            <h3 className="text-lg font-medium text-dark-50 mb-2">Recommended Next</h3>
-            <p className="text-dark-400 text-sm mb-4">{recommendedProblem.title}</p>
-            <p className="text-sm text-dark-400">
-              Matches your skill level in {recommendedProblem.category}
-            </p>
-          </Link>
+              <h3 className="text-lg font-medium text-dark-50 mb-2">Recommended Next</h3>
+              <p className="text-dark-400 text-sm mb-4">{recommendedProblem.title}</p>
+              <p className="text-sm text-dark-400">
+                Matches your skill level in {recommendedProblem.category}
+              </p>
+            </Link>
+          )}
         </div>
       </div>
 
