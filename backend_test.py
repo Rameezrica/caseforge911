@@ -3,6 +3,7 @@ import requests
 import sys
 import json
 from datetime import datetime
+import os
 
 class CaseForgeAPITester:
     def __init__(self, base_url="http://localhost:8001/api"):
@@ -18,6 +19,7 @@ class CaseForgeAPITester:
         
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
+        print(f"URL: {url}")
         
         try:
             if method == 'GET':
@@ -151,8 +153,11 @@ class CaseForgeAPITester:
 
 def main():
     # Get the API URL from environment or use default
-    import os
     api_url = os.environ.get("VITE_API_URL", "http://localhost:8001/api")
+    
+    # Print environment variables for debugging
+    print("Environment Variables:")
+    print(f"VITE_API_URL: {os.environ.get('VITE_API_URL')}")
     
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
