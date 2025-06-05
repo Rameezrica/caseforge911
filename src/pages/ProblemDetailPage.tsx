@@ -5,7 +5,7 @@ import {
   FileText, MessageSquare, Award, ExternalLink,
   Loader2
 } from 'lucide-react';
-import { getProblemById, getSolutionsForProblem } from '../data/mockData';
+import { apiService, Problem } from '../services/api';
 import DifficultyBadge from '../components/common/DifficultyBadge';
 import SolutionCard from '../components/solutions/SolutionCard';
 import SolutionSubmissionForm from '../components/solutions/SolutionSubmissionForm';
