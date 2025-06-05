@@ -168,10 +168,12 @@ const HomePage = () => {
       </div>
 
       {/* Daily Challenge Widget */}
-      <DailyChallengeWidget 
-        challenge={dailyChallenge}
-        userStreak={0}
-      />
+      {challenge && (
+        <DailyChallengeWidget 
+          challenge={challenge}
+          userStreak={currentStreak}
+        />
+      )}
 
       {/* User Dashboard Widget */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
