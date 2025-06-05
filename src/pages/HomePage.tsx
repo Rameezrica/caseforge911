@@ -5,8 +5,10 @@ import {
   TrendingUp, Users, Star, Clock, Briefcase, 
   BarChart2, Rocket, CheckCircle 
 } from 'lucide-react';
-import { dailyChallenge } from '../data/mockData';
 import DailyChallengeWidget from '../components/home/DailyChallengeWidget';
+import { useStats } from '../hooks/useStats';
+import { useDailyChallenge } from '../hooks/useDailyChallenge';
+import { useProblems } from '../hooks/useProblems';
 
 const HomePage = () => {
   const totalProblems = 2847;
