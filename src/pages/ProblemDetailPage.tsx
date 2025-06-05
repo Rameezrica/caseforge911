@@ -14,21 +14,34 @@ const ProblemDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'problem' | 'solutions' | 'discussions'>('problem');
   const [isLoading, setIsLoading] = useState(true);
+  const [problem, setProblem] = useState<Problem | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
-  const problem = id ? getProblemById(id) : undefined;
-  const solutions = id ? getSolutionsForProblem(id) : [];
   const navigate = useNavigate();
   
   useEffect(() => {
-    if (problem) {
-      document.title = `${problem.title} - CaseForge`;
-    }
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [problem]);
+    const fetchProblem = async () => {
+      if (!id) {
+        setError('No problem ID provided');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const problemData = await apiService.getProblem(id);
+        setProblem(problemData);
+        document.title = `${problemData.title} - CaseForge`;
+      } catch (err) {
+        console.error('Error fetching problem:', err);
+        setError('Problem not found');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProblem();
+  }, [id]);
   
   if (isLoading) {
     return (
