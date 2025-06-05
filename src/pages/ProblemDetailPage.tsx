@@ -187,33 +187,12 @@ const ProblemDetailPage: React.FC = () => {
               )}
 
               {activeTab === 'solutions' && (
-                <div>
-                  {solutions.length > 0 ? (
-                    <div className="space-y-6">
-                      {solutions.map((solution) => (
-                        <SolutionCard 
-                          key={solution.id} 
-                          solution={{
-                            id: solution.id,
-                            userName: solution.userName,
-                            submittedAt: solution.submittedAt,
-                            votes: solution.votes,
-                            aiScore: solution.aiScore,
-                            executiveSummary: solution.executiveSummary,
-                            problemId: solution.problemId
-                          }} 
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-10">
-                      <FileText className="h-12 w-12 text-dark-400 mx-auto mb-3" />
-                      <h3 className="text-lg font-medium text-dark-50 mb-2">No solutions yet</h3>
-                      <p className="text-dark-400 max-w-md mx-auto mb-6">
-                        Be the first to submit a solution for this business case and help others learn.
-                      </p>
-                    </div>
-                  )}
+                <div className="text-center py-10">
+                  <FileText className="h-12 w-12 text-dark-400 mx-auto mb-3" />
+                  <h3 className="text-lg font-medium text-dark-50 mb-2">No solutions yet</h3>
+                  <p className="text-dark-400 max-w-md mx-auto mb-6">
+                    Be the first to submit a solution for this business case and help others learn.
+                  </p>
                 </div>
               )}
 
