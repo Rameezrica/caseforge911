@@ -216,31 +216,19 @@ const ProblemDetailPage: React.FC = () => {
 
         <div className="lg:w-80 space-y-6">
           <div className="bg-dark-800 rounded-xl border border-dark-700 p-5">
-            <h3 className="font-semibold text-dark-50 mb-3">Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {problem.tags?.map((tag, idx) => (
-                <div key={idx} className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
-                  <Tag className="mr-1 h-3 w-3" />
-                  {tag}
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-5">
-            <h3 className="font-semibold text-dark-50 mb-3">Problem Stats</h3>
+            <h3 className="font-semibold text-dark-50 mb-3">Problem Info</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-dark-400">Success Rate</span>
-                <span className="font-medium text-dark-50">{problem.successRate}%</span>
+                <span className="text-dark-400">Domain</span>
+                <span className="font-medium text-dark-50">{problem.domain}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-dark-400">Time Limit</span>
-                <span className="font-medium text-dark-50">{problem.timeLimit} minutes</span>
+                <span className="font-medium text-dark-50">{problem.time_limit || 60} minutes</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-dark-400">Solutions</span>
-                <span className="font-medium text-dark-50">{solutions.length}</span>
+                <span className="text-dark-400">Difficulty</span>
+                <span className="font-medium text-dark-50">{problem.difficulty}</span>
               </div>
             </div>
           </div>
