@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { problems } from '../data/mockData';
+import { apiService, Problem } from '../services/api';
 import ProblemCard from '../components/common/ProblemCard';
 import { 
   Search, Filter, X, BookOpen, TrendingUp, Users, 
   Settings, BarChart, Briefcase, Grid, List, 
   Clock, Award, ChevronDown, ChevronUp
 } from 'lucide-react';
-import { Category, Difficulty, Problem } from '../types';
 
 type SortOption = 'recent' | 'popular' | 'difficulty' | 'time';
 type ViewMode = 'grid' | 'list';
