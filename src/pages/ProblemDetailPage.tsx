@@ -54,7 +54,7 @@ const ProblemDetailPage: React.FC = () => {
     );
   }
 
-  if (!problem) {
+  if (!problem && error) {
     return (
       <div className="flex items-center justify-center p-4">
         <div className="bg-dark-800 p-8 rounded-lg shadow-md max-w-md w-full text-center border border-dark-700">
