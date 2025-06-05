@@ -4,7 +4,7 @@ import { getProblemById } from '../data/mockData';
 import SolutionSubmissionForm from '../components/solutions/SolutionSubmissionForm';
 import { Clock, Lightbulb, HelpCircle } from 'lucide-react';
 import CaseContextPanel from '../components/solutions/CaseContextPanel';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '../components/layout/Sidebar';
 import PremiumCard from '../components/ui/PremiumCard';
 
 const CaseSolverPage: React.FC = () => {
