@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import AchievementBadge from '../components/common/AchievementBadge';
 import { 
   User, Settings, BookOpen, BarChart2, Award, CheckCircle,
@@ -9,39 +8,9 @@ import {
 import { achievements } from '../data/mockData';
 
 const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
-  
   useEffect(() => {
-    document.title = user ? `${user.name}'s Profile - CaseForge` : 'Profile - CaseForge';
-  }, [user]);
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
-          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Not Logged In</h2>
-          <p className="text-gray-600 mb-6">
-            Please log in or create an account to view your profile.
-          </p>
-          <div className="space-y-3">
-            <Link 
-              to="/login" 
-              className="block w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700"
-            >
-              Log In
-            </Link>
-            <Link 
-              to="/register" 
-              className="block w-full px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-md hover:bg-gray-300"
-            >
-              Create Account
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    document.title = 'Profile - CaseForge';
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
@@ -51,25 +20,20 @@ const ProfilePage: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
               <div className="bg-blue-800 h-24 w-24 rounded-full flex items-center justify-center text-3xl font-bold text-white border-4 border-blue-700">
-                {user.name.charAt(0)}
+                {/* Placeholder for user initials */}
               </div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">{user.name}</h1>
+              <h1 className="text-3xl font-bold text-white mb-2">Placeholder Name</h1>
               <div className="flex flex-wrap items-center text-blue-100 gap-y-2">
                 <span className="flex items-center mr-4">
                   <BookOpen className="h-4 w-4 mr-1" />
-                  {user.problemsSolved} problems solved
+                  {/* Placeholder for problems solved */} problems solved
                 </span>
-                {user.university && (
-                  <span className="flex items-center mr-4">
-                    <Award className="h-4 w-4 mr-1" />
-                    {user.university}
-                  </span>
-                )}
+                {/* Placeholder for university */}
                 <span className="flex items-center mr-4">
                   <Calendar className="h-4 w-4 mr-1" />
-                  Joined {new Date(user.joinedDate).toLocaleDateString()}
+                  Joined {/* Placeholder for joined date */}
                 </span>
               </div>
             </div>
@@ -99,10 +63,10 @@ const ProfilePage: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-900">Problems</h3>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {user.problemsSolved}
+                  {/* Placeholder for problems solved */}
                 </div>
                 <p className="text-sm text-gray-600">
-                  {user.problemsSolved > 0 ? 'Cases solved across all categories' : 'No cases solved yet'}
+                  {/* Placeholder for problems solved text */}
                 </p>
               </div>
               
@@ -112,10 +76,10 @@ const ProfilePage: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-900">Badges</h3>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {user.achievements.length}
+                  {/* Placeholder for achievements */}
                 </div>
                 <p className="text-sm text-gray-600">
-                  {user.achievements.length > 0 ? 'Achievements earned' : 'No badges earned yet'}
+                  {/* Placeholder for achievements text */}
                 </p>
               </div>
               
@@ -259,28 +223,9 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div className="space-y-4">
-                {user.achievements.map((achievement) => (
-                  <AchievementBadge key={achievement.id} achievement={achievement} earned={true} />
-                ))}
-                
+                {/* Placeholder for achievements */}
                 {/* Next achievement to earn */}
-                {achievements.length > user.achievements.length && (
-                  <>
-                    <div className="relative py-3">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-200"></div>
-                      </div>
-                      <div className="relative flex justify-center">
-                        <span className="px-2 bg-white text-sm text-gray-500">Next to earn</span>
-                      </div>
-                    </div>
-                    
-                    <AchievementBadge 
-                      achievement={achievements.find(a => !user.achievements.find(ua => ua.id === a.id)) || achievements[0]} 
-                      earned={false} 
-                    />
-                  </>
-                )}
+                {/* Placeholder for next achievement */}
               </div>
             </div>
             

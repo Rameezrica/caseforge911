@@ -1,4 +1,4 @@
-import React from 'react';
+ruimport React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Briefcase, Award, Users, Zap } from 'lucide-react';
 

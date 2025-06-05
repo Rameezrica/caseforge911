@@ -1,25 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Clock, Briefcase, Tag, ArrowLeft, 
-  FileText, MessageSquare, Award, ExternalLink 
+  FileText, MessageSquare, Award, ExternalLink,
+  Loader2
 } from 'lucide-react';
 import { getProblemById, getSolutionsForProblem } from '../data/mockData';
 import DifficultyBadge from '../components/common/DifficultyBadge';
+import SolutionCard from '../components/solutions/SolutionCard';
+import SolutionSubmissionForm from '../components/solutions/SolutionSubmissionForm';
 
 const ProblemDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'problem' | 'solutions' | 'discussions'>('problem');
+  const [isLoading, setIsLoading] = useState(true);
   
   const problem = id ? getProblemById(id) : undefined;
   const solutions = id ? getSolutionsForProblem(id) : [];
+  const navigate = useNavigate();
   
   useEffect(() => {
     if (problem) {
       document.title = `${problem.title} - CaseForge`;
     }
+    // Simulate loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [problem]);
   
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 text-emerald-500 animate-spin mb-4" />
+          <p className="text-dark-400">Loading problem details...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!problem) {
     return (
       <div className="flex items-center justify-center p-4">
@@ -73,7 +94,7 @@ const ProblemDetailPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="lg:flex gap-6">
         <div className="lg:flex-1">
           {/* Tabs */}
           <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
@@ -131,7 +152,7 @@ const ProblemDetailPage: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-dark-50 mb-3">Key Questions</h3>
                     <ul className="space-y-2">
-                      {problem.questions.map((question, idx) => (
+                      {problem.questions?.map((question, idx) => (
                         <li key={idx} className="flex items-start">
                           <span className="inline-flex items-center justify-center flex-shrink-0 w-6 h-6 bg-dark-700 text-emerald-500 rounded-full mr-2 font-medium text-sm">
                             {idx + 1}
@@ -142,27 +163,25 @@ const ProblemDetailPage: React.FC = () => {
                     </ul>
                   </div>
                   
-                  {problem.frameworkSuggestions && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-dark-50 mb-3">Suggested Frameworks</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {problem.frameworkSuggestions.map((framework, idx) => (
-                          <div key={idx} className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
-                            {framework}
-                            <ExternalLink className="ml-1 h-3 w-3" />
-                          </div>
-                        ))}
-                      </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-dark-50 mb-3">Suggested Frameworks</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {problem.frameworkSuggestions?.map((framework, idx) => (
+                        <div key={idx} className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
+                          {framework}
+                          <ExternalLink className="ml-1 h-3 w-3" />
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
                   
                   <div className="flex justify-center mt-8">
-                    <Link 
-                      to={`/problem/${problem.id}/solve`}
+                    <button
+                      onClick={() => navigate(`/solve/${problem.id}`)}
                       className="px-6 py-3 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200"
                     >
                       Start Solving
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}
@@ -172,37 +191,18 @@ const ProblemDetailPage: React.FC = () => {
                   {solutions.length > 0 ? (
                     <div className="space-y-6">
                       {solutions.map((solution) => (
-                        <div key={solution.id} className="border border-dark-700 rounded-lg overflow-hidden">
-                          <div className="border-b border-dark-700 bg-dark-700 px-4 py-3 flex justify-between items-center">
-                            <div className="flex items-center">
-                              <div className="font-medium text-dark-50">{solution.userName}</div>
-                              <span className="mx-2 text-dark-500">•</span>
-                              <div className="text-sm text-dark-400">
-                                {new Date(solution.submittedAt).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <div className="bg-dark-600 text-emerald-500 rounded-full px-3 py-1 text-sm flex items-center">
-                                <Award className="mr-1 h-4 w-4" />
-                                AI Score: {solution.aiScore}
-                              </div>
-                              <div className="bg-dark-600 text-emerald-500 rounded-full px-3 py-1 text-sm">
-                                +{solution.votes}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="p-4 bg-dark-800">
-                            <h3 className="font-medium text-dark-50 mb-2">Executive Summary</h3>
-                            <p className="text-dark-300 mb-4">{solution.executiveSummary}</p>
-                            <Link 
-                              to={`/solution/${solution.id}`} 
-                              className="text-emerald-500 hover:text-emerald-400 font-medium flex items-center text-sm"
-                            >
-                              View full solution
-                              <ExternalLink className="ml-1 h-4 w-4" />
-                            </Link>
-                          </div>
-                        </div>
+                        <SolutionCard 
+                          key={solution.id} 
+                          solution={{
+                            id: solution.id,
+                            userName: solution.userName,
+                            submittedAt: solution.submittedAt,
+                            votes: solution.votes,
+                            aiScore: solution.aiScore,
+                            executiveSummary: solution.executiveSummary,
+                            problemId: solution.problemId
+                          }} 
+                        />
                       ))}
                     </div>
                   ) : (
@@ -212,12 +212,6 @@ const ProblemDetailPage: React.FC = () => {
                       <p className="text-dark-400 max-w-md mx-auto mb-6">
                         Be the first to submit a solution for this business case and help others learn.
                       </p>
-                      <Link 
-                        to={`/problem/${problem.id}/solve`}
-                        className="px-4 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200"
-                      >
-                        Submit a Solution
-                      </Link>
                     </div>
                   )}
                 </div>
@@ -226,14 +220,14 @@ const ProblemDetailPage: React.FC = () => {
               {activeTab === 'discussions' && (
                 <div className="text-center py-10">
                   <MessageSquare className="h-12 w-12 text-dark-400 mx-auto mb-3" />
-                  <h3 className="text-lg font-medium text-dark-50 mb-2">Join the discussion</h3>
+                  <h3 className="text-lg font-medium text-dark-50 mb-2">No discussions yet</h3>
                   <p className="text-dark-400 max-w-md mx-auto mb-6">
-                    Share your thoughts on this case or ask questions to the community.
+                    Start a discussion about this problem to share insights and learn from others.
                   </p>
-                  <button 
+                  <button
                     className="px-4 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200"
                   >
-                    Start a Discussion
+                    Start Discussion
                   </button>
                 </div>
               )}
@@ -241,12 +235,11 @@ const ProblemDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="lg:w-80 space-y-6">
           <div className="bg-dark-800 rounded-xl border border-dark-700 p-5">
             <h3 className="font-semibold text-dark-50 mb-3">Tags</h3>
             <div className="flex flex-wrap gap-2">
-              {problem.tags.map((tag, idx) => (
+              {problem.tags?.map((tag, idx) => (
                 <div key={idx} className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
                   <Tag className="mr-1 h-3 w-3" />
                   {tag}

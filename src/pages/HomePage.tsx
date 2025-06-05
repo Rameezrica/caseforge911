@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { 
   ArrowRight, Trophy, BookOpen, Target, Award,
   TrendingUp, Users, Star, Clock, Briefcase, 
@@ -10,12 +9,25 @@ import { dailyChallenge } from '../data/mockData';
 import DailyChallengeWidget from '../components/home/DailyChallengeWidget';
 
 const HomePage = () => {
-  const { user } = useAuth();
   const totalProblems = 2847;
-  const solvedCount = user?.problemsSolved || 0;
+  const solvedCount = 0;
   const currentStreak = 7;
   const skillLevel = "Beginner";
   const nextMilestone = 25;
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800); // Simulate loading
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
 
   // Mock data for Quick Start section
   const lastProblem = {
@@ -149,7 +161,7 @@ const HomePage = () => {
       {/* Daily Challenge Widget */}
       <DailyChallengeWidget 
         challenge={dailyChallenge}
-        userStreak={user?.dailyStreak || 0}
+        userStreak={0}
       />
 
       {/* User Dashboard Widget */}

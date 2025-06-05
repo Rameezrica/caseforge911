@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trophy, Clock, Users, Calendar, Target, Award } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 
 interface Contest {
   id: string;
@@ -15,7 +14,6 @@ interface Contest {
 }
 
 const ContestPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'live' | 'past'>('upcoming');
   const [timeUntilNext, setTimeUntilNext] = useState<string>('');
@@ -120,10 +118,6 @@ const ContestPage: React.FC = () => {
   }, [contests]);
 
   const handleJoinContest = (contestId: string) => {
-    if (!isAuthenticated) {
-      navigate('/login', { state: { from: `/contests/${contestId}` } });
-      return;
-    }
     // Handle contest registration
     console.log('Joining contest:', contestId);
   };

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Difficulty } from '../../types';
+import { Star } from 'lucide-react';
+
+export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert';
 
 interface DifficultyBadgeProps {
   difficulty: Difficulty;
@@ -7,38 +9,54 @@ interface DifficultyBadgeProps {
 }
 
 const DifficultyBadge: React.FC<DifficultyBadgeProps> = ({ difficulty, size = 'md' }) => {
-  const getColorClasses = () => {
+  const getDifficultyColor = (difficulty: Difficulty) => {
     switch (difficulty) {
       case 'Easy':
-        return 'bg-green-100 text-green-800';
+        return 'bg-emerald-500/20 text-emerald-500';
       case 'Medium':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-500/20 text-yellow-500';
       case 'Hard':
-        return 'bg-red-100 text-red-800';
+        return 'bg-orange-500/20 text-orange-500';
+      case 'Expert':
+        return 'bg-red-500/20 text-red-500';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-dark-700 text-dark-300';
     }
   };
 
-  const getSizeClasses = () => {
+  const getSizeClasses = (size: string) => {
     switch (size) {
       case 'sm':
         return 'text-xs px-2 py-0.5';
-      case 'md':
-        return 'text-sm px-2.5 py-0.5';
       case 'lg':
-        return 'text-md px-3 py-1';
-      default:
+        return 'text-sm px-3 py-1';
+      default: // md
         return 'text-sm px-2.5 py-0.5';
+    }
+  };
+
+  const getStarCount = (difficulty: Difficulty) => {
+    switch (difficulty) {
+      case 'Easy':
+        return 1;
+      case 'Medium':
+        return 2;
+      case 'Hard':
+        return 3;
+      case 'Expert':
+        return 4;
+      default:
+        return 0;
     }
   };
 
   return (
-    <span 
-      className={`font-medium rounded-full inline-flex items-center justify-center ${getColorClasses()} ${getSizeClasses()}`}
-    >
-      {difficulty}
-    </span>
+    <div className={`inline-flex items-center rounded-full ${getDifficultyColor(difficulty)} ${getSizeClasses(size)}`}>
+      {Array.from({ length: getStarCount(difficulty) }).map((_, index) => (
+        <Star key={index} className="h-3 w-3 fill-current mr-0.5" />
+      ))}
+      <span className="font-medium ml-0.5">{difficulty}</span>
+    </div>
   );
 };
 

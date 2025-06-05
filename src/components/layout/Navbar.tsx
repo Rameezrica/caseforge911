@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { Briefcase, Search } from 'lucide-react';
+import { Link, useLocation, useNavigate, matchPath } from 'react-router-dom';
+import { Briefcase, Search, Clock } from 'lucide-react';
 import ThemeToggle from '../common/ThemeToggle';
 
 const Navbar = () => {
-  const { isAuthenticated, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,6 +14,40 @@ const Navbar = () => {
       navigate(`/problems?search=${encodeURIComponent(searchTerm)}`);
     }
   };
+
+  // Minimal header for solution dashboard
+  const isSolver = matchPath('/solve/:id', location.pathname);
+
+  if (isSolver) {
+    // Extract problem id for back navigation
+    const match = location.pathname.match(/\/solve\/(.+)$/);
+    const problemId = match ? match[1] : '';
+    return (
+      <nav className="bg-dark-800 border-b border-dark-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="flex items-center">
+              <Briefcase className="h-8 w-8 text-emerald-500" />
+              <span className="ml-2 text-xl font-bold text-dark-50">CaseForge</span>
+            </Link>
+            <div className="flex items-center gap-4">
+              {/* Timer placeholder, actual timer is in the workspace */}
+              <div className="flex items-center text-dark-400">
+                <Clock className="h-5 w-5 mr-2" />
+                <span className="font-medium">Solving Mode</span>
+              </div>
+              <button
+                onClick={() => navigate(`/problem/${problemId}`)}
+                className="px-4 py-2 text-dark-400 hover:text-dark-200 border border-dark-600 rounded-lg"
+              >
+                Back to Problem
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   // Don't show search on homepage
   const showSearch = location.pathname !== '/';
@@ -47,23 +79,14 @@ const Navbar = () => {
             
             <ThemeToggle />
 
-            {isAuthenticated ? (
-              <Link
-                to="/profile"
-                className="flex items-center space-x-2 text-dark-200 hover:text-dark-50"
-              >
-                <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center text-dark-900 font-bold">
-                  {user?.name?.[0]?.toUpperCase()}
-                </div>
-              </Link>
-            ) : (
-              <Link
-                to="/login"
-                className="text-dark-200 hover:text-dark-50"
-              >
-                Sign In
-              </Link>
-            )}
+            <Link
+              to="/profile"
+              className="flex items-center space-x-2 text-dark-200 hover:text-dark-50"
+            >
+              <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center text-dark-900 font-bold">
+                {/* Placeholder for user initials */}
+              </div>
+            </Link>
           </div>
         </div>
       </div>
