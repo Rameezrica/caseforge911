@@ -132,7 +132,7 @@ const ProblemDetailPage: React.FC = () => {
                     : 'text-dark-400 hover:text-dark-200'
                 }`}
               >
-                Solutions ({solutions.length})
+                Solutions (0)
               </button>
               <button
                 onClick={() => setActiveTab('discussions')}
