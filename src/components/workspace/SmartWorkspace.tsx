@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProblemById } from '../../data/mockData';
+import { useProblem } from '../../hooks/useProblems';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/Tabs';
 import FinanceWorkspace from './domains/FinanceWorkspace';
 import OperationsWorkspace from './domains/OperationsWorkspace';
