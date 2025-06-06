@@ -153,11 +153,12 @@ class CaseForgeAPITester:
 
 def main():
     # Get the API URL from environment or use default
-    api_url = os.environ.get("VITE_API_URL", "http://localhost:8001/api")
+    api_url = os.environ.get("REACT_APP_BACKEND_URL", "http://localhost:8001")
+    api_url = f"{api_url}/api"
     
     # Print environment variables for debugging
     print("Environment Variables:")
-    print(f"VITE_API_URL: {os.environ.get('VITE_API_URL')}")
+    print(f"REACT_APP_BACKEND_URL: {os.environ.get('REACT_APP_BACKEND_URL')}")
     
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
