@@ -12,7 +12,7 @@ import SolutionPage from './pages/SolutionPage';
 import CommunityPage from './pages/CommunityPage';
 import ContestPage from './pages/ContestPage';
 import StudyPlansPage from './pages/StudyPlansPage';
-import CaseSolverPage from './pages/CaseSolverPage';
+import SmartWorkspace from './components/workspace/SmartWorkspace';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 // Wrapper component to handle layout
