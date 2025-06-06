@@ -16,10 +16,13 @@ load_dotenv()
 
 app = FastAPI(title="CaseForge API", description="Backend for business case practice platform")
 
-# CORS middleware
+# CORS middleware - Get allowed origins from environment
+FRONTEND_URLS = os.getenv("FRONTEND_URLS", "http://localhost:5173,http://localhost:3000")
+allowed_origins = [url.strip() for url in FRONTEND_URLS.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
