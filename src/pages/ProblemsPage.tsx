@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiService, Problem } from '../services/api';
+import { Category } from '../types';
 import ProblemCard from '../components/common/ProblemCard';
 import { 
   Search, Filter, X, BookOpen, TrendingUp, Users, 
