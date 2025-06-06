@@ -1,80 +1,182 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useDomain } from '../../context/DomainContext';
 import { 
-  Home, BookOpen, Trophy, Users, User, 
-  Target, BarChart3, Calendar, 
-  Code, Layers, Zap, ChevronRight
+  Home, 
+  BookOpen, 
+  Trophy, 
+  User, 
+  MessageSquare, 
+  Calendar,
+  Target,
+  BarChart3,
+  Settings,
+  LogOut,
+  Calculator,
+  Brain,
+  Users,
+  TrendingUp,
+  RefreshCw
 } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar: React.FC = () => {
   const location = useLocation();
+  const { selectedDomain, setSelectedDomain } = useDomain();
 
-  const navigationItems = [
-    { icon: Home, label: 'Home', path: '/' },
-    { icon: BookOpen, label: 'Problems', path: '/problems' },
-    { icon: Target, label: 'Study Plans', path: '/study-plans' },
-    { icon: Trophy, label: 'Contests', path: '/contests' },
-    { icon: Users, label: 'Community', path: '/community' },
-    { icon: BarChart3, label: 'Leaderboard', path: '/leaderboard' },
-    { icon: User, label: 'Profile', path: '/profile' },
-  ];
-
-  const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
+  const getDomainIcon = (domainName: string) => {
+    switch (domainName) {
+      case 'Finance & Investment':
+        return <Calculator className="h-5 w-5" />;
+      case 'Strategy & Consulting':
+        return <Brain className="h-5 w-5" />;
+      case 'Operations & Supply Chain':
+        return <Target className="h-5 w-5" />;
+      case 'Marketing & Growth':
+        return <BarChart3 className="h-5 w-5" />;
+      case 'Data Analytics':
+        return <TrendingUp className="h-5 w-5" />;
+      default:
+        return <Users className="h-5 w-5" />;
     }
-    return location.pathname.startsWith(path);
   };
 
+  const getColorClasses = (domainName: string) => {
+    const colorMap = {
+      'Finance & Investment': 'text-green-500',
+      'Strategy & Consulting': 'text-purple-500',
+      'Operations & Supply Chain': 'text-blue-500',
+      'Marketing & Growth': 'text-orange-500',
+      'Data Analytics': 'text-cyan-500'
+    };
+    return colorMap[domainName as keyof typeof colorMap] || 'text-blue-500';
+  };
+
+  const mainNavItems = [
+    {
+      name: 'Dashboard',
+      href: '/dashboard',
+      icon: Home,
+      current: location.pathname === '/dashboard'
+    },
+    {
+      name: 'Problems',
+      href: '/problems',
+      icon: BookOpen,
+      current: location.pathname === '/problems' || location.pathname.startsWith('/problem/')
+    },
+    {
+      name: 'Leaderboard',
+      href: '/leaderboard',
+      icon: Trophy,
+      current: location.pathname === '/leaderboard' || location.pathname.includes('/leaderboard')
+    },
+    {
+      name: 'Community',
+      href: '/community',
+      icon: MessageSquare,
+      current: location.pathname === '/community'
+    },
+    {
+      name: 'Study Plans',
+      href: '/study-plans',
+      icon: Target,
+      current: location.pathname === '/study-plans'
+    },
+    {
+      name: 'Contests',
+      href: '/contests',
+      icon: Calendar,
+      current: location.pathname === '/contests'
+    }
+  ];
+
+  const bottomNavItems = [
+    {
+      name: 'Profile',
+      href: '/profile',
+      icon: User,
+      current: location.pathname === '/profile'
+    },
+    {
+      name: 'Settings',
+      href: '/settings',
+      icon: Settings,
+      current: location.pathname === '/settings'
+    }
+  ];
+
   return (
-    <div className="fixed left-0 top-0 h-screen w-20 bg-dark-900 border-r border-dark-700 flex flex-col items-center py-6 z-50">
+    <div className="fixed inset-y-0 left-0 z-50 w-20 bg-dark-800 border-r border-dark-700 flex flex-col">
       {/* Logo */}
-      <Link to="/" className="mb-8">
-        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center">
-          <Layers className="h-6 w-6 text-white" />
+      <div className="flex h-16 items-center justify-center border-b border-dark-700">
+        <div className="h-8 w-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+          <span className="text-dark-900 font-bold text-lg">C</span>
         </div>
-      </Link>
+      </div>
 
-      {/* Navigation Items */}
-      <nav className="flex flex-col space-y-2 w-full">
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.path);
-          
-          return (
+      {/* Domain Indicator */}
+      {selectedDomain && (
+        <div className="flex flex-col items-center py-4 border-b border-dark-700">
+          <div className={`p-2 rounded-lg bg-dark-700 ${getColorClasses(selectedDomain)}`}>
+            {getDomainIcon(selectedDomain)}
+          </div>
+          <div className="text-xs text-dark-400 mt-1 text-center leading-tight max-w-16">
+            {selectedDomain.split(' ')[0]}
+          </div>
+        </div>
+      )}
+
+      {/* Main Navigation */}
+      <nav className="flex-1 py-4">
+        <div className="space-y-2 px-2">
+          {mainNavItems.map((item) => (
             <Link
-              key={item.path}
-              to={item.path}
-              className={`
-                group relative flex items-center justify-center h-12 w-12 mx-auto rounded-xl transition-all duration-200
-                ${active 
-                  ? 'bg-emerald-500/20 text-emerald-400' 
-                  : 'text-dark-400 hover:text-dark-200 hover:bg-dark-800'
-                }
-              `}
-              title={item.label}
+              key={item.name}
+              to={item.href}
+              className={`flex flex-col items-center justify-center p-3 rounded-lg text-xs transition-colors duration-200 ${
+                item.current
+                  ? 'bg-emerald-500/10 text-emerald-400'
+                  : 'text-dark-400 hover:text-dark-200 hover:bg-dark-700'
+              }`}
+              title={item.name}
             >
-              <Icon className="h-5 w-5" />
-              
-              {/* Tooltip */}
-              <div className="absolute left-full ml-4 px-3 py-2 bg-dark-800 text-dark-200 text-sm rounded-lg border border-dark-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                {item.label}
-                <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-dark-800 border-l border-t border-dark-700 rotate-45"></div>
-              </div>
-
-              {/* Active indicator */}
-              {active && (
-                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-emerald-500 rounded-r-full"></div>
-              )}
+              <item.icon className="h-5 w-5 mb-1" />
+              <span className="text-center leading-tight">{item.name}</span>
             </Link>
-          );
-        })}
+          ))}
+        </div>
       </nav>
 
-      {/* Bottom section */}
-      <div className="mt-auto">
-        <div className="w-8 h-8 bg-dark-800 rounded-lg flex items-center justify-center">
-          <Zap className="h-4 w-4 text-dark-400" />
+      {/* Domain Switcher */}
+      <div className="border-t border-dark-700 p-2">
+        <button
+          onClick={() => setSelectedDomain(null)}
+          className="w-full flex flex-col items-center justify-center p-3 rounded-lg text-xs text-dark-400 hover:text-dark-200 hover:bg-dark-700 transition-colors duration-200"
+          title="Switch Domain"
+        >
+          <RefreshCw className="h-5 w-5 mb-1" />
+          <span className="text-center leading-tight">Switch</span>
+        </button>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="border-t border-dark-700 p-2">
+        <div className="space-y-2">
+          {bottomNavItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.href}
+              className={`flex flex-col items-center justify-center p-3 rounded-lg text-xs transition-colors duration-200 ${
+                item.current
+                  ? 'bg-emerald-500/10 text-emerald-400'
+                  : 'text-dark-400 hover:text-dark-200 hover:bg-dark-700'
+              }`}
+              title={item.name}
+            >
+              <item.icon className="h-5 w-5 mb-1" />
+              <span className="text-center leading-tight">{item.name}</span>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
