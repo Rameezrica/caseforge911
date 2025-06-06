@@ -119,6 +119,16 @@ const ExperienceStep: React.FC<ExperienceStepProps> = ({ data, updateData, onNex
     });
   };
 
+  const handleRoleSelect = (role: string) => {
+    console.log('Role button clicked:', role);
+    updateData({ currentRole: role });
+  };
+
+  const handleIndustrySelect = (industry: string) => {
+    console.log('Industry button clicked:', industry);
+    updateData({ industry });
+  };
+
   const canProceed = data.overallExperience && data.currentRole && data.industry;
 
   // Debug logging
