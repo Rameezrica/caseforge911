@@ -50,7 +50,7 @@ const App: React.FC = () => {
         <Route path="/community" element={<LayoutWrapper><CommunityPage /></LayoutWrapper>} />
         <Route path="/contests" element={<LayoutWrapper><ContestPage /></LayoutWrapper>} />
         <Route path="/study-plans" element={<LayoutWrapper><StudyPlansPage /></LayoutWrapper>} />
-        <Route path="/solve/:id" element={<LayoutWrapper><CaseSolverPage /></LayoutWrapper>} />
+        <Route path="/solve/:id" element={<SmartWorkspace />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
