@@ -121,6 +121,14 @@ const ExperienceStep: React.FC<ExperienceStepProps> = ({ data, updateData, onNex
 
   const canProceed = data.overallExperience && data.currentRole && data.industry;
 
+  // Debug logging
+  console.log('Experience Step Data:', {
+    overallExperience: data.overallExperience,
+    currentRole: data.currentRole,
+    industry: data.industry,
+    canProceed
+  });
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
