@@ -35,22 +35,28 @@ interface Problem {
 const SmartWorkspace: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [problem, setProblem] = useState<Problem | null>(null);
+  const { problem, loading, error } = useProblem(id || '');
   const [activeTab, setActiveTab] = useState('workspace');
   const [solution, setSolution] = useState('');
 
-  useEffect(() => {
-    if (id) {
-      const problemData = getProblemById(id);
-      setProblem(problemData);
-    }
-  }, [id]);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-dark-900">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
 
-  if (!problem) {
+  if (error || !problem) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-dark-900">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-dark-50 mb-2">Problem Not Found</h1>
+          <h1 className="text-2xl font-bold text-dark-50 mb-2">
+            {error || "Problem Not Found"}
+          </h1>
+          <p className="text-dark-400 mb-4">
+            {error || "The requested problem could not be found."}
+          </p>
           <button
             onClick={() => navigate('/problems')}
             className="px-4 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-400 mt-4"
