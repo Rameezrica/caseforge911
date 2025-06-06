@@ -4,6 +4,7 @@ import sys
 import json
 from datetime import datetime
 import os
+import urllib.parse
 
 class CaseForgeAPITester:
     def __init__(self, base_url="http://localhost:8001/api"):
@@ -67,6 +68,55 @@ class CaseForgeAPITester:
             200
         )
 
+    def test_get_domains(self):
+        """Test getting all domains"""
+        return self.run_test(
+            "Get All Domains",
+            "GET",
+            "domains",
+            200
+        )
+
+    def test_get_domain_stats(self, domain):
+        """Test getting domain statistics"""
+        encoded_domain = urllib.parse.quote(domain)
+        return self.run_test(
+            f"Get Domain Stats for {domain}",
+            "GET",
+            f"domains/{encoded_domain}/stats",
+            200
+        )
+
+    def test_get_domain_leaderboard(self, domain):
+        """Test getting domain leaderboard"""
+        encoded_domain = urllib.parse.quote(domain)
+        return self.run_test(
+            f"Get Domain Leaderboard for {domain}",
+            "GET",
+            f"domains/{encoded_domain}/leaderboard",
+            200
+        )
+
+    def test_get_domain_learning_paths(self, domain):
+        """Test getting domain learning paths"""
+        encoded_domain = urllib.parse.quote(domain)
+        return self.run_test(
+            f"Get Domain Learning Paths for {domain}",
+            "GET",
+            f"domains/{encoded_domain}/learning-paths",
+            200
+        )
+
+    def test_get_domain_discussions(self, domain):
+        """Test getting domain discussions"""
+        encoded_domain = urllib.parse.quote(domain)
+        return self.run_test(
+            f"Get Domain Discussions for {domain}",
+            "GET",
+            f"domains/{encoded_domain}/discussions",
+            200
+        )
+
     def test_get_problems(self):
         """Test getting all problems"""
         return self.run_test(
@@ -76,12 +126,13 @@ class CaseForgeAPITester:
             200
         )
 
-    def test_get_problems_with_filters(self):
-        """Test getting problems with filters"""
+    def test_get_problems_with_domain_filter(self, domain):
+        """Test getting problems with domain filter"""
+        encoded_domain = urllib.parse.quote(domain)
         return self.run_test(
-            "Get Problems with Filters",
+            f"Get Problems for Domain {domain}",
             "GET",
-            "problems?domain=Strategy%20%26%20Consulting&limit=2",
+            f"problems?domain={encoded_domain}&limit=5",
             200
         )
 
@@ -121,7 +172,44 @@ class CaseForgeAPITester:
             200
         )
 
-    def test_submit_solution(self, problem_id):
+    def test_get_domain_daily_challenge(self, domain):
+        """Test getting domain-specific daily challenge"""
+        encoded_domain = urllib.parse.quote(domain)
+        return self.run_test(
+            f"Get Daily Challenge for Domain {domain}",
+            "GET",
+            f"daily-challenge/{encoded_domain}",
+            200
+        )
+
+    def test_set_user_preferences(self, user_id, domain):
+        """Test setting user domain preferences"""
+        return self.run_test(
+            "Set User Domain Preferences",
+            "POST",
+            f"users/{user_id}/preferences",
+            200,
+            data={
+                "preferred_domain": domain,
+                "difficulty_preference": "Medium",
+                "notification_settings": {
+                    "daily_challenge": True,
+                    "new_problems": True
+                }
+            }
+        )
+
+    def test_get_user_domain_progress(self, user_id, domain):
+        """Test getting user domain progress"""
+        encoded_domain = urllib.parse.quote(domain)
+        return self.run_test(
+            f"Get User Progress for Domain {domain}",
+            "GET",
+            f"users/{user_id}/domain-progress/{encoded_domain}",
+            200
+        )
+
+    def test_submit_solution(self, problem_id, domain):
         """Test submitting a solution"""
         return self.run_test(
             "Submit Solution",
@@ -130,8 +218,10 @@ class CaseForgeAPITester:
             200,
             data={
                 "problem_id": problem_id,
-                "content": "This is a test solution for the CaseForge API test.",
-                "user_id": "test_user"
+                "content": f"This is a test solution for the {domain} domain.",
+                "user_id": "test_user",
+                "score": 85,
+                "time_taken": 45
             }
         )
 
@@ -153,19 +243,48 @@ class CaseForgeAPITester:
 
 def main():
     # Get the API URL from environment or use default
-    api_url = os.environ.get("REACT_APP_BACKEND_URL", "http://localhost:8001")
+    api_url = os.environ.get("VITE_API_BASE_URL", "http://localhost:8001/api")
     if not api_url.endswith('/api'):
         api_url = f"{api_url}/api"
     
     # Print environment variables for debugging
     print("Environment Variables:")
-    print(f"REACT_APP_BACKEND_URL: {os.environ.get('REACT_APP_BACKEND_URL')}")
+    print(f"VITE_API_BASE_URL: {os.environ.get('VITE_API_BASE_URL')}")
     
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
     
-    # Run the tests
+    # Run basic health check
     tester.test_health_check()
+    
+    # Test domain-related endpoints
+    success, domains_data = tester.test_get_domains()
+    
+    # Select a test domain for further tests
+    test_domain = None
+    if success and domains_data:
+        if len(domains_data) > 0:
+            test_domain = domains_data[0].get('name')
+    
+    if test_domain:
+        print(f"\n🔍 Using test domain: {test_domain}")
+        
+        # Test domain-specific endpoints
+        tester.test_get_domain_stats(test_domain)
+        tester.test_get_domain_leaderboard(test_domain)
+        tester.test_get_domain_learning_paths(test_domain)
+        tester.test_get_domain_discussions(test_domain)
+        tester.test_get_problems_with_domain_filter(test_domain)
+        tester.test_get_domain_daily_challenge(test_domain)
+        
+        # Test user domain preferences and progress
+        test_user_id = "test_user_1"
+        tester.test_set_user_preferences(test_user_id, test_domain)
+        tester.test_get_user_domain_progress(test_user_id, test_domain)
+    else:
+        print("❌ Could not get a domain for further tests")
+    
+    # Test problem-related endpoints
     success, problems_data = tester.test_get_problems()
     
     # Get a problem ID for further tests
@@ -176,11 +295,12 @@ def main():
     
     if problem_id:
         tester.test_get_problem_by_id(problem_id)
-        tester.test_submit_solution(problem_id)
+        if test_domain:
+            tester.test_submit_solution(problem_id, test_domain)
     else:
         print("❌ Could not get a problem ID for further tests")
     
-    tester.test_get_problems_with_filters()
+    # Test other general endpoints
     tester.test_get_categories()
     tester.test_get_stats()
     tester.test_get_daily_challenge()
