@@ -185,7 +185,11 @@ const ExperienceStep: React.FC<ExperienceStepProps> = ({ data, updateData, onNex
             {roles.map((role) => (
               <button
                 key={role}
-                onClick={() => updateData({ currentRole: role })}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleRoleSelect(role);
+                }}
                 className={`p-3 rounded-lg border text-sm transition-colors ${
                   data.currentRole === role
                     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
