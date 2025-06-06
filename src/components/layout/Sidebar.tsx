@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDomain } from '../../context/DomainContext';
 import { 
   Home, 
@@ -21,6 +21,7 @@ import {
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { selectedDomain, setSelectedDomain } = useDomain();
 
   const getDomainIcon = (domainName: string) => {
@@ -49,6 +50,11 @@ const Sidebar: React.FC = () => {
       'Data Analytics': 'text-cyan-500'
     };
     return colorMap[domainName as keyof typeof colorMap] || 'text-blue-500';
+  };
+
+  const handleDomainSwitch = () => {
+    setSelectedDomain(null);
+    navigate('/select-domain');
   };
 
   const mainNavItems = [
@@ -150,7 +156,7 @@ const Sidebar: React.FC = () => {
       {/* Domain Switcher */}
       <div className="border-t border-dark-700 p-2">
         <button
-          onClick={() => setSelectedDomain(null)}
+          onClick={handleDomainSwitch}
           className="w-full flex flex-col items-center justify-center p-3 rounded-lg text-xs text-dark-400 hover:text-dark-200 hover:bg-dark-700 transition-colors duration-200"
           title="Switch Domain"
         >

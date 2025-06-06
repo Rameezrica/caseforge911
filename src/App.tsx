@@ -15,7 +15,7 @@ import ContestPage from './pages/ContestPage';
 import StudyPlansPage from './pages/StudyPlansPage';
 import SmartWorkspace from './components/workspace/SmartWorkspace';
 import { NotFoundPage } from './pages/NotFoundPage';
-import DomainSelector from './components/domain/DomainSelector';
+import OnboardingFlow from './components/onboarding/OnboardingFlow';
 import DomainDashboard from './pages/DomainDashboard';
 import DomainLeaderboard from './pages/DomainLeaderboard';
 import DomainLearningPaths from './pages/DomainLearningPaths';
@@ -25,27 +25,57 @@ const DomainAwareRoutes: React.FC = () => {
   const { selectedDomain } = useDomain();
   const location = useLocation();
   
-  // If no domain is selected and not on domain selection page, redirect to domain selector
-  if (!selectedDomain && location.pathname !== '/select-domain' && location.pathname !== '/') {
+  // Check if user has completed onboarding
+  const hasCompletedOnboarding = localStorage.getItem('onboardingCompleted') === 'true';
+  
+  // If no domain is selected and not on onboarding/domain selection pages, redirect to onboarding
+  if (!selectedDomain && !hasCompletedOnboarding && 
+      location.pathname !== '/onboarding' && 
+      location.pathname !== '/select-domain' && 
+      location.pathname !== '/') {
+    return <Navigate to="/onboarding" replace />;
+  }
+  
+  // If domain is selected but haven't completed onboarding, and not on onboarding page
+  if (selectedDomain && !hasCompletedOnboarding && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  // If completed onboarding but no domain selected, go to domain selector
+  if (!selectedDomain && hasCompletedOnboarding && 
+      location.pathname !== '/select-domain' && 
+      location.pathname !== '/onboarding' && 
+      location.pathname !== '/') {
     return <Navigate to="/select-domain" replace />;
   }
 
   return (
     <Routes>
-      {/* Domain Selection */}
-      <Route path="/select-domain" element={<DomainSelector />} />
+      {/* Onboarding Flow */}
+      <Route path="/onboarding" element={<OnboardingFlow />} />
       
-      {/* Main Routes - Domain aware */}
+      {/* Domain Selection */}
+      <Route path="/select-domain" element={<OnboardingFlow />} />
+      
+      {/* Homepage - redirect based on state */}
       <Route path="/" element={
-        selectedDomain ? (
+        !hasCompletedOnboarding ? (
+          <Navigate to="/onboarding" replace />
+        ) : selectedDomain ? (
           <Navigate to="/dashboard" replace />
         ) : (
-          <LayoutWrapper><HomePage /></LayoutWrapper>
+          <Navigate to="/select-domain" replace />
         )
       } />
       
       {/* Domain Dashboard */}
-      <Route path="/dashboard" element={<LayoutWrapper><DomainDashboard /></LayoutWrapper>} />
+      <Route path="/dashboard" element={
+        selectedDomain ? (
+          <LayoutWrapper><DomainDashboard /></LayoutWrapper>
+        ) : (
+          <Navigate to="/select-domain" replace />
+        )
+      } />
       
       {/* Domain-specific routes */}
       <Route path="/domain/:domain/leaderboard" element={<LayoutWrapper><DomainLeaderboard /></LayoutWrapper>} />
@@ -73,9 +103,9 @@ const DomainAwareRoutes: React.FC = () => {
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  const isDomainSelector = location.pathname === '/select-domain';
+  const isOnboardingPage = location.pathname === '/onboarding' || location.pathname === '/select-domain';
 
-  if (isAuthPage || isDomainSelector) {
+  if (isAuthPage || isOnboardingPage) {
     return <>{children}</>;
   }
 
