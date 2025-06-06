@@ -5,7 +5,7 @@ import { DomainProvider, useDomain } from './context/DomainContext';
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
 import HomePage from './pages/HomePage';
-import ProblemsPage from './pages/ProblemsPage';
+import DomainProblemsPage from './pages/DomainProblemsPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import ProfilePage from './pages/ProfilePage';
@@ -18,6 +18,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import DomainSelector from './components/domain/DomainSelector';
 import DomainDashboard from './pages/DomainDashboard';
 import DomainLeaderboard from './pages/DomainLeaderboard';
+import DomainLearningPaths from './pages/DomainLearningPaths';
 
 // Domain-aware routing component
 const DomainAwareRoutes: React.FC = () => {
@@ -48,10 +49,12 @@ const DomainAwareRoutes: React.FC = () => {
       
       {/* Domain-specific routes */}
       <Route path="/domain/:domain/leaderboard" element={<LayoutWrapper><DomainLeaderboard /></LayoutWrapper>} />
+      <Route path="/domain/:domain/learning-paths" element={<LayoutWrapper><DomainLearningPaths /></LayoutWrapper>} />
       <Route path="/leaderboard" element={<LayoutWrapper><DomainLeaderboard /></LayoutWrapper>} />
+      <Route path="/learning-paths" element={<LayoutWrapper><DomainLearningPaths /></LayoutWrapper>} />
       
       {/* Enhanced existing routes with domain awareness */}
-      <Route path="/problems" element={<LayoutWrapper><ProblemsPage /></LayoutWrapper>} />
+      <Route path="/problems" element={<LayoutWrapper><DomainProblemsPage /></LayoutWrapper>} />
       <Route path="/problem/:id" element={<LayoutWrapper><ProblemDetailPage /></LayoutWrapper>} />
       <Route path="/profile" element={<LayoutWrapper><ProfilePage /></LayoutWrapper>} />
       <Route path="/solution/:id" element={<LayoutWrapper><SolutionPage /></LayoutWrapper>} />
