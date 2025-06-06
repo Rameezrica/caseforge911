@@ -1,96 +1,73 @@
-# CaseForge - "LeetCode for Business Students" 
+# 🧠 Caseforge
 
-CaseForge is an online platform where business students can practice real-world business cases, strategy problems, finance scenarios, and operations challenges with community discussion and AI-assisted evaluation.
+**Caseforge** is a new frontier in business education — a platform built for those who want to *learn business by doing*. Whether you're a student aiming for top internships, a career switcher building practical skills, or a company looking for high-signal talent — Caseforge puts real-world decision-making at the heart of learning.
 
-## Project Overview
+---
 
-This platform is designed to help business students develop their case-solving skills through practice with realistic business scenarios. It includes features like:
+## 🎯 Mission
 
-- Problem repository with categorized business cases
-- Structured solution submission
-- Community discussion and voting
-- AI-assisted evaluation
-- Progress tracking and achievement badges
-- Leaderboard system
+> You shouldn’t need to go to an elite B-school to solve real business problems.
 
-## Core Features
+Caseforge democratizes access to practical, case-based learning — turning theoretical knowledge into actionable skills across domains like:
 
-### 1. Homepage & Navigation
-- Modern landing page with explanation of the platform
-- Navigation bar with key sections
-- Statistics dashboard showing platform activity
+- 📊 Finance
+- 📈 Marketing
+- 🧠 Strategy
+- 🏭 Operations
+- 📦 Supply Chain
+- 💼 General Management
 
-### 2. User Authentication System
-- Sign up/Login functionality
-- User profiles with educational information
-- Progress tracking and achievements
+---
 
-### 3. Problem Repository
-Categories:
-- Strategy & Consulting
-- Finance & Investment
-- Operations & Supply Chain
-- Marketing & Growth
-- Entrepreneurship
-- Data Analysis & Business Intelligence
+## ⚙️ What You Can Do on Caseforge
 
-### 4. Solution Submission Interface
-- Structured approach to case solving
-- Framework suggestions
-- Feedback mechanism
+- **Solve Case Problems**: Tackle realistic, data-backed business challenges
+- **Take Decision Quizzes**: Choose your path, defend your logic, get scored
+- **Level Up**: Choose learning paths or take a test to skip levels
+- **Get Scorecards**: Build a resume-worthy profile showing your domain strengths
+- **Join Contests**: Compete in challenges and win job interview opportunities
+- **Track Growth**: See how you perform across business functions
 
-### 5. Community Features
-- Discussion forum
-- Upvote/downvote system
-- Solution sharing
+---
 
-### 6. AI Evaluation System
-- Feedback on solution structure and content
-- Performance scoring
+## 🔧 Under the Hood (Tech Stack)
 
-### 7. Progress Tracking
-- Personal dashboard
-- Performance analytics
+- **Frontend**: Next.js + TailwindCSS
+- **Backend**: Supabase (TBD)
+- **Authentication**: Clerk (or Firebase Auth)
+- **AI Layer**: GPT-4 / Claude (prompt scoring, hints, learning suggestions)
+- **Automation**: n8n + OpenAI API
 
-### 8. Leaderboard System
-- Ranking of top performers
-- Category-specific recognition
+---
 
-## Getting Started
+## 🧪 Live Preview
 
-### Prerequisites
-- Node.js (version 16 or higher)
-- npm or yarn
+👉 [Visit Caseforge](https://caseforge911.vercel.app)
 
-### Installation
+---
 
-1. Clone the repository
-2. Install dependencies:
-```bash
-npm install
-```
+## 🚧 Current Status
 
-3. Start the development server:
-```bash
-npm run dev
-```
+Caseforge is in **early development (alpha)** and evolving rapidly.
 
-## Technologies Used
+### ✅ What’s Done:
+- Landing page UI
+- Problem navigation structure
+- Starter problem types (case + decision)
 
-- React
-- TypeScript
-- Tailwind CSS
-- Vite
-- React Router
+### 🔜 Coming Soon:
+- AI scoring with GPT-4
+- User profiles and dashboards
+- Admin case builder
+- Domain-specific toolkits
+- Contests and certification paths
 
-## Project Structure
+---
 
-- `/src/components` - Reusable UI components
-- `/src/pages` - Page components for different routes
-- `/src/context` - React context for state management
-- `/src/data` - Mock data for development
-- `/src/types` - TypeScript type definitions
+## 📌 Roadmap (Q2–Q4 2025)
 
-## License
-
-MIT
+- [ ] Build full multi-domain case database
+- [ ] Implement AI-based evaluation engine
+- [ ] Launch personalized learning journeys
+- [ ] Partner with employers for hiring contests
+- [ ] Release v1.0 to 10,000+ users
