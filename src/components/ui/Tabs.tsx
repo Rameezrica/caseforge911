@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
-import { cn } from '../../lib/utils';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface TabsContextType {
   value: string;
@@ -11,14 +10,14 @@ const TabsContext = createContext<TabsContextType | undefined>(undefined);
 interface TabsProps {
   value: string;
   onValueChange: (value: string) => void;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-export const Tabs: React.FC<TabsProps> = ({ value, onValueChange, children, className }) => {
+export const Tabs: React.FC<TabsProps> = ({ value, onValueChange, children, className = '' }) => {
   return (
     <TabsContext.Provider value={{ value, onValueChange }}>
-      <div className={cn('w-full', className)}>
+      <div className={className}>
         {children}
       </div>
     </TabsContext.Provider>
@@ -26,16 +25,13 @@ export const Tabs: React.FC<TabsProps> = ({ value, onValueChange, children, clas
 };
 
 interface TabsListProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-export const TabsList: React.FC<TabsListProps> = ({ children, className }) => {
+export const TabsList: React.FC<TabsListProps> = ({ children, className = '' }) => {
   return (
-    <div className={cn(
-      'inline-flex h-10 items-center justify-center rounded-md p-1 text-dark-400',
-      className
-    )}>
+    <div className={`flex space-x-1 ${className}`}>
       {children}
     </div>
   );
@@ -43,26 +39,28 @@ export const TabsList: React.FC<TabsListProps> = ({ children, className }) => {
 
 interface TabsTriggerProps {
   value: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-export const TabsTrigger: React.FC<TabsTriggerProps> = ({ value, children, className }) => {
+export const TabsTrigger: React.FC<TabsTriggerProps> = ({ value, children, className = '' }) => {
   const context = useContext(TabsContext);
-  if (!context) throw new Error('TabsTrigger must be used within Tabs');
+  
+  if (!context) {
+    throw new Error('TabsTrigger must be used within a Tabs component');
+  }
 
-  const isActive = context.value === value;
+  const { value: selectedValue, onValueChange } = context;
+  const isSelected = selectedValue === value;
 
   return (
     <button
-      onClick={() => context.onValueChange(value)}
-      className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-        isActive 
-          ? 'bg-dark-700 text-dark-50 shadow-sm' 
-          : 'text-dark-400 hover:bg-dark-700/50 hover:text-dark-300',
-        className
-      )}
+      onClick={() => onValueChange(value)}
+      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+        isSelected
+          ? 'bg-emerald-500 text-dark-900'
+          : 'text-dark-400 hover:text-dark-200 hover:bg-dark-700'
+      } ${className}`}
     >
       {children}
     </button>
@@ -71,18 +69,25 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({ value, children, class
 
 interface TabsContentProps {
   value: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-export const TabsContent: React.FC<TabsContentProps> = ({ value, children, className }) => {
+export const TabsContent: React.FC<TabsContentProps> = ({ value, children, className = '' }) => {
   const context = useContext(TabsContext);
-  if (!context) throw new Error('TabsContent must be used within Tabs');
+  
+  if (!context) {
+    throw new Error('TabsContent must be used within a Tabs component');
+  }
 
-  if (context.value !== value) return null;
+  const { value: selectedValue } = context;
+  
+  if (selectedValue !== value) {
+    return null;
+  }
 
   return (
-    <div className={cn('mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', className)}>
+    <div className={className}>
       {children}
     </div>
   );
