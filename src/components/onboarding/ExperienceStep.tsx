@@ -208,7 +208,11 @@ const ExperienceStep: React.FC<ExperienceStepProps> = ({ data, updateData, onNex
             {industries.map((industry) => (
               <button
                 key={industry}
-                onClick={() => updateData({ industry })}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleIndustrySelect(industry);
+                }}
                 className={`p-3 rounded-lg border text-sm transition-colors ${
                   data.industry === industry
                     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
