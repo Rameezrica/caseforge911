@@ -243,7 +243,11 @@ const ExperienceStep: React.FC<ExperienceStepProps> = ({ data, updateData, onNex
       </div>
 
       {/* Continue Button */}
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center">
+        {/* Progress Indicator */}
+        <div className="mb-4 text-sm text-dark-400">
+          Progress: {[data.overallExperience, data.currentRole, data.industry].filter(Boolean).length} / 3 required fields completed
+        </div>
         <button
           onClick={onNext}
           disabled={!canProceed}
@@ -255,6 +259,11 @@ const ExperienceStep: React.FC<ExperienceStepProps> = ({ data, updateData, onNex
         >
           Continue to Goals
         </button>
+        {!canProceed && (
+          <p className="mt-2 text-xs text-dark-500">
+            Please complete all required fields above
+          </p>
+        )}
       </div>
     </div>
   );
