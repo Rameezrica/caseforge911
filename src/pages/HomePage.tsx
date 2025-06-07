@@ -6,14 +6,16 @@ import {
   BarChart2, Rocket, CheckCircle 
 } from 'lucide-react';
 import DailyChallengeWidget from '../components/home/DailyChallengeWidget';
+import ServerStatus from '../components/ui/ServerStatus';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { useStats } from '../hooks/useStats';
 import { useDailyChallenge } from '../hooks/useDailyChallenge';
 import { useProblems } from '../hooks/useProblems';
 
 const HomePage = () => {
-  const { stats, loading: statsLoading } = useStats();
-  const { challenge, loading: challengeLoading } = useDailyChallenge();
-  const { problems, loading: problemsLoading } = useProblems({ limit: 10 });
+  const { stats, loading: statsLoading, isServerOnline: statsOnline, retry: retryStats } = useStats();
+  const { challenge, loading: challengeLoading, isServerOnline: challengeOnline, retry: retryChallenge } = useDailyChallenge();
+  const { problems, loading: problemsLoading, isServerOnline: problemsOnline, retry: retryProblems } = useProblems({ limit: 10 });
   
   const totalProblems = stats?.total_problems || 0;
   const solvedCount = 0; // Will be replaced with user-specific data
@@ -21,6 +23,9 @@ const HomePage = () => {
   const skillLevel = "Beginner";
   const nextMilestone = 25;
   const [loading, setLoading] = useState(true);
+
+  // Check if any service is offline
+  const isAnyServiceOffline = !statsOnline || !challengeOnline || !problemsOnline;
 
   useEffect(() => {
     // Set loading to false when all data is loaded
@@ -30,10 +35,16 @@ const HomePage = () => {
     }
   }, [statsLoading, challengeLoading, problemsLoading]);
 
+  const handleRetryAll = () => {
+    retryStats();
+    retryChallenge();
+    retryProblems();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+        <LoadingSpinner size="lg" text="Loading dashboard..." />
       </div>
     );
   }
@@ -139,6 +150,12 @@ const HomePage = () => {
 
   return (
     <div className="space-y-8">
+      {/* Server Status Banner */}
+      <ServerStatus 
+        isOnline={!isAnyServiceOffline} 
+        onRetry={handleRetryAll}
+      />
+
       {/* Header Section */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-8">
         <div className="max-w-4xl">
