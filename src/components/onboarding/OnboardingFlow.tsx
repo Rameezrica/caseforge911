@@ -9,7 +9,7 @@ import RoleStep from './RoleStep';
 import TimeCommitmentStep from './TimeCommitmentStep';
 import MotivationStep from './MotivationStep';
 import CompletionStep from './CompletionStep';
-import { Progress } from '@radix-ui/react-progress';
+import { Progress } from '../ui/progress';
 
 export interface OnboardingData {
   // Step 1: Experience Level
