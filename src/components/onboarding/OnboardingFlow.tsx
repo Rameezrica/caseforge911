@@ -1,81 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDomain } from '../../context/DomainContext';
 import { apiService } from '../../services/api';
 import WelcomeStep from './WelcomeStep';
 import ExperienceStep from './ExperienceStep';
-import GoalsStep from './GoalsStep';
-import LearningPreferencesStep from './LearningPreferencesStep';
 import DomainSelectionStep from './DomainSelectionStep';
-import PersonalizationStep from './PersonalizationStep';
+import RoleStep from './RoleStep';
+import TimeCommitmentStep from './TimeCommitmentStep';
+import MotivationStep from './MotivationStep';
 import CompletionStep from './CompletionStep';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Progress } from '@radix-ui/react-progress';
 
 export interface OnboardingData {
-  // Experience Assessment
-  overallExperience: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  domainExperience: Record<string, 'none' | 'basic' | 'intermediate' | 'advanced'>;
-  currentRole: string;
-  industry: string;
+  // Step 1: Experience Level
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced' | '';
   
-  // Goals and Aspirations
-  primaryGoal: 'interview_prep' | 'skill_development' | 'career_change' | 'academic' | 'certification';
-  targetRoles: string[];
-  timeCommitment: 'casual' | 'regular' | 'intensive';
-  targetCompanies: string[];
-  
-  // Learning Preferences
-  learningStyle: 'visual' | 'hands_on' | 'theoretical' | 'mixed';
-  preferredDifficulty: 'gradual' | 'challenging' | 'mixed';
-  studySessionLength: '15-30' | '30-60' | '60-90' | '90+';
-  
-  // Domain Preferences
+  // Step 2: Domain Selection
   selectedDomain: string;
-  secondaryInterests: string[];
   
-  // Personalization
-  notifications: {
-    dailyChallenge: boolean;
-    weeklyProgress: boolean;
-    newProblems: boolean;
-    communityUpdates: boolean;
-  };
-  competitiveMode: boolean;
-  privateProfile: boolean;
+  // Step 3: Current Role
+  currentRole: 'student' | 'working_professional' | 'career_switcher' | 'entrepreneur' | '';
+  
+  // Step 4: Time Commitment
+  timeCommitment: '2-4' | '5-7' | '8+' | '';
+  
+  // Step 5: Motivation
+  motivation: 'crack_interviews' | 'build_skills' | 'land_internships' | 'exploring' | '';
 }
 
 const OnboardingFlow: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { setSelectedDomain } = useDomain();
   
   const [currentStep, setCurrentStep] = useState(0);
-  const [onboardingData, setOnboardingData] = useState<Partial<OnboardingData>>({
-    notifications: {
-      dailyChallenge: true,
-      weeklyProgress: true,
-      newProblems: false,
-      communityUpdates: false,
-    },
-    competitiveMode: true,
-    privateProfile: false,
+  const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+    experienceLevel: '',
+    selectedDomain: '',
+    currentRole: '',
+    timeCommitment: '',
+    motivation: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Check if we're coming from domain switch (skip to domain selection)
-  useEffect(() => {
-    if (location.pathname === '/select-domain') {
-      setCurrentStep(4); // Jump to domain selection step
-    }
-  }, [location.pathname]);
 
   const steps = [
     { id: 'welcome', title: 'Welcome', component: WelcomeStep },
     { id: 'experience', title: 'Experience', component: ExperienceStep },
-    { id: 'goals', title: 'Goals', component: GoalsStep },
-    { id: 'preferences', title: 'Learning', component: LearningPreferencesStep },
     { id: 'domain', title: 'Domain', component: DomainSelectionStep },
-    { id: 'personalization', title: 'Customize', component: PersonalizationStep },
+    { id: 'role', title: 'Role', component: RoleStep },
+    { id: 'time', title: 'Time', component: TimeCommitmentStep },
+    { id: 'motivation', title: 'Motivation', component: MotivationStep },
     { id: 'completion', title: 'Complete', component: CompletionStep },
   ];
 
@@ -98,28 +71,10 @@ const OnboardingFlow: React.FC = () => {
     }
   };
 
-  const skipToCompletion = async () => {
-    // For domain switching, just select domain and redirect
-    if (location.pathname === '/select-domain' && onboardingData.selectedDomain) {
-      setSelectedDomain(onboardingData.selectedDomain);
-      
-      // Save minimal preferences
-      try {
-        await apiService.setUserPreferences('user_1', {
-          preferred_domain: onboardingData.selectedDomain,
-          difficulty_preference: 'Medium',
-          notification_settings: onboardingData.notifications
-        });
-      } catch (error) {
-        console.error('Error saving preferences:', error);
-      }
-      
-      navigate('/dashboard');
-      return;
-    }
-    
-    // Complete full onboarding
-    await completeOnboarding();
+  const skipOnboarding = () => {
+    // Set default preferences and redirect to dashboard
+    localStorage.setItem('onboardingCompleted', 'true');
+    navigate('/dashboard');
   };
 
   const completeOnboarding = async () => {
@@ -133,9 +88,14 @@ const OnboardingFlow: React.FC = () => {
       // Save user preferences to backend
       await apiService.setUserPreferences('user_1', {
         preferred_domain: onboardingData.selectedDomain,
-        difficulty_preference: onboardingData.preferredDifficulty === 'gradual' ? 'Easy' : 
-                              onboardingData.preferredDifficulty === 'challenging' ? 'Hard' : 'Medium',
-        notification_settings: onboardingData.notifications,
+        difficulty_preference: onboardingData.experienceLevel === 'beginner' ? 'Easy' : 
+                              onboardingData.experienceLevel === 'advanced' ? 'Hard' : 'Medium',
+        notification_settings: {
+          dailyChallenge: true,
+          weeklyProgress: true,
+          newProblems: false,
+          communityUpdates: false,
+        },
         onboarding_data: onboardingData
       });
       
@@ -152,89 +112,66 @@ const OnboardingFlow: React.FC = () => {
     }
   };
 
+  // Calculate progress for steps 1-5 (excluding welcome and completion)
+  const progressValue = currentStep === 0 || currentStep === steps.length - 1 
+    ? 0 
+    : ((currentStep - 1) / (steps.length - 3)) * 100;
+
   return (
-    <div className="min-h-screen bg-dark-900 relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-emerald-500/5 to-cyan-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-purple-500/3 to-pink-500/3 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative min-h-screen flex flex-col">
+        {/* Skip Button */}
+        {currentStep > 0 && currentStep < steps.length - 1 && (
+          <div className="absolute top-6 right-6 z-10">
+            <button
+              onClick={skipOnboarding}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Skip for now
+            </button>
+          </div>
+        )}
+
         {/* Progress Bar */}
         {currentStep > 0 && currentStep < steps.length - 1 && (
-          <div className="bg-dark-800 border-b border-dark-700 px-6 py-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-dark-300">
+          <div className="bg-card/50 backdrop-blur border-b border-border px-6 py-4">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-foreground">
                   Step {currentStep} of {steps.length - 2}
                 </span>
-                <span className="text-sm text-dark-400">
-                  {Math.round((currentStep / (steps.length - 2)) * 100)}% Complete
+                <span className="text-sm text-muted-foreground">
+                  {Math.round(progressValue)}% Complete
                 </span>
               </div>
-              <div className="w-full bg-dark-700 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-emerald-500 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${(currentStep / (steps.length - 2)) * 100}%` }}
-                ></div>
-              </div>
+              <Progress value={progressValue} className="h-2" />
             </div>
           </div>
         )}
 
         {/* Main Content */}
         <div className="flex-1 flex items-center justify-center px-4 py-8">
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-2xl">
             <StepComponent
               data={onboardingData}
               updateData={updateData}
               onNext={nextStep}
-              onSkip={skipToCompletion}
+              onPrev={prevStep}
+              onSkip={skipOnboarding}
               onComplete={completeOnboarding}
               isSubmitting={isSubmitting}
-              isStandaloneFlow={location.pathname === '/select-domain'}
+              canGoBack={currentStep > 0}
+              showBackButton={currentStep > 1 && currentStep < steps.length - 1}
             />
           </div>
         </div>
-
-        {/* Navigation */}
-        {currentStep > 0 && currentStep < steps.length - 1 && (
-          <div className="bg-dark-800 border-t border-dark-700 px-6 py-4">
-            <div className="max-w-4xl mx-auto flex items-center justify-between">
-              <button
-                onClick={prevStep}
-                className="flex items-center px-4 py-2 text-dark-400 hover:text-dark-200 transition-colors"
-                disabled={currentStep === 0}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
-              </button>
-
-              <div className="flex items-center space-x-2">
-                {steps.slice(1, -1).map((step, index) => (
-                  <div
-                    key={step.id}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index + 1 === currentStep ? 'bg-emerald-500' :
-                      index + 1 < currentStep ? 'bg-emerald-600' : 'bg-dark-600'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <button
-                onClick={currentStep === steps.length - 2 ? skipToCompletion : nextStep}
-                className="flex items-center px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
-                disabled={isSubmitting}
-              >
-                {currentStep === steps.length - 2 ? 'Complete' : 'Continue'}
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
