@@ -1,6 +1,6 @@
-# 🧠 Caseforge
+# 🧠 CaseForge
 
-**Caseforge** is a new frontier in business education — a platform built for those who want to *learn business by doing*. Whether you're a student aiming for top internships, a career switcher building practical skills, or a company looking for high-signal talent — Caseforge puts real-world decision-making at the heart of learning.
+**CaseForge** is a comprehensive business education platform that democratizes access to practical, case-based learning. Whether you're a student aiming for top internships, a career switcher building practical skills, or a company looking for high-signal talent — CaseForge puts real-world decision-making at the heart of learning.
 
 ---
 
