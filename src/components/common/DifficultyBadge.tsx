@@ -1,7 +1,7 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 
-export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert';
+type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert';
 
 interface DifficultyBadgeProps {
   difficulty: Difficulty;

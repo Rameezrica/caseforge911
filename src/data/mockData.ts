@@ -209,7 +209,7 @@ const additionalProblems: Problem[] = [
 const allProblems = [...problems, ...additionalProblems];
 
 // Mock Solutions
-export const solutions: Solution[] = [
+const solutions: Solution[] = [
   {
     id: '1',
     userId: '1',
@@ -261,7 +261,7 @@ export const solutions: Solution[] = [
 ];
 
 // Mock stats for homepage
-export const siteStats = {
+const siteStats = {
   totalUsers: 12547,
   totalProblemsSolved: 287690,
   totalProblems: allProblems.length,
@@ -269,7 +269,7 @@ export const siteStats = {
 };
 
 // Current logged in user (mock)
-export const currentUser: User = {
+const currentUser: User = {
   id: '1',
   name: 'Alex Johnson',
   email: 'alex@university.edu',
@@ -279,19 +279,19 @@ export const currentUser: User = {
 };
 
 // Helper functions
-export const getProblemById = (id: string): Problem | undefined => {
+const getProblemById = (id: string): Problem | undefined => {
   return allProblems.find(problem => problem.id === id);
 };
 
-export const getProblemsByCategory = (category: string): Problem[] => {
+const getProblemsByCategory = (category: string): Problem[] => {
   return allProblems.filter(problem => problem.category === category);
 };
 
-export const getProblemsByDifficulty = (difficulty: string): Problem[] => {
+const getProblemsByDifficulty = (difficulty: string): Problem[] => {
   return allProblems.filter(problem => problem.difficulty === difficulty);
 };
 
-export const getSolutionsForProblem = (problemId: string): Solution[] => {
+const getSolutionsForProblem = (problemId: string): Solution[] => {
   return solutions.filter(solution => solution.problemId === problemId);
 };
 
@@ -310,7 +310,7 @@ export const leaderboard = [
 ];
 
 // Add daily challenge mock data
-export const dailyChallenge: DailyChallenge = {
+const dailyChallenge: DailyChallenge = {
   id: 'dc-1',
   date: new Date().toISOString(),
   problemId: '2',
@@ -338,7 +338,7 @@ export const dailyChallenge: DailyChallenge = {
 };
 
 // Mock Users
-export const users: User[] = [
+const users: User[] = [
   {
     id: '1',
     name: 'Alex Johnson',
@@ -392,4 +392,4 @@ problems.forEach((problem, index) => {
   }
 });
 
-export { allProblems as problems };
+;

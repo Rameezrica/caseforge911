@@ -4,9 +4,9 @@ import { Clock, Users, Award, ChevronRight } from 'lucide-react';
 import { Problem } from '../../types';
 import DifficultyBadge from './DifficultyBadge';
 
-export type ViewMode = 'grid' | 'list';
+type ViewMode = 'grid' | 'list';
 
-export interface ProblemCardProps {
+interface ProblemCardProps {
   problem: Problem;
   viewMode: ViewMode;
 }

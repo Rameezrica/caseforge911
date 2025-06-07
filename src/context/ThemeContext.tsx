@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ThemeContextType {
+  theme: 'light' | 'dark';
   isDark: boolean;
   toggleTheme: () => void;
 }
@@ -20,12 +21,13 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [isDark, setIsDark] = useState(true);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const isDark = theme === 'dark';
 
-  const toggleTheme = () => setIsDark(!isDark);
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, isDark, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

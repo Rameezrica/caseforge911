@@ -30,7 +30,7 @@ export interface PlatformStats {
   difficulty_distribution: Record<string, number>;
 }
 
-export interface CategoryInfo {
+interface CategoryInfo {
   domain: string;
   categories: string[];
   problem_count: number;
@@ -96,4 +96,3 @@ export const apiService = {
   }
 };
 
-export default api;
