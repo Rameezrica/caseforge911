@@ -14,6 +14,7 @@ import ContestPage from './pages/ContestPage';
 import StudyPlansPage from './pages/StudyPlansPage';
 import CaseSolverPage from './pages/CaseSolverPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 
 // Wrapper component to handle layout
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -30,7 +31,9 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       <div className="flex-1 ml-20">
         <Navbar />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
     </div>
@@ -39,21 +42,23 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LayoutWrapper><HomePage /></LayoutWrapper>} />
-        <Route path="/problems" element={<LayoutWrapper><ProblemsPage /></LayoutWrapper>} />
-        <Route path="/problem/:id" element={<LayoutWrapper><ProblemDetailPage /></LayoutWrapper>} />
-        <Route path="/leaderboard" element={<LayoutWrapper><LeaderboardPage /></LayoutWrapper>} />
-        <Route path="/profile" element={<LayoutWrapper><ProfilePage /></LayoutWrapper>} />
-        <Route path="/solution/:id" element={<LayoutWrapper><SolutionPage /></LayoutWrapper>} />
-        <Route path="/community" element={<LayoutWrapper><CommunityPage /></LayoutWrapper>} />
-        <Route path="/contests" element={<LayoutWrapper><ContestPage /></LayoutWrapper>} />
-        <Route path="/study-plans" element={<LayoutWrapper><StudyPlansPage /></LayoutWrapper>} />
-        <Route path="/solve/:id" element={<LayoutWrapper><CaseSolverPage /></LayoutWrapper>} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LayoutWrapper><HomePage /></LayoutWrapper>} />
+          <Route path="/problems" element={<LayoutWrapper><ProblemsPage /></LayoutWrapper>} />
+          <Route path="/problem/:id" element={<LayoutWrapper><ProblemDetailPage /></LayoutWrapper>} />
+          <Route path="/leaderboard" element={<LayoutWrapper><LeaderboardPage /></LayoutWrapper>} />
+          <Route path="/profile" element={<LayoutWrapper><ProfilePage /></LayoutWrapper>} />
+          <Route path="/solution/:id" element={<LayoutWrapper><SolutionPage /></LayoutWrapper>} />
+          <Route path="/community" element={<LayoutWrapper><CommunityPage /></LayoutWrapper>} />
+          <Route path="/contests" element={<LayoutWrapper><ContestPage /></LayoutWrapper>} />
+          <Route path="/study-plans" element={<LayoutWrapper><StudyPlansPage /></LayoutWrapper>} />
+          <Route path="/solve/:id" element={<LayoutWrapper><CaseSolverPage /></LayoutWrapper>} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 };
 

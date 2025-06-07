@@ -1,13 +1,64 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api';
 
+// Create axios instance with better configuration
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 10000, // 10 second timeout
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Add request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => {
+    console.log(`API Response: ${response.status} ${response.config.url}`);
+    return response;
+  },
+  (error: AxiosError) => {
+    console.error('API Response Error:', error);
+    
+    // Handle different types of errors
+    if (error.code === 'ERR_NETWORK') {
+      throw new Error('Network error: Unable to connect to the server. Please check if the backend is running.');
+    }
+    
+    if (error.code === 'ECONNABORTED') {
+      throw new Error('Request timeout: The server took too long to respond.');
+    }
+    
+    if (error.response) {
+      // Server responded with error status
+      const status = error.response.status;
+      const message = error.response.data?.message || error.message;
+      
+      switch (status) {
+        case 404:
+          throw new Error(`Resource not found: ${message}`);
+        case 500:
+          throw new Error(`Server error: ${message}`);
+        default:
+          throw new Error(`API error (${status}): ${message}`);
+      }
+    }
+    
+    throw new Error(`Unknown error: ${error.message}`);
+  }
+);
 
 export interface Problem {
   id: string;
@@ -43,7 +94,18 @@ export interface DailyChallenge {
   completion_rate: number;
 }
 
-// API Functions
+// Health check function
+export const checkServerHealth = async (): Promise<boolean> => {
+  try {
+    await api.get('/health');
+    return true;
+  } catch (error) {
+    console.warn('Server health check failed:', error);
+    return false;
+  }
+};
+
+// API Functions with better error handling
 export const apiService = {
   // Health check
   async healthCheck() {
@@ -58,41 +120,70 @@ export const apiService = {
     category?: string;
     limit?: number;
   }) {
-    const response = await api.get('/problems', { params: filters });
-    return response.data as Problem[];
+    try {
+      const response = await api.get('/problems', { params: filters });
+      return response.data as Problem[];
+    } catch (error) {
+      console.error('Failed to fetch problems:', error);
+      throw error;
+    }
   },
 
   async getProblem(id: string) {
-    const response = await api.get(`/problems/${id}`);
-    return response.data as Problem;
+    try {
+      const response = await api.get(`/problems/${id}`);
+      return response.data as Problem;
+    } catch (error) {
+      console.error(`Failed to fetch problem ${id}:`, error);
+      throw error;
+    }
   },
 
   // Categories and domains
   async getCategories() {
-    const response = await api.get('/categories');
-    return response.data as CategoryInfo[];
+    try {
+      const response = await api.get('/categories');
+      return response.data as CategoryInfo[];
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+      throw error;
+    }
   },
 
   // Platform statistics
   async getStats() {
-    const response = await api.get('/stats');
-    return response.data as PlatformStats;
+    try {
+      const response = await api.get('/stats');
+      return response.data as PlatformStats;
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+      throw error;
+    }
   },
 
   // Daily challenge
   async getDailyChallenge() {
-    const response = await api.get('/daily-challenge');
-    return response.data as DailyChallenge;
+    try {
+      const response = await api.get('/daily-challenge');
+      return response.data as DailyChallenge;
+    } catch (error) {
+      console.error('Failed to fetch daily challenge:', error);
+      throw error;
+    }
   },
 
   // Submit solution
   async submitSolution(problemId: string, content: string, userId?: string) {
-    const response = await api.post('/solutions', {
-      problem_id: problemId,
-      content,
-      user_id: userId || 'anonymous'
-    });
-    return response.data;
+    try {
+      const response = await api.post('/solutions', {
+        problem_id: problemId,
+        content,
+        user_id: userId || 'anonymous'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to submit solution:', error);
+      throw error;
+    }
   }
 };
-

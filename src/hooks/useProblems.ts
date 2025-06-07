@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { apiService, Problem } from '../services/api';
+import { apiService } from '../services/api';
+import { useApiWithFallback } from './useApiWithFallback';
+import { problems as mockProblems } from '../data/mockData';
 
 export const useProblems = (filters?: {
   domain?: string;
@@ -7,55 +8,35 @@ export const useProblems = (filters?: {
   category?: string;
   limit?: number;
 }) => {
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const result = useApiWithFallback(
+    () => apiService.getProblems(filters),
+    mockProblems, // Fallback to mock data
+    [filters?.domain, filters?.difficulty, filters?.category, filters?.limit]
+  );
 
-  useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiService.getProblems(filters);
-        setProblems(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch problems');
-        console.error('Error fetching problems:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProblems();
-  }, [filters?.domain, filters?.difficulty, filters?.category, filters?.limit]);
-
-  return { problems, loading, error, refetch: () => window.location.reload() };
+  return {
+    problems: result.data || [],
+    loading: result.loading,
+    error: result.error,
+    isServerOnline: result.isServerOnline,
+    retry: result.retry
+  };
 };
 
 export const useProblem = (id: string) => {
-  const [problem, setProblem] = useState<Problem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const mockProblem = mockProblems.find(p => p.id === id);
+  
+  const result = useApiWithFallback(
+    () => apiService.getProblem(id),
+    mockProblem,
+    [id]
+  );
 
-  useEffect(() => {
-    const fetchProblem = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiService.getProblem(id);
-        setProblem(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch problem');
-        console.error('Error fetching problem:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchProblem();
-    }
-  }, [id]);
-
-  return { problem, loading, error };
+  return {
+    problem: result.data,
+    loading: result.loading,
+    error: result.error,
+    isServerOnline: result.isServerOnline,
+    retry: result.retry
+  };
 };

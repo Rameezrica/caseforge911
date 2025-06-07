@@ -1,28 +1,28 @@
-import { useState, useEffect } from 'react';
-import { apiService, PlatformStats } from '../services/api';
+import { apiService } from '../services/api';
+import { useApiWithFallback } from './useApiWithFallback';
+
+const mockStats = {
+  total_problems: 150,
+  total_solutions: 1250,
+  total_users: 850,
+  difficulty_distribution: {
+    'Easy': 45,
+    'Medium': 65,
+    'Hard': 40
+  }
+};
 
 export const useStats = () => {
-  const [stats, setStats] = useState<PlatformStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const result = useApiWithFallback(
+    () => apiService.getStats(),
+    mockStats
+  );
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiService.getStats();
-        setStats(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch stats');
-        console.error('Error fetching stats:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  return { stats, loading, error };
+  return {
+    stats: result.data,
+    loading: result.loading,
+    error: result.error,
+    isServerOnline: result.isServerOnline,
+    retry: result.retry
+  };
 };

@@ -1,28 +1,18 @@
-import { useState, useEffect } from 'react';
-import { apiService, DailyChallenge } from '../services/api';
+import { apiService } from '../services/api';
+import { useApiWithFallback } from './useApiWithFallback';
+import { dailyChallenge as mockDailyChallenge } from '../data/mockData';
 
 export const useDailyChallenge = () => {
-  const [challenge, setChallenge] = useState<DailyChallenge | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const result = useApiWithFallback(
+    () => apiService.getDailyChallenge(),
+    mockDailyChallenge
+  );
 
-  useEffect(() => {
-    const fetchDailyChallenge = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiService.getDailyChallenge();
-        setChallenge(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch daily challenge');
-        console.error('Error fetching daily challenge:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDailyChallenge();
-  }, []);
-
-  return { challenge, loading, error };
+  return {
+    challenge: result.data,
+    loading: result.loading,
+    error: result.error,
+    isServerOnline: result.isServerOnline,
+    retry: result.retry
+  };
 };
