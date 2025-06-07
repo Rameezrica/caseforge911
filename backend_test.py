@@ -162,7 +162,7 @@ def main():
     
     # Print environment variables for debugging
     print("Environment Variables:")
-    print(f"REACT_APP_BACKEND_URL: {os.environ.get('REACT_APP_BACKEND_URL')}")
+    print(f"VITE_API_BASE_URL: {os.environ.get('VITE_API_BASE_URL')}")
     
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
