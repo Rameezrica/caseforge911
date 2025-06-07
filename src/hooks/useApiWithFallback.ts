@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiService, checkServerHealth } from '../services/api';
+import { checkServerHealth } from '../services/api';
 
 interface ApiState<T> {
   data: T | null;
@@ -27,7 +27,6 @@ export function useApiWithFallback<T>(
       try {
         setState(prev => ({ ...prev, loading: true, error: null }));
         
-        // Check server health first
         const isOnline = await checkServerHealth();
         
         if (!isOnline) {
@@ -42,7 +41,6 @@ export function useApiWithFallback<T>(
           return;
         }
 
-        // Server is online, fetch real data
         const data = await apiCall();
         
         if (isMounted) {
@@ -76,7 +74,6 @@ export function useApiWithFallback<T>(
 
   const retry = () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-    // Trigger re-fetch by updating a dependency
   };
 
   return { ...state, retry };

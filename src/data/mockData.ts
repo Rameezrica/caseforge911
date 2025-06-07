@@ -1,6 +1,5 @@
-import { Problem, User, Solution, Comment, Achievement, Category, Difficulty, DailyChallenge } from '../types';
+import { Problem, User, Solution, Achievement, Category, Difficulty, DailyChallenge } from '../types';
 
-// Mock Achievements
 export const achievements: Achievement[] = [
   {
     id: '1',
@@ -34,7 +33,6 @@ export const achievements: Achievement[] = [
   }
 ];
 
-// Mock Problems
 const problems: Problem[] = [
   {
     id: '1',
@@ -173,144 +171,7 @@ const problems: Problem[] = [
   }
 ];
 
-// Add more problems with required properties
-const additionalProblems: Problem[] = [
-  {
-    id: '6',
-    title: 'Apple Stock Buyback Analysis',
-    description: 'Analyze Apple\'s stock buyback program and its impact on shareholder value.',
-    category: 'Finance & Investment',
-    difficulty: 'Medium',
-    timeLimit: 60,
-    tags: ['Capital Allocation', 'Corporate Finance', 'Technology', 'Shareholder Value'],
-    companyContext: 'Apple Inc. with $2T market cap',
-    createdAt: '2024-03-10T10:00:00Z',
-    solvedCount: 245,
-    averageScore: 78,
-    successRate: 58,
-    questions: [
-      'What is the impact of the buyback program on EPS?',
-      'How does the buyback compare to other capital allocation options?',
-      'What are the risks and benefits of the current strategy?',
-      'How should the program be optimized?',
-      'What is the impact on long-term shareholder value?'
-    ],
-    frameworkSuggestions: [
-      'Capital Structure Analysis',
-      'Shareholder Value Framework',
-      'EPS Impact Analysis',
-      'Capital Allocation Matrix'
-    ]
-  }
-  // Add more problems here...
-];
-
-// Combine all problems
-const allProblems = [...problems, ...additionalProblems];
-
-// Mock Solutions
-const solutions: Solution[] = [
-  {
-    id: '1',
-    userId: '1',
-    userName: 'Alex Johnson',
-    problemId: '1',
-    content: 'This is the full solution content with detailed analysis and recommendations...',
-    executiveSummary: 'Apple should maintain a balanced approach to capital allocation, with continued stock buybacks but at a reduced rate.',
-    problemAnalysis: 'Analysis of current market conditions, competitive landscape, and investment opportunities shows potential for strategic investments.',
-    recommendations: 'Implement a three-part strategy: (1) Reduce buybacks by 30%, (2) Increase R&D investment in AI/AR, (3) Maintain current dividend policy.',
-    implementationPlan: 'Phase the changes over 18 months to allow market adjustment and proper communication of the strategy.',
-    riskAssessment: 'Key risks include market reaction to reduced buybacks and execution risk on new investments. Mitigate through clear communication and staged implementation.',
-    submittedAt: '2024-03-10T14:30:00Z',
-    votes: 12,
-    aiScore: 85,
-    aiFeedback: 'Strong analysis with good balance between financial and strategic considerations. Consider adding more quantitative analysis on investment returns.'
-  },
-  {
-    id: '2',
-    userId: '2',
-    userName: 'Sarah Chen',
-    problemId: '1',
-    content: 'Detailed solution content...',
-    executiveSummary: 'Apple should prioritize R&D investment in emerging technologies while maintaining moderate buybacks.',
-    problemAnalysis: 'Market analysis shows strong potential in AR/VR and AI markets, with Apple well-positioned to lead.',
-    recommendations: '1) Increase R&D spend by 40% 2) Reduce buybacks by 50% 3) Launch new AR product line',
-    implementationPlan: '12-month phased approach with quarterly milestones',
-    riskAssessment: 'Execution risk in new markets, mitigated by strong brand and cash position',
-    submittedAt: '2024-03-11T09:15:00Z',
-    votes: 8,
-    aiScore: 78,
-    aiFeedback: 'Good strategic thinking but needs more financial analysis'
-  },
-  {
-    id: '3',
-    userId: '3',
-    userName: 'Michael Rodriguez',
-    problemId: '1',
-    content: 'Detailed solution content...',
-    executiveSummary: 'Apple should focus on returning capital to shareholders through increased dividends.',
-    problemAnalysis: 'Current market conditions favor income-generating investments',
-    recommendations: '1) Increase dividend yield 2) Maintain current buyback level 3) Focus on core business',
-    implementationPlan: 'Immediate dividend increase with quarterly reviews',
-    riskAssessment: 'Market volatility risk, mitigated by strong balance sheet',
-    submittedAt: '2024-03-12T16:45:00Z',
-    votes: 5,
-    aiScore: 72,
-    aiFeedback: 'Conservative approach with good risk management'
-  }
-];
-
-// Mock stats for homepage
-const siteStats = {
-  totalUsers: 12547,
-  totalProblemsSolved: 287690,
-  totalProblems: allProblems.length,
-  activeCommunityMembers: 8760
-};
-
-// Current logged in user (mock)
-const currentUser: User = {
-  id: '1',
-  name: 'Alex Johnson',
-  email: 'alex@university.edu',
-  problemsSolved: 27,
-  rank: 2,
-  achievements: [achievements[0], achievements[1]]
-};
-
-// Helper functions
-const getProblemById = (id: string): Problem | undefined => {
-  return allProblems.find(problem => problem.id === id);
-};
-
-const getProblemsByCategory = (category: string): Problem[] => {
-  return allProblems.filter(problem => problem.category === category);
-};
-
-const getProblemsByDifficulty = (difficulty: string): Problem[] => {
-  return allProblems.filter(problem => problem.difficulty === difficulty);
-};
-
-const getSolutionsForProblem = (problemId: string): Solution[] => {
-  return solutions.filter(solution => solution.problemId === problemId);
-};
-
-// Leaderboard data
-export const leaderboard = [
-  { userId: '3', userName: 'Morgan Lee', problemsSolved: 42, rank: 1 },
-  { userId: '1', userName: 'Alex Johnson', problemsSolved: 27, rank: 2 },
-  { userId: '2', userName: 'Sarah Chen', problemsSolved: 15, rank: 3 },
-  { userId: '4', userName: 'Jamie Wilson', problemsSolved: 14, rank: 4 },
-  { userId: '5', userName: 'Casey Brown', problemsSolved: 12, rank: 5 },
-  { userId: '6', userName: 'Jordan Miller', problemsSolved: 10, rank: 6 },
-  { userId: '7', userName: 'Riley Davis', problemsSolved: 9, rank: 7 },
-  { userId: '8', userName: 'Avery Martinez', problemsSolved: 8, rank: 8 },
-  { userId: '9', userName: 'Quinn Thompson', problemsSolved: 7, rank: 9 },
-  { userId: '10', userName: 'Parker Robinson', problemsSolved: 6, rank: 10 }
-];
-
-// Add daily challenge mock data
-const dailyChallenge: DailyChallenge = {
+export const dailyChallenge: DailyChallenge = {
   id: 'dc-1',
   date: new Date().toISOString(),
   problemId: '2',
@@ -333,63 +194,24 @@ const dailyChallenge: DailyChallenge = {
     frameworkSuggestions: ['Venture Capital Valuation', 'Risk Assessment Matrix', 'Growth Metrics Analysis'],
     timeLimit: 60,
     tags: ['Startup', 'Valuation', 'Venture Capital', 'AI Technology'],
-    successRate: 34
+    successRate: 34,
+    createdAt: new Date().toISOString(),
+    solvedCount: 234,
+    averageScore: 72
   }
 };
 
-// Mock Users
-const users: User[] = [
-  {
-    id: '1',
-    name: 'Alex Johnson',
-    email: 'alex@example.com',
-    problemsSolved: 27,
-    rank: 2,
-    achievements: [
-      {
-        id: '1',
-        name: 'Case Novice',
-        description: 'Solved your first business case',
-        icon: 'award'
-      },
-      {
-        id: '2',
-        name: 'Strategy Expert',
-        description: 'Solved 10 strategy & consulting cases',
-        icon: 'briefcase'
-      }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Sarah Chen',
-    email: 'sarah@example.com',
-    problemsSolved: 15,
-    rank: 3,
-    achievements: [
-      {
-        id: '1',
-        name: 'Case Novice',
-        description: 'Solved your first business case',
-        icon: 'award'
-      }
-    ]
-  }
+export const leaderboard = [
+  { userId: '3', userName: 'Morgan Lee', problemsSolved: 42, rank: 1 },
+  { userId: '1', userName: 'Alex Johnson', problemsSolved: 27, rank: 2 },
+  { userId: '2', userName: 'Sarah Chen', problemsSolved: 15, rank: 3 },
+  { userId: '4', userName: 'Jamie Wilson', problemsSolved: 14, rank: 4 },
+  { userId: '5', userName: 'Casey Brown', problemsSolved: 12, rank: 5 },
+  { userId: '6', userName: 'Jordan Miller', problemsSolved: 10, rank: 6 },
+  { userId: '7', userName: 'Riley Davis', problemsSolved: 9, rank: 7 },
+  { userId: '8', userName: 'Avery Martinez', problemsSolved: 8, rank: 8 },
+  { userId: '9', userName: 'Quinn Thompson', problemsSolved: 7, rank: 9 },
+  { userId: '10', userName: 'Parker Robinson', problemsSolved: 6, rank: 10 }
 ];
 
-// Update the remaining problems to include createdAt and solvedCount
-problems.forEach((problem, index) => {
-  if (!problem.createdAt) {
-    const date = new Date();
-    date.setDate(date.getDate() - index);
-    problem.createdAt = date.toISOString();
-  }
-  if (!problem.solvedCount) {
-    problem.solvedCount = Math.floor(Math.random() * 300) + 50;
-  }
-  if (!problem.averageScore) {
-    problem.averageScore = Math.floor(Math.random() * 20) + 70;
-  }
-});
-
-;
+export { problems };

@@ -18,16 +18,13 @@ const ContestPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'live' | 'past'>('upcoming');
   const [timeUntilNext, setTimeUntilNext] = useState<string>('');
 
-  // Helper function to create dates relative to now
   const getRelativeDate = (days: number) => {
     const date = new Date();
     date.setDate(date.getDate() + days);
     return date;
   };
 
-  // Mock contest data with dynamic dates
   const contests: Contest[] = [
-    // Upcoming Contests
     {
       id: '1',
       title: 'March Business Challenge',
@@ -48,7 +45,6 @@ const ContestPage: React.FC = () => {
       difficulty: 'Hard',
       status: 'upcoming'
     },
-    // Live Contests
     {
       id: '3',
       title: 'Strategy Case Competition',
@@ -59,7 +55,6 @@ const ContestPage: React.FC = () => {
       difficulty: 'Medium',
       status: 'live'
     },
-    // Past Contests
     {
       id: '4',
       title: 'Consulting Case Sprint',
@@ -96,7 +91,6 @@ const ContestPage: React.FC = () => {
   });
 
   useEffect(() => {
-    // Update countdown timer
     const updateCountdown = () => {
       const nextContest = contests.find(c => c.status === 'upcoming');
       if (nextContest) {
@@ -118,7 +112,6 @@ const ContestPage: React.FC = () => {
   }, [contests]);
 
   const handleJoinContest = (contestId: string) => {
-    // Handle contest registration
     console.log('Joining contest:', contestId);
   };
 
@@ -156,7 +149,6 @@ const ContestPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-8">
         <div className="flex items-center justify-between">
           <div>
@@ -170,7 +162,6 @@ const ContestPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Contest Rules */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
         <h2 className="text-xl font-bold text-dark-50 mb-4 flex items-center">
           <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
@@ -207,7 +198,6 @@ const ContestPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Contests List */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
         <div className="flex border-b border-dark-700">
           <button

@@ -15,11 +15,9 @@ const Navbar = () => {
     }
   };
 
-  // Minimal header for solution dashboard
   const isSolver = matchPath('/solve/:id', location.pathname);
 
   if (isSolver) {
-    // Extract problem id for back navigation
     const match = location.pathname.match(/\/solve\/(.+)$/);
     const problemId = match ? match[1] : '';
     return (
@@ -31,7 +29,6 @@ const Navbar = () => {
               <span className="ml-2 text-xl font-bold text-dark-50">CaseForge</span>
             </Link>
             <div className="flex items-center gap-4">
-              {/* Timer placeholder, actual timer is in the workspace */}
               <div className="flex items-center text-dark-400">
                 <Clock className="h-5 w-5 mr-2" />
                 <span className="font-medium">Solving Mode</span>
@@ -49,7 +46,6 @@ const Navbar = () => {
     );
   }
 
-  // Don't show search on homepage
   const showSearch = location.pathname !== '/';
 
   return (
@@ -84,7 +80,6 @@ const Navbar = () => {
               className="flex items-center space-x-2 text-dark-200 hover:text-dark-50"
             >
               <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center text-dark-900 font-bold">
-                {/* Placeholder for user initials */}
               </div>
             </Link>
           </div>

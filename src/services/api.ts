@@ -2,16 +2,14 @@ import axios, { AxiosError } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api';
 
-// Create axios instance with better configuration
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // 10 second timeout
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add request interceptor for debugging
 api.interceptors.request.use(
   (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
@@ -23,7 +21,6 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
     console.log(`API Response: ${response.status} ${response.config.url}`);
@@ -32,7 +29,6 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     console.error('API Response Error:', error);
     
-    // Handle different types of errors
     if (error.code === 'ERR_NETWORK') {
       throw new Error('Network error: Unable to connect to the server. Please check if the backend is running.');
     }
@@ -42,7 +38,6 @@ api.interceptors.response.use(
     }
     
     if (error.response) {
-      // Server responded with error status
       const status = error.response.status;
       const message = error.response.data?.message || error.message;
       
@@ -94,7 +89,6 @@ export interface DailyChallenge {
   completion_rate: number;
 }
 
-// Health check function
 export const checkServerHealth = async (): Promise<boolean> => {
   try {
     await api.get('/health');
@@ -105,15 +99,12 @@ export const checkServerHealth = async (): Promise<boolean> => {
   }
 };
 
-// API Functions with better error handling
 export const apiService = {
-  // Health check
   async healthCheck() {
     const response = await api.get('/health');
     return response.data;
   },
 
-  // Problems
   async getProblems(filters?: {
     domain?: string;
     difficulty?: string;
@@ -139,7 +130,6 @@ export const apiService = {
     }
   },
 
-  // Categories and domains
   async getCategories() {
     try {
       const response = await api.get('/categories');
@@ -150,7 +140,6 @@ export const apiService = {
     }
   },
 
-  // Platform statistics
   async getStats() {
     try {
       const response = await api.get('/stats');
@@ -161,7 +150,6 @@ export const apiService = {
     }
   },
 
-  // Daily challenge
   async getDailyChallenge() {
     try {
       const response = await api.get('/daily-challenge');
@@ -172,7 +160,6 @@ export const apiService = {
     }
   },
 
-  // Submit solution
   async submitSolution(problemId: string, content: string, userId?: string) {
     try {
       const response = await api.post('/solutions', {

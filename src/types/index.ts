@@ -1,5 +1,3 @@
-// Common Types for CaseForge
-
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 export type Category = 
@@ -15,7 +13,7 @@ export interface User {
   email: string;
   problemsSolved: number;
   rank: number;
-  achievements: string[];
+  achievements: Achievement[];
 }
 
 export interface Achievement {
@@ -23,6 +21,7 @@ export interface Achievement {
   name: string;
   description: string;
   icon: string;
+  earnedOn?: string;
 }
 
 export interface Problem {

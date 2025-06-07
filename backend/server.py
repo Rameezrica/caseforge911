@@ -11,12 +11,10 @@ from datetime import datetime, timedelta
 import bcrypt
 import jwt
 
-# Load environment variables
 load_dotenv()
 
 app = FastAPI(title="CaseForge API", description="Backend for business case practice platform")
 
-# CORS middleware - Get allowed origins from environment
 FRONTEND_URLS = os.getenv("FRONTEND_URLS", "http://localhost:5173,http://localhost:3000,https://localhost:3000")
 allowed_origins = [url.strip() for url in FRONTEND_URLS.split(",")]
 
@@ -28,29 +26,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database connection
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/")
 DATABASE_NAME = os.getenv("DATABASE_NAME", "caseforge")
 
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[DATABASE_NAME]
 
-# Collections
 problems_collection = db.problems
 users_collection = db.users
 solutions_collection = db.solutions
 discussions_collection = db.discussions
 
-# Pydantic models
 class Problem(BaseModel):
     id: str
     title: str
     description: str
-    difficulty: str  # "Easy", "Medium", "Hard"
+    difficulty: str
     category: str
     domain: str
     company: Optional[str] = None
-    time_limit: Optional[int] = 60  # minutes
+    time_limit: Optional[int] = 60
     sample_framework: Optional[str] = None
     created_at: datetime
     updated_at: datetime
@@ -81,11 +76,7 @@ class Discussion(BaseModel):
     downvotes: int = 0
     created_at: datetime
 
-# Sample data initialization
 async def init_sample_data():
-    """Initialize the database with sample business problems"""
-    
-    # Check if problems already exist
     existing_count = await problems_collection.count_documents({})
     if existing_count > 0:
         return
@@ -230,14 +221,11 @@ Conduct a comprehensive analysis to identify root causes and recommend immediate
         }
     ]
     
-    # Insert sample problems
     await problems_collection.insert_many(sample_problems)
     print(f"Inserted {len(sample_problems)} sample problems")
 
-# API Routes
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database with sample data on startup"""
     await init_sample_data()
 
 @app.get("/api/health")
@@ -251,7 +239,6 @@ async def get_problems(
     category: Optional[str] = None,
     limit: int = 50
 ):
-    """Get problems with optional filtering"""
     filter_query = {}
     
     if domain:
@@ -271,7 +258,6 @@ async def get_problems(
 
 @app.get("/api/problems/{problem_id}", response_model=Problem)
 async def get_problem(problem_id: str):
-    """Get a specific problem by ID"""
     problem = await problems_collection.find_one({"id": problem_id})
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
@@ -281,7 +267,6 @@ async def get_problem(problem_id: str):
 
 @app.get("/api/categories")
 async def get_categories():
-    """Get all available categories and domains"""
     pipeline = [
         {
             "$group": {
@@ -305,12 +290,10 @@ async def get_categories():
 
 @app.get("/api/stats")
 async def get_platform_stats():
-    """Get platform statistics"""
     total_problems = await problems_collection.count_documents({})
     total_solutions = await solutions_collection.count_documents({})
     total_users = await users_collection.count_documents({})
     
-    # Get difficulty distribution
     difficulty_pipeline = [
         {"$group": {"_id": "$difficulty", "count": {"$sum": 1}}}
     ]
@@ -328,14 +311,13 @@ async def get_platform_stats():
 
 @app.post("/api/solutions")
 async def submit_solution(solution_data: dict):
-    """Submit a solution for a problem"""
     solution = {
         "id": str(uuid.uuid4()),
         "problem_id": solution_data["problem_id"],
         "user_id": solution_data.get("user_id", "anonymous"),
         "content": solution_data["content"],
         "submitted_at": datetime.utcnow(),
-        "score": None  # To be calculated later
+        "score": None
     }
     
     result = await solutions_collection.insert_one(solution)
@@ -345,9 +327,6 @@ async def submit_solution(solution_data: dict):
 
 @app.get("/api/daily-challenge")
 async def get_daily_challenge():
-    """Get today's daily challenge"""
-    # For now, return a random problem
-    # In production, this would be based on date
     pipeline = [{"$sample": {"size": 1}}]
     cursor = problems_collection.aggregate(pipeline)
     
@@ -356,7 +335,7 @@ async def get_daily_challenge():
         return {
             "problem": problem,
             "date": datetime.utcnow().strftime("%Y-%m-%d"),
-            "participants": 0,  # Mock data
+            "participants": 0,
             "completion_rate": 0.0
         }
     

@@ -28,14 +28,12 @@ const Sidebar = () => {
 
   return (
     <div className="fixed left-0 top-0 h-screen w-20 bg-dark-900 border-r border-dark-700 flex flex-col items-center py-6 z-50">
-      {/* Logo */}
       <Link to="/" className="mb-8">
         <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center">
           <Layers className="h-6 w-6 text-white" />
         </div>
       </Link>
 
-      {/* Navigation Items */}
       <nav className="flex flex-col space-y-2 w-full">
         {navigationItems.map((item) => {
           const Icon = item.icon;
@@ -56,13 +54,11 @@ const Sidebar = () => {
             >
               <Icon className="h-5 w-5" />
               
-              {/* Tooltip */}
               <div className="absolute left-full ml-4 px-3 py-2 bg-dark-800 text-dark-200 text-sm rounded-lg border border-dark-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
                 {item.label}
                 <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-dark-800 border-l border-t border-dark-700 rotate-45"></div>
               </div>
 
-              {/* Active indicator */}
               {active && (
                 <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-emerald-500 rounded-r-full"></div>
               )}
@@ -71,7 +67,6 @@ const Sidebar = () => {
         })}
       </nav>
 
-      {/* Bottom section */}
       <div className="mt-auto">
         <div className="w-8 h-8 bg-dark-800 rounded-lg flex items-center justify-center">
           <Zap className="h-4 w-4 text-dark-400" />

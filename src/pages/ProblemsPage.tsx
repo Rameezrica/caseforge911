@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { apiService, Problem } from '../services/api';
-import { Category } from '../types';
+import { useProblems } from '../hooks/useProblems';
 import ProblemCard from '../components/common/ProblemCard';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { 
   Search, Filter, X, BookOpen, TrendingUp, Users, 
   Settings, BarChart, Briefcase, Grid, List, 
@@ -16,9 +16,6 @@ const ProblemsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [filteredProblems, setFilteredProblems] = useState<Problem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
@@ -26,6 +23,9 @@ const ProblemsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [timeRange, setTimeRange] = useState<number | null>(null);
+
+  const { problems, loading } = useProblems();
+  const [filteredProblems, setFilteredProblems] = useState(problems);
 
   const categories = {
     'Strategy & Consulting': [
@@ -68,25 +68,6 @@ const ProblemsPage: React.FC = () => {
   const difficulties: string[] = ['Easy', 'Medium', 'Hard'];
   const timeRanges = [30, 45, 60, 90, 120];
 
-  // Fetch problems on initial load
-  useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        setIsLoading(true);
-        const problemData = await apiService.getProblems();
-        setProblems(problemData);
-        setFilteredProblems(problemData);
-      } catch (error) {
-        console.error('Error fetching problems:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProblems();
-  }, []);
-
-  // Get search term from URL on initial load
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const searchParam = params.get('search');
@@ -95,11 +76,9 @@ const ProblemsPage: React.FC = () => {
     }
   }, [location.search]);
 
-  // Filter and sort problems
   useEffect(() => {
     let result = [...problems];
     
-    // Apply filters
     if (selectedCategory) {
       result = result.filter(problem => problem.category === selectedCategory);
     }
@@ -126,7 +105,6 @@ const ProblemsPage: React.FC = () => {
       );
     }
     
-    // Apply sorting
     switch (sortBy) {
       case 'recent':
         result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -144,7 +122,7 @@ const ProblemsPage: React.FC = () => {
     }
     
     setFilteredProblems(result);
-  }, [selectedCategory, selectedSubcategory, selectedDifficulty, searchTerm, sortBy, timeRange]);
+  }, [problems, selectedCategory, selectedSubcategory, selectedDifficulty, searchTerm, sortBy, timeRange]);
 
   const clearFilters = () => {
     setSelectedCategory('');
@@ -171,18 +149,23 @@ const ProblemsPage: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <LoadingSpinner size="lg" text="Loading problems..." />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-dark-50 mb-2">Business Case Problems</h1>
         <p className="text-dark-400">Practice with real-world business scenarios across multiple domains</p>
       </div>
 
-      {/* Search and Filters */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 mb-8">
         <div className="flex flex-col space-y-4">
-          {/* Search and View Controls */}
           <div className="flex items-center justify-between">
             <div className="relative flex-1 max-w-2xl">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 h-5 w-5" />
@@ -218,7 +201,6 @@ const ProblemsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Filter Toggle */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -229,7 +211,6 @@ const ProblemsPage: React.FC = () => {
               {showFilters ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />}
             </button>
 
-            {/* Sort Options */}
             <div className="flex items-center space-x-2">
               <span className="text-dark-400">Sort by:</span>
               <select
@@ -245,10 +226,8 @@ const ProblemsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Expanded Filters */}
           {showFilters && (
             <div className="space-y-4 pt-4 border-t border-dark-700">
-              {/* Category Filters */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.entries(categories).map(([category, subcategories]) => (
                   <div
@@ -258,7 +237,7 @@ const ProblemsPage: React.FC = () => {
                         ? 'bg-dark-700 border-emerald-500'
                         : 'bg-dark-700 border-dark-600 hover:border-dark-500'
                     }`}
-                    onClick={() => setSelectedCategory(selectedCategory === category ? '' : category as Category)}
+                    onClick={() => setSelectedCategory(selectedCategory === category ? '' : category)}
                   >
                     <div className="flex items-center mb-2">
                       <span className={`${selectedCategory === category ? 'text-emerald-500' : 'text-dark-400'}`}>
@@ -294,7 +273,6 @@ const ProblemsPage: React.FC = () => {
                 ))}
               </div>
 
-              {/* Difficulty and Time Filters */}
               <div className="flex flex-wrap gap-4">
                 <div className="flex-1 min-w-[200px]">
                   <h3 className="text-sm font-medium text-dark-200 mb-2">Difficulty</h3>
@@ -335,7 +313,6 @@ const ProblemsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Clear Filters */}
               {(selectedCategory || selectedSubcategory || selectedDifficulty || timeRange || searchTerm) && (
                 <button
                   onClick={clearFilters}
@@ -350,7 +327,6 @@ const ProblemsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Results */}
       <div className="mb-6 flex justify-between items-center">
         <div className="text-dark-400">
           Showing {filteredProblems.length} {filteredProblems.length === 1 ? 'case' : 'cases'}
@@ -359,7 +335,6 @@ const ProblemsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Problem Grid/List */}
       <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
         {filteredProblems.map((problem) => (
           <ProblemCard key={problem.id} problem={problem} viewMode={viewMode} />

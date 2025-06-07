@@ -1,6 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
 import HomePage from './pages/HomePage';
@@ -16,7 +15,6 @@ import CaseSolverPage from './pages/CaseSolverPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
-// Wrapper component to handle layout
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';

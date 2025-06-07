@@ -18,17 +18,15 @@ const HomePage = () => {
   const { problems, loading: problemsLoading, isServerOnline: problemsOnline, retry: retryProblems } = useProblems({ limit: 10 });
   
   const totalProblems = stats?.total_problems || 0;
-  const solvedCount = 0; // Will be replaced with user-specific data
+  const solvedCount = 0;
   const currentStreak = 7;
   const skillLevel = "Beginner";
   const nextMilestone = 25;
   const [loading, setLoading] = useState(true);
 
-  // Check if any service is offline
   const isAnyServiceOffline = !statsOnline || !challengeOnline || !problemsOnline;
 
   useEffect(() => {
-    // Set loading to false when all data is loaded
     if (!statsLoading && !challengeLoading && !problemsLoading) {
       const timer = setTimeout(() => setLoading(false), 500);
       return () => clearTimeout(timer);
@@ -49,7 +47,6 @@ const HomePage = () => {
     );
   }
 
-  // Mock data for Quick Start section - will be replaced with recent user activity
   const lastProblem = problems.length > 0 ? {
     id: problems[0].id,
     title: problems[0].title,
@@ -150,13 +147,11 @@ const HomePage = () => {
 
   return (
     <div className="space-y-8">
-      {/* Server Status Banner */}
       <ServerStatus 
         isOnline={!isAnyServiceOffline} 
         onRetry={handleRetryAll}
       />
 
-      {/* Header Section */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-8">
         <div className="max-w-4xl">
           <h1 className="text-4xl font-bold text-dark-50 mb-3">
@@ -184,7 +179,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Daily Challenge Widget */}
       {challenge && (
         <DailyChallengeWidget 
           challenge={challenge}
@@ -192,7 +186,6 @@ const HomePage = () => {
         />
       )}
 
-      {/* User Dashboard Widget */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-dark-700 rounded-lg p-4">
@@ -255,11 +248,9 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Quick Start Section */}
       <div>
         <h2 className="text-xl font-bold text-dark-50 mb-6">Quick Start</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Resume Card */}
           {lastProblem && (
             <Link
               to={`/problem/${lastProblem.id}`}
@@ -283,7 +274,6 @@ const HomePage = () => {
             </Link>
           )}
 
-          {/* AI Recommended Card */}
           {recommendedProblem && (
             <Link
               to={`/problem/${recommendedProblem.id}`}
@@ -311,7 +301,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Practice by Domain Grid */}
       <div>
         <h2 className="text-xl font-bold text-dark-50 mb-4">Practice by Domain</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -338,7 +327,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Study Plans */}
       <div>
         <h2 className="text-xl font-bold text-dark-50 mb-4">Study Plans</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

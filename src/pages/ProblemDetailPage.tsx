@@ -5,45 +5,23 @@ import {
   FileText, MessageSquare, Award, ExternalLink,
   Loader2
 } from 'lucide-react';
-import { apiService, Problem } from '../services/api';
+import { useProblem } from '../hooks/useProblems';
 import DifficultyBadge from '../components/common/DifficultyBadge';
-import SolutionCard from '../components/solutions/SolutionCard';
-import SolutionSubmissionForm from '../components/solutions/SolutionSubmissionForm';
 
 const ProblemDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'problem' | 'solutions' | 'discussions'>('problem');
-  const [isLoading, setIsLoading] = useState(true);
-  const [problem, setProblem] = useState<Problem | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  
   const navigate = useNavigate();
   
-  useEffect(() => {
-    const fetchProblem = async () => {
-      if (!id) {
-        setError('No problem ID provided');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const problemData = await apiService.getProblem(id);
-        setProblem(problemData);
-        document.title = `${problemData.title} - CaseForge`;
-      } catch (err) {
-        console.error('Error fetching problem:', err);
-        setError('Problem not found');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProblem();
-  }, [id]);
+  const { problem, loading, error } = useProblem(id || '');
   
-  if (isLoading) {
+  useEffect(() => {
+    if (problem) {
+      document.title = `${problem.title} - CaseForge`;
+    }
+  }, [problem]);
+  
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center">
@@ -79,7 +57,6 @@ const ProblemDetailPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
         <Link 
           to="/problems" 
@@ -97,21 +74,19 @@ const ProblemDetailPage: React.FC = () => {
           </span>
           <span className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
             <Clock className="mr-1 h-4 w-4" />
-            {problem.time_limit || 60} min
+            {problem.timeLimit} min
           </span>
-          {problem.company && (
+          {problem.companyContext && (
             <span className="bg-dark-700 text-dark-200 rounded-full px-3 py-1 text-sm flex items-center">
               <Briefcase className="mr-1 h-4 w-4" />
-              {problem.company}
+              {problem.companyContext}
             </span>
           )}
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="lg:flex gap-6">
         <div className="lg:flex-1">
-          {/* Tabs */}
           <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
             <div className="flex border-b border-dark-700">
               <button
@@ -146,14 +121,13 @@ const ProblemDetailPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Tab Content */}
             <div className="p-6">
               {activeTab === 'problem' && (
                 <div className="space-y-6">
-                  {problem.company && (
+                  {problem.companyContext && (
                     <div className="bg-dark-700 rounded-lg p-4 border border-dark-600">
                       <h3 className="text-lg font-semibold text-dark-50 mb-2">Company Context</h3>
-                      <p className="text-dark-200">{problem.company}</p>
+                      <p className="text-dark-200">{problem.companyContext}</p>
                     </div>
                   )}
                   
@@ -166,11 +140,11 @@ const ProblemDetailPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  {problem.sample_framework && (
+                  {problem.frameworkSuggestions && (
                     <div>
                       <h3 className="text-lg font-semibold text-dark-50 mb-3">Suggested Framework</h3>
                       <div className="bg-dark-700 text-dark-200 rounded-lg px-4 py-3">
-                        {problem.sample_framework}
+                        {problem.frameworkSuggestions.join(', ')}
                       </div>
                     </div>
                   )}
@@ -219,12 +193,12 @@ const ProblemDetailPage: React.FC = () => {
             <h3 className="font-semibold text-dark-50 mb-3">Problem Info</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-dark-400">Domain</span>
-                <span className="font-medium text-dark-50">{problem.domain}</span>
+                <span className="text-dark-400">Category</span>
+                <span className="font-medium text-dark-50">{problem.category}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-dark-400">Time Limit</span>
-                <span className="font-medium text-dark-50">{problem.time_limit || 60} minutes</span>
+                <span className="font-medium text-dark-50">{problem.timeLimit} minutes</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-dark-400">Difficulty</span>

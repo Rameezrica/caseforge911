@@ -10,7 +10,7 @@ export const useProblems = (filters?: {
 }) => {
   const result = useApiWithFallback(
     () => apiService.getProblems(filters),
-    mockProblems, // Fallback to mock data
+    mockProblems,
     [filters?.domain, filters?.difficulty, filters?.category, filters?.limit]
   );
 

@@ -83,7 +83,6 @@ const StudyPlansPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-8">
         <div className="max-w-3xl">
           <h1 className="text-3xl font-bold text-dark-50 mb-3">Study Plans</h1>
@@ -115,7 +114,6 @@ const StudyPlansPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Study Plans Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {studyPlans.map(plan => (
           <div 

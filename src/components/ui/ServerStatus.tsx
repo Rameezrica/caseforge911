@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { WifiOff, RefreshCw } from 'lucide-react';
 
 interface ServerStatusProps {
   isOnline: boolean;
@@ -13,7 +13,7 @@ const ServerStatus: React.FC<ServerStatusProps> = ({
   className = "" 
 }) => {
   if (isOnline) {
-    return null; // Don't show anything when online
+    return null;
   }
 
   return (

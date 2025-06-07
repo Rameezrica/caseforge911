@@ -1,14 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProblem } from '../hooks/useProblems';
-import SolutionSubmissionForm from '../components/solutions/SolutionSubmissionForm';
-import { Clock, Lightbulb, HelpCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { Clock, ArrowLeft, Loader2 } from 'lucide-react';
 
 const CaseSolverPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { problem, loading, error } = useProblem(id || '');
-  const [showGuidelines, setShowGuidelines] = useState(false);
 
   useEffect(() => {
     if (problem) {
@@ -47,7 +45,6 @@ const CaseSolverPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-dark-900">
-      {/* Header */}
       <div className="bg-dark-800 border-b border-dark-700 p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -60,22 +57,20 @@ const CaseSolverPage: React.FC = () => {
             </button>
             <div>
               <h1 className="text-xl font-bold text-dark-50">{problem.title}</h1>
-              <p className="text-dark-400 text-sm">{problem.domain} • {problem.difficulty}</p>
+              <p className="text-dark-400 text-sm">{problem.category} • {problem.difficulty}</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center text-dark-400">
               <Clock className="h-5 w-5 mr-2" />
-              <span>{problem.time_limit || 60} minutes</span>
+              <span>{problem.timeLimit || 60} minutes</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Problem Context */}
           <div className="lg:col-span-1">
             <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 sticky top-6">
               <h2 className="text-lg font-semibold text-dark-50 mb-4">Problem Context</h2>
@@ -85,11 +80,11 @@ const CaseSolverPage: React.FC = () => {
                     <p key={idx} className="mb-3">{paragraph}</p>
                   ))}
                 </div>
-                {problem.sample_framework && (
+                {problem.frameworkSuggestions && (
                   <div>
                     <h3 className="font-medium text-dark-50 mb-2">Suggested Framework</h3>
                     <div className="bg-dark-700 text-dark-200 rounded-lg px-3 py-2 text-sm">
-                      {problem.sample_framework}
+                      {problem.frameworkSuggestions.join(', ')}
                     </div>
                   </div>
                 )}
@@ -97,12 +92,10 @@ const CaseSolverPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Solution Workspace */}
           <div className="lg:col-span-2">
             <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
               <h2 className="text-lg font-semibold text-dark-50 mb-6">Your Solution</h2>
               
-              {/* Simple Solution Form */}
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-dark-300 mb-2">
@@ -130,7 +123,6 @@ Consider the following structure:
                   </button>
                   <button
                     onClick={() => {
-                      // Mock submit - redirect back to problem
                       navigate(`/problem/${problem.id}`);
                     }}
                     className="px-6 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200"
@@ -147,4 +139,4 @@ Consider the following structure:
   );
 };
 
-export default CaseSolverPage; 
+export default CaseSolverPage;

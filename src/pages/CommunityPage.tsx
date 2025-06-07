@@ -65,9 +65,7 @@ const CommunityPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex gap-6">
-        {/* Main Content */}
         <div className="flex-1">
-          {/* Create Post Button */}
           <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 mb-6">
             <Link 
               to="/community/create-post"
@@ -82,7 +80,6 @@ const CommunityPage: React.FC = () => {
             </Link>
           </div>
 
-          {/* Sort Options */}
           <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 mb-6">
             <div className="flex space-x-4">
               <button 
@@ -115,7 +112,6 @@ const CommunityPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Posts List */}
           <div className="space-y-4">
             {mockPosts.map((post) => (
               <div key={post.id} className="bg-dark-800 rounded-xl border border-dark-700 p-6">
@@ -176,7 +172,6 @@ const CommunityPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className={`transition-all duration-300 ${sidebarOpen ? 'w-80' : 'w-12'}`}>
           <div className="relative">
             <button
