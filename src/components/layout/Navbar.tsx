@@ -43,23 +43,23 @@ const Navbar = () => {
     const match = location.pathname.match(/\/solve\/(.+)$/);
     const problemId = match ? match[1] : '';
     return (
-      <nav className="bg-dark-800 border-b border-dark-700 sticky top-0 z-50">
+      <nav className="glass border-b border-white/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-lg flex items-center justify-center mr-2">
+            <Link to="/" className="flex items-center group">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200">
                 <Layers className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-dark-50">CaseForge</span>
+              <span className="text-xl font-bold text-gray-100">CaseForge</span>
             </Link>
             <div className="flex items-center gap-4">
-              <div className="flex items-center text-dark-400">
-                <Clock className="h-5 w-5 mr-2" />
+              <div className="flex items-center text-gray-300 px-3 py-1.5 rounded-lg bg-gray-800/50">
+                <Clock className="h-5 w-5 mr-2 text-primary-400" />
                 <span className="font-medium">Solving Mode</span>
               </div>
               <button
                 onClick={() => navigate(`/problem/${problemId}`)}
-                className="px-4 py-2 text-dark-400 hover:text-dark-200 border border-dark-600 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-300 hover:text-gray-100 border border-gray-600 rounded-lg hover:border-gray-500 transition-all duration-200 hover:bg-gray-800/50"
               >
                 Back to Problem
               </button>
@@ -73,16 +73,16 @@ const Navbar = () => {
   const showSearch = location.pathname !== '/';
 
   return (
-    <nav className="bg-dark-800 border-b border-dark-700 sticky top-0 z-50">
+    <nav className="glass border-b border-white/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo and Brand */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-lg flex items-center justify-center mr-2">
+            <Link to="/" className="flex items-center group">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200 shadow-lg">
                 <Layers className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-dark-50">CaseForge</span>
+              <span className="text-xl font-bold text-gray-100">CaseForge</span>
             </Link>
           </div>
 
@@ -97,15 +97,18 @@ const Navbar = () => {
                   key={item.path}
                   to={item.path}
                   className={`
-                    flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                    flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 relative group
                     ${active 
-                      ? 'bg-emerald-500/20 text-emerald-400 border-b-2 border-emerald-400' 
-                      : 'text-dark-300 hover:text-dark-50 hover:bg-dark-700'
+                      ? 'text-primary-300 bg-primary-500/20 shadow-md border border-primary-500/30' 
+                      : 'text-gray-300 hover:text-gray-100 hover:bg-white/5'
                     }
                   `}
                 >
                   <Icon className="h-4 w-4" />
                   <span>{item.label}</span>
+                  {active && (
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary-400 rounded-full"></div>
+                  )}
                 </Link>
               );
             })}
@@ -115,13 +118,13 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             {showSearch && (
               <form onSubmit={handleSearch} className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <input
                   type="text"
                   placeholder="Search problems..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-64 pl-10 pr-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-64 pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                 />
               </form>
             )}
@@ -131,14 +134,14 @@ const Navbar = () => {
             <Link
               to="/profile"
               className={`
-                flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                flex items-center space-x-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group
                 ${isActive('/profile')
-                  ? 'bg-emerald-500/20 text-emerald-400' 
-                  : 'text-dark-200 hover:text-dark-50 hover:bg-dark-700'
+                  ? 'text-primary-300 bg-primary-500/20 border border-primary-500/30' 
+                  : 'text-gray-200 hover:text-gray-100 hover:bg-white/5'
                 }
               `}
             >
-              <div className="h-6 w-6 rounded-full bg-emerald-500 flex items-center justify-center text-dark-900 font-bold text-xs">
+              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-xs shadow-lg group-hover:scale-110 transition-transform duration-200">
                 U
               </div>
               <span className="hidden lg:block">Profile</span>
@@ -147,7 +150,7 @@ const Navbar = () => {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-dark-400 hover:text-dark-200 hover:bg-dark-700"
+              className="md:hidden p-2.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all duration-200"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -156,7 +159,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-dark-700">
+          <div className="md:hidden border-t border-white/10 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
@@ -168,10 +171,10 @@ const Navbar = () => {
                     to={item.path}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`
-                      flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200
+                      flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-semibold transition-all duration-200
                       ${active 
-                        ? 'bg-emerald-500/20 text-emerald-400' 
-                        : 'text-dark-300 hover:text-dark-50 hover:bg-dark-700'
+                        ? 'text-primary-300 bg-primary-500/20 border border-primary-500/30' 
+                        : 'text-gray-300 hover:text-gray-100 hover:bg-white/5'
                       }
                     `}
                   >
@@ -184,13 +187,13 @@ const Navbar = () => {
               {showSearch && (
                 <form onSubmit={handleSearch} className="pt-2 sm:hidden">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <input
                       type="text"
                       placeholder="Search problems..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
                 </form>
