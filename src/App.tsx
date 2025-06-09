@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
 import ProblemsPage from './pages/ProblemsPage';
@@ -14,6 +15,18 @@ import CaseSolverPage from './pages/CaseSolverPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
+};
+
+const pageTransition = {
+  type: "tween",
+  ease: "anticipate",
+  duration: 0.5
+};
+
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
@@ -23,12 +36,33 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   }
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800">
+      {/* Background Decorations */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-br from-brand-500/10 to-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 -left-24 w-96 h-96 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 right-1/3 w-96 h-96 bg-gradient-to-br from-pink-500/10 to-rose-500/10 rounded-full blur-3xl" />
+      </div>
+
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ErrorBoundary>
-          {children}
-        </ErrorBoundary>
+      
+      <main className="relative z-10 pt-20 pb-12">
+        <div className="container-lg">
+          <ErrorBoundary>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </ErrorBoundary>
+        </div>
       </main>
     </div>
   );
