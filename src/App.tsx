@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
-import Sidebar from './components/layout/Sidebar';
 import HomePage from './pages/HomePage';
 import ProblemsPage from './pages/ProblemsPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
@@ -24,16 +23,13 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   }
 
   return (
-    <div className="min-h-screen bg-dark-900 flex">
-      <Sidebar />
-      <div className="flex-1 ml-20">
-        <Navbar />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
-        </main>
-      </div>
+    <div className="min-h-screen bg-dark-900">
+      <Navbar />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+      </main>
     </div>
   );
 };
