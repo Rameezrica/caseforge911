@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useProblems } from '../hooks/useProblems';
 import ProblemCard from '../components/common/ProblemCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
 import { 
   Search, Filter, X, BookOpen, TrendingUp, Users, 
   Settings, BarChart, Briefcase, Grid, List, 
-  Clock, Award, ChevronDown, ChevronUp
+  Clock, Award, ChevronDown, ChevronUp, Sparkles,
+  Zap, Target
 } from 'lucide-react';
 
 type SortOption = 'recent' | 'popular' | 'difficulty' | 'time';
@@ -28,44 +33,69 @@ const ProblemsPage: React.FC = () => {
   const [filteredProblems, setFilteredProblems] = useState(problems);
 
   const categories = {
-    'Strategy & Consulting': [
-      'Market Analysis',
-      'Growth Strategy', 
-      'Digital Transformation',
-      'Competitive Strategy',
-      'Business Model Design'
-    ],
-    'Finance & Investment': [
-      'Financial Modeling',
-      'Investment Analysis',
-      'Corporate Finance', 
-      'Personal Finance',
-      'Quantitative Finance'
-    ],
-    'Operations & Supply Chain': [
-      'Supply Chain Optimization',
-      'Process Improvement',
-      'Quality Management',
-      'Project Management', 
-      'Production Planning'
-    ],
-    'Marketing & Growth': [
-      'Customer Segmentation',
-      'Pricing Strategy',
-      'Campaign Optimization',
-      'Brand Strategy',
-      'Digital Marketing'
-    ],
-    'Data Analytics': [
-      'Business Intelligence',
-      'Data Analysis',
-      'Performance Metrics',
-      'Reporting',
-      'Analytics'
-    ]
+    'Strategy & Consulting': {
+      subcategories: [
+        'Market Analysis',
+        'Growth Strategy', 
+        'Digital Transformation',
+        'Competitive Strategy',
+        'Business Model Design'
+      ],
+      gradient: 'from-purple-500 to-pink-600',
+      icon: <Briefcase className="h-5 w-5" />
+    },
+    'Finance & Investment': {
+      subcategories: [
+        'Financial Modeling',
+        'Investment Analysis',
+        'Corporate Finance', 
+        'Personal Finance',
+        'Quantitative Finance'
+      ],
+      gradient: 'from-emerald-500 to-teal-600',
+      icon: <BarChart className="h-5 w-5" />
+    },
+    'Operations & Supply Chain': {
+      subcategories: [
+        'Supply Chain Optimization',
+        'Process Improvement',
+        'Quality Management',
+        'Project Management', 
+        'Production Planning'
+      ],
+      gradient: 'from-blue-500 to-cyan-600',
+      icon: <Settings className="h-5 w-5" />
+    },
+    'Marketing & Growth': {
+      subcategories: [
+        'Customer Segmentation',
+        'Pricing Strategy',
+        'Campaign Optimization',
+        'Brand Strategy',
+        'Digital Marketing'
+      ],
+      gradient: 'from-orange-500 to-red-600',
+      icon: <TrendingUp className="h-5 w-5" />
+    },
+    'Data Analytics': {
+      subcategories: [
+        'Business Intelligence',
+        'Data Analysis',
+        'Performance Metrics',
+        'Reporting',
+        'Analytics'
+      ],
+      gradient: 'from-cyan-500 to-blue-600',
+      icon: <BarChart className="h-5 w-5" />
+    }
   };
 
-  const difficulties: string[] = ['Easy', 'Medium', 'Hard'];
+  const difficulties: { label: string; gradient: string }[] = [
+    { label: 'Easy', gradient: 'from-emerald-500 to-teal-600' },
+    { label: 'Medium', gradient: 'from-yellow-500 to-orange-600' },
+    { label: 'Hard', gradient: 'from-red-500 to-pink-600' }
+  ];
+  
   const timeRanges = [30, 45, 60, 90, 120];
 
   useEffect(() => {
@@ -132,226 +162,275 @@ const ProblemsPage: React.FC = () => {
     setSearchTerm('');
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Finance & Investment':
-        return <BarChart className="h-5 w-5" />;
-      case 'Operations & Supply Chain':
-        return <Settings className="h-5 w-5" />;
-      case 'Management':
-        return <Users className="h-5 w-5" />;
-      case 'Strategy & Consulting':
-        return <Briefcase className="h-5 w-5" />;
-      case 'Marketing & Growth':
-        return <TrendingUp className="h-5 w-5" />;
-      default:
-        return <BookOpen className="h-5 w-5" />;
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <LoadingSpinner size="lg\" text="Loading problems..." />
+        <LoadingSpinner size="lg" text="Loading problems..." />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-dark-50 mb-2">Business Case Problems</h1>
-        <p className="text-dark-400">Practice with real-world business scenarios across multiple domains</p>
-      </div>
+    <div className="space-y-8">
+      {/* Header Section */}
+      <motion.section
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center"
+      >
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-brand-500 to-purple-600 rounded-2xl mb-6 shadow-neon"
+        >
+          <BookOpen className="h-8 w-8 text-white" />
+        </motion.div>
+        <h1 className="text-5xl font-bold mb-4">
+          <span className="text-gradient">Business Case Problems</span>
+        </h1>
+        <p className="text-xl text-dark-300 max-w-2xl mx-auto">
+          Practice with real-world business scenarios across multiple domains
+        </p>
+      </motion.section>
 
-      <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 mb-8">
-        <div className="flex flex-col space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="relative flex-1 max-w-2xl">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 h-5 w-5" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search cases by title, company, or keywords..."
-                className="w-full pl-10 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
+      {/* Search and Filters */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.6 }}
+      >
+        <Card variant="glass" className="p-8">
+          <div className="space-y-6">
+            {/* Search Bar */}
+            <div className="flex items-center justify-between gap-6">
+              <div className="relative flex-1 max-w-2xl">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-dark-400 h-5 w-5 z-10" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search cases by title, company, or keywords..."
+                  className="w-full pl-12 pr-6 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-300 text-lg"
+                />
+              </div>
+              
+              {/* View Mode Toggle */}
+              <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-1">
+                <Button
+                  variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-lg"
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-lg"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center space-x-2 ml-4">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg ${
-                  viewMode === 'grid' 
-                    ? 'bg-emerald-500 text-dark-900' 
-                    : 'bg-dark-700 text-dark-400 hover:text-dark-200'
-                }`}
+
+            {/* Filter Controls */}
+            <div className="flex items-center justify-between">
+              <Button
+                variant="glass"
+                onClick={() => setShowFilters(!showFilters)}
+                leftIcon={<Filter className="h-4 w-4" />}
+                rightIcon={showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               >
-                <Grid className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg ${
-                  viewMode === 'list' 
-                    ? 'bg-emerald-500 text-dark-900' 
-                    : 'bg-dark-700 text-dark-400 hover:text-dark-200'
-                }`}
-              >
-                <List className="h-5 w-5" />
-              </button>
+                Filters
+              </Button>
+
+              <div className="flex items-center gap-3">
+                <span className="text-dark-400">Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                  <option value="recent">Most Recent</option>
+                  <option value="popular">Most Popular</option>
+                  <option value="difficulty">Difficulty</option>
+                  <option value="time">Time Required</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center text-dark-400 hover:text-dark-200"
-            >
-              <Filter className="h-5 w-5 mr-2" />
-              Filters
-              {showFilters ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />}
-            </button>
-
-            <div className="flex items-center space-x-2">
-              <span className="text-dark-400">Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="bg-dark-700 border border-dark-600 rounded-lg px-3 py-1.5 text-dark-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="recent">Most Recent</option>
-                <option value="popular">Most Popular</option>
-                <option value="difficulty">Difficulty</option>
-                <option value="time">Time Required</option>
-              </select>
-            </div>
-          </div>
-
-          {showFilters && (
-            <div className="space-y-4 pt-4 border-t border-dark-700">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(categories).map(([category, subcategories]) => (
-                  <div
-                    key={category}
-                    className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                      selectedCategory === category
-                        ? 'bg-dark-700 border-emerald-500'
-                        : 'bg-dark-700 border-dark-600 hover:border-dark-500'
-                    }`}
-                    onClick={() => setSelectedCategory(selectedCategory === category ? '' : category)}
-                  >
-                    <div className="flex items-center mb-2">
-                      <span className={`${selectedCategory === category ? 'text-emerald-500' : 'text-dark-400'}`}>
-                        {getCategoryIcon(category)}
-                      </span>
-                      <span className={`ml-2 font-medium ${
-                        selectedCategory === category ? 'text-emerald-500' : 'text-dark-200'
-                      }`}>
-                        {category}
-                      </span>
-                    </div>
-                    {selectedCategory === category && (
-                      <div className="mt-2 space-y-1">
-                        {subcategories.map((sub) => (
-                          <button
-                            key={sub}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedSubcategory(selectedSubcategory === sub ? '' : sub);
-                            }}
-                            className={`block w-full text-left px-2 py-1 rounded text-sm ${
-                              selectedSubcategory === sub
-                                ? 'bg-emerald-500/20 text-emerald-500'
-                                : 'text-dark-400 hover:text-dark-200'
+            {/* Filter Panel */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-6 pt-6 border-t border-white/10"
+                >
+                  {/* Categories */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-4">Categories</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.entries(categories).map(([category, config]) => (
+                        <motion.div
+                          key={category}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Card
+                            variant={selectedCategory === category ? "interactive" : "glass"}
+                            className={`p-4 cursor-pointer transition-all duration-300 ${
+                              selectedCategory === category ? 'border-brand-500/50 shadow-neon' : ''
                             }`}
+                            onClick={() => setSelectedCategory(selectedCategory === category ? '' : category)}
                           >
-                            {sub}
-                          </button>
+                            <div className="flex items-center mb-3">
+                              <div className={`p-2 bg-gradient-to-br ${config.gradient} rounded-lg mr-3 shadow-lg`}>
+                                {config.icon}
+                              </div>
+                              <span className="font-medium text-white">{category}</span>
+                            </div>
+                            
+                            {selectedCategory === category && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                className="mt-3 space-y-2"
+                              >
+                                {config.subcategories.map((sub) => (
+                                  <Button
+                                    key={sub}
+                                    variant={selectedSubcategory === sub ? "primary" : "ghost"}
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedSubcategory(selectedSubcategory === sub ? '' : sub);
+                                    }}
+                                    className="w-full justify-start text-sm"
+                                  >
+                                    {sub}
+                                  </Button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Difficulty and Time */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-4">Difficulty</h3>
+                      <div className="flex flex-wrap gap-3">
+                        {difficulties.map((difficulty) => (
+                          <Button
+                            key={difficulty.label}
+                            variant={selectedDifficulty === difficulty.label ? "primary" : "glass"}
+                            onClick={() => setSelectedDifficulty(selectedDifficulty === difficulty.label ? '' : difficulty.label)}
+                            className="px-4 py-2"
+                          >
+                            {difficulty.label}
+                          </Button>
                         ))}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                    </div>
 
-              <div className="flex flex-wrap gap-4">
-                <div className="flex-1 min-w-[200px]">
-                  <h3 className="text-sm font-medium text-dark-200 mb-2">Difficulty</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {difficulties.map((difficulty) => (
-                      <button
-                        key={difficulty}
-                        onClick={() => setSelectedDifficulty(selectedDifficulty === difficulty ? '' : difficulty)}
-                        className={`px-3 py-1.5 rounded-lg text-sm transition-colors duration-200 ${
-                          selectedDifficulty === difficulty
-                            ? 'bg-emerald-500 text-dark-900'
-                            : 'bg-dark-700 text-dark-400 hover:text-dark-200'
-                        }`}
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-4">Time Required</h3>
+                      <div className="flex flex-wrap gap-3">
+                        {timeRanges.map((time) => (
+                          <Button
+                            key={time}
+                            variant={timeRange === time ? "primary" : "glass"}
+                            onClick={() => setTimeRange(timeRange === time ? null : time)}
+                            className="px-4 py-2"
+                          >
+                            ≤ {time} min
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Clear Filters */}
+                  {(selectedCategory || selectedSubcategory || selectedDifficulty || timeRange || searchTerm) && (
+                    <div className="flex justify-center pt-4">
+                      <Button
+                        variant="secondary"
+                        onClick={clearFilters}
+                        leftIcon={<X className="h-4 w-4" />}
                       >
-                        {difficulty}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex-1 min-w-[200px]">
-                  <h3 className="text-sm font-medium text-dark-200 mb-2">Time Required</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {timeRanges.map((time) => (
-                      <button
-                        key={time}
-                        onClick={() => setTimeRange(timeRange === time ? null : time)}
-                        className={`px-3 py-1.5 rounded-lg text-sm transition-colors duration-200 ${
-                          timeRange === time
-                            ? 'bg-emerald-500 text-dark-900'
-                            : 'bg-dark-700 text-dark-400 hover:text-dark-200'
-                        }`}
-                      >
-                        ≤ {time} min
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {(selectedCategory || selectedSubcategory || selectedDifficulty || timeRange || searchTerm) && (
-                <button
-                  onClick={clearFilters}
-                  className="flex items-center text-dark-400 hover:text-dark-200"
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Clear all filters
-                </button>
+                        Clear all filters
+                      </Button>
+                    </div>
+                  )}
+                </motion.div>
               )}
-            </div>
-          )}
-        </div>
-      </div>
+            </AnimatePresence>
+          </div>
+        </Card>
+      </motion.section>
 
-      <div className="mb-6 flex justify-between items-center">
-        <div className="text-dark-400">
-          Showing {filteredProblems.length} {filteredProblems.length === 1 ? 'case' : 'cases'}
+      {/* Results Header */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.6 }}
+        className="flex justify-between items-center"
+      >
+        <div className="text-dark-300">
+          Showing <span className="text-white font-semibold">{filteredProblems.length}</span> {filteredProblems.length === 1 ? 'case' : 'cases'}
           {selectedCategory && ` in ${selectedCategory}`}
           {selectedSubcategory && ` > ${selectedSubcategory}`}
         </div>
-      </div>
+        
+        {filteredProblems.length > 0 && (
+          <div className="flex items-center gap-2 text-sm text-dark-400">
+            <Sparkles className="h-4 w-4" />
+            <span>Premium quality cases</span>
+          </div>
+        )}
+      </motion.div>
 
-      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-        {filteredProblems.map((problem) => (
-          <ProblemCard key={problem.id} problem={problem} viewMode={viewMode} />
-        ))}
-      </div>
-
-      {filteredProblems.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-dark-400 mb-2">No cases found matching your criteria</div>
-          <button
-            onClick={clearFilters}
-            className="text-emerald-500 hover:text-emerald-400"
-          >
-            Clear all filters
-          </button>
-        </div>
-      )}
+      {/* Problems Grid/List */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.6 }}
+      >
+        {filteredProblems.length > 0 ? (
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+            {filteredProblems.map((problem, index) => (
+              <motion.div
+                key={problem.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 + index * 0.05, duration: 0.4 }}
+              >
+                <ProblemCard problem={problem} viewMode={viewMode} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <Card variant="glass" className="p-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-dark-600 to-dark-700 rounded-2xl mb-6">
+              <Target className="h-8 w-8 text-dark-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">No cases found</h3>
+            <p className="text-dark-400 mb-6">Try adjusting your search criteria or filters</p>
+            <Button variant="primary" onClick={clearFilters}>
+              Clear all filters
+            </Button>
+          </Card>
+        )}
+      </motion.section>
     </div>
   );
 };
