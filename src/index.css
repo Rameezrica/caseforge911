@@ -131,7 +131,7 @@
   }
   
   .card-interactive {
-    @apply glass-card p-6 cursor-pointer hover:shadow-premium transition-all duration-500 hover:transform hover:scale-105 hover:border-brand-500/50 hover:shadow-neon group;
+    @apply glass-card p-6 cursor-pointer hover:shadow-premium transition-all duration-500 hover:scale-105 hover:border-brand-500/50 hover:shadow-neon group;
   }
   
   /* Gradient Text */
