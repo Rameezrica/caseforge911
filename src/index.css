@@ -135,7 +135,7 @@
   }
   
   .card-interactive-group {
-    @apply group;
+    /* Group utility */
   }
   
   /* Gradient Text */
