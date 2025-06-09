@@ -5,18 +5,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    host: '0.0.0.0',
+    host: true, // Required to accept all hosts
     strictPort: false,
     open: false,
-    allowedHosts: [
-      'localhost',
-      '8b14f97d-ea08-4824-b8b2-22a83f1c708a.preview.emergentagent.com',
-      '.preview.emergentagent.com'
-    ],
-    hmr: {
-      port: 3000,
-      host: '0.0.0.0'
-    }
+  },
+  preview: {
+    host: true, // Required for preview mode
+    port: 3000
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
