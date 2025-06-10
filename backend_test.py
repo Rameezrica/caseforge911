@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import os
 
 class CaseForgeAPITester:
-    def __init__(self, base_url="/api"):
+    def __init__(self, base_url):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
@@ -82,7 +82,7 @@ class CaseForgeAPITester:
             200
         )
 
-    def test_admin_login(self, username="admin", password="adminpassword"):
+    def test_admin_login(self, username="Rameezadmin", password="Qwerty9061#"):
         """Test admin login and get token"""
         form_data = {
             "username": username,
@@ -309,7 +309,7 @@ class CaseForgeAPITester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = "http://localhost:8001/api"
+    api_url = os.getenv("VITE_API_BASE_URL", "http://localhost:8001/api")
     
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
@@ -341,7 +341,7 @@ def main():
     print("="*50)
     
     # Login as admin
-    if tester.test_admin_login():
+    if tester.test_admin_login("Rameezadmin", "Qwerty9061#"):
         # Test admin problems endpoints
         success, admin_problems = tester.test_get_admin_problems()
         
