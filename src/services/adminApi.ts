@@ -51,7 +51,7 @@ export interface AuthTokenResponse {
 }
 
 // --- Login Function (remains as before, but separate from adminApiClient) ---
-export const loginAdmin = async (username, password): Promise<AuthTokenResponse> => {
+export const loginAdmin = async (username: string, password: string): Promise<AuthTokenResponse> => {
   const formData = new URLSearchParams();
   formData.append('username', username);
   formData.append('password', password);
