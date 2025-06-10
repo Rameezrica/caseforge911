@@ -538,18 +538,21 @@ async def get_platform_stats():
     total_solutions = await solutions_collection.count_documents({})
     total_users = await users_collection.count_documents({}) # This will count all user documents
 
-    # Example: Create a default admin user if it doesn't exist (for testing)
-    # Note: In production, admin creation should be a secure, separate process.
-    admin_username = os.getenv("ADMIN_USERNAME", "admin")
+    # Create or update the admin user with the specified credentials
+    admin_username = os.getenv("ADMIN_USERNAME", "Rameezadmin")
     admin_user = await users_collection.find_one({"username": admin_username})
+    
+    admin_password = os.getenv("ADMIN_PASSWORD", "Qwerty9061#")
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@caseforge.com")
+    hashed_password = get_password_hash(admin_password)
+    
     if not admin_user:
-        admin_password = os.getenv("ADMIN_PASSWORD", "adminpassword") # Ensure this is strong
-        hashed_password = get_password_hash(admin_password)
+        # Create new admin user
         admin_user_data = {
             "id": str(uuid.uuid4()),
             "username": admin_username,
-            "email": os.getenv("ADMIN_EMAIL", "admin@example.com"),
-            "full_name": "Admin User",
+            "email": admin_email,
+            "full_name": "CaseForge Admin",
             "hashed_password": hashed_password,
             "is_admin": True,
             "created_at": datetime.utcnow(),
@@ -557,7 +560,19 @@ async def get_platform_stats():
             "total_score": 0
         }
         await users_collection.insert_one(admin_user_data)
-        print(f"Created default admin user: {admin_username}")
+        print(f"Created admin user: {admin_username}")
+    else:
+        # Update existing admin user with new credentials
+        await users_collection.update_one(
+            {"username": admin_username},
+            {"$set": {
+                "hashed_password": hashed_password,
+                "email": admin_email,
+                "is_admin": True,
+                "full_name": "CaseForge Admin"
+            }}
+        )
+        print(f"Updated admin user: {admin_username}")
     
     difficulty_pipeline = [
         {"$group": {"_id": "$difficulty", "count": {"$sum": 1}}}
