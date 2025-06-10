@@ -406,6 +406,10 @@ def main():
     # Use the API URL from environment or default to http://localhost:8001/api
     api_url = os.getenv("VITE_API_BASE_URL", "/api")
     
+    # Ensure the URL has a scheme
+    if not api_url.startswith(('http://', 'https://')):
+        api_url = f"http://localhost{api_url}"
+    
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
     
