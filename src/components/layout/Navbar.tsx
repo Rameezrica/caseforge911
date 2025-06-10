@@ -6,11 +6,13 @@ import {
   Home, BookOpen, Trophy, Users, User, 
   Target, BarChart3, Calendar, 
   Code, Layers, Zap, ChevronRight,
-  Brain
+  Brain, LogIn, UserPlus, Settings,
+  LogOut, Gauge
 } from 'lucide-react';
 import ThemeToggle from '../common/ThemeToggle';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
   const location = useLocation();
