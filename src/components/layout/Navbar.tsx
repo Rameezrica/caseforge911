@@ -19,6 +19,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   const navigationItems = [
     { icon: Home, label: 'Home', path: '/', gradient: 'from-blue-500 to-cyan-500' },
@@ -29,11 +31,23 @@ const Navbar = () => {
     { icon: BarChart3, label: 'Leaderboard', path: '/leaderboard', gradient: 'from-red-500 to-pink-500' },
   ];
 
+  const userMenuItems = [
+    { icon: Gauge, label: 'Dashboard', path: '/dashboard' },
+    { icon: User, label: 'Profile', path: '/profile' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
+  ];
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/problems?search=${encodeURIComponent(searchTerm)}`);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    navigate('/');
   };
 
   const isActive = (path: string) => {
