@@ -308,13 +308,13 @@ class CaseForgeAPITester:
         return self.tests_passed == self.tests_run
 
 def main():
-    # Use the local backend URL since we're testing directly
-    api_url = "http://localhost:8001/api"
+    # Use the API URL from environment or default to /api
+    api_url = os.environ.get("VITE_API_URL", "/api")
     
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
     
-    # Run the tests
+    # Run basic API tests
     tester.test_health_check()
     success, problems_data = tester.test_get_problems()
     
@@ -334,6 +334,37 @@ def main():
     tester.test_get_categories()
     tester.test_get_stats()
     tester.test_get_daily_challenge()
+    
+    # Run admin API tests
+    print("\n" + "="*50)
+    print("🔐 Testing Admin API Endpoints")
+    print("="*50)
+    
+    # Login as admin
+    if tester.test_admin_login():
+        # Test admin problems endpoints
+        success, admin_problems = tester.test_get_admin_problems()
+        
+        # Create a new problem
+        success, new_problem = tester.test_create_admin_problem()
+        if success and 'id' in new_problem:
+            new_problem_id = new_problem['id']
+            # Update the problem
+            tester.test_update_admin_problem(new_problem_id)
+            # Delete the problem
+            tester.test_delete_admin_problem(new_problem_id)
+        
+        # Test admin competitions endpoints
+        success, admin_competitions = tester.test_get_admin_competitions()
+        
+        # Create a new competition
+        success, new_competition = tester.test_create_admin_competition()
+        if success and 'id' in new_competition:
+            new_competition_id = new_competition['id']
+            # Update the competition
+            tester.test_update_admin_competition(new_competition_id)
+            # Delete the competition
+            tester.test_delete_admin_competition(new_competition_id)
     
     # Print summary
     success = tester.print_summary()
