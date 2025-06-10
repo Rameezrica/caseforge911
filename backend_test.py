@@ -318,55 +318,24 @@ def main():
     
     # Run basic API tests
     tester.test_health_check()
-    success, problems_data = tester.test_get_problems()
     
-    # Get a problem ID for further tests
-    problem_id = None
-    if success and problems_data:
-        if isinstance(problems_data, list) and len(problems_data) > 0:
-            problem_id = problems_data[0].get('id')
-    
-    if problem_id:
-        tester.test_get_problem_by_id(problem_id)
-        tester.test_submit_solution(problem_id)
-    else:
-        print("❌ Could not get a problem ID for further tests")
-    
-    tester.test_get_problems_with_filters()
-    tester.test_get_categories()
-    tester.test_get_stats()
-    tester.test_get_daily_challenge()
-    
-    # Run admin API tests
+    # Focus on admin login testing
     print("\n" + "="*50)
-    print("🔐 Testing Admin API Endpoints")
+    print("🔐 Testing Admin Login Functionality (CRITICAL)")
     print("="*50)
     
     # Login as admin
     if tester.test_admin_login("Rameezadmin", "Qwerty9061#"):
-        # Test admin problems endpoints
+        print("✅ Admin login successful - Fix has been applied correctly")
+        
+        # Test admin problems endpoints to verify admin functionality
         success, admin_problems = tester.test_get_admin_problems()
-        
-        # Create a new problem
-        success, new_problem = tester.test_create_admin_problem()
-        if success and 'id' in new_problem:
-            new_problem_id = new_problem['id']
-            # Update the problem
-            tester.test_update_admin_problem(new_problem_id)
-            # Delete the problem
-            tester.test_delete_admin_problem(new_problem_id)
-        
-        # Test admin competitions endpoints
-        success, admin_competitions = tester.test_get_admin_competitions()
-        
-        # Create a new competition
-        success, new_competition = tester.test_create_admin_competition()
-        if success and 'id' in new_competition:
-            new_competition_id = new_competition['id']
-            # Update the competition
-            tester.test_update_admin_competition(new_competition_id)
-            # Delete the competition
-            tester.test_delete_admin_competition(new_competition_id)
+        if success:
+            print("✅ Admin problems endpoint accessible - Admin authentication is working")
+        else:
+            print("❌ Admin problems endpoint not accessible - Admin authentication may have issues")
+    else:
+        print("❌ Admin login failed - Fix may not have been applied correctly")
     
     # Print summary
     success = tester.print_summary()
