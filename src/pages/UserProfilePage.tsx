@@ -8,7 +8,7 @@ import {
   BookOpen, 
   Clock, 
   Award,
-  Fire,
+  Flame,
   Settings,
   LogOut,
   Edit3,
@@ -104,7 +104,7 @@ const UserProfilePage: React.FC = () => {
     {
       title: 'Streak Master',
       description: 'Maintained a 7-day streak',
-      icon: Fire,
+      icon: Flame,
       earned: (userProgress?.current_streak || 0) >= 7,
       color: 'text-orange-400',
       bgColor: 'bg-orange-500/10',
