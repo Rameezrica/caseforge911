@@ -6,17 +6,21 @@ import {
   Home, BookOpen, Trophy, Users, User, 
   Target, BarChart3, Calendar, 
   Code, Layers, Zap, ChevronRight,
-  Brain
+  Brain, LogIn, UserPlus, Settings,
+  LogOut, Gauge
 } from 'lucide-react';
 import ThemeToggle from '../common/ThemeToggle';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   const navigationItems = [
     { icon: Home, label: 'Home', path: '/', gradient: 'from-blue-500 to-cyan-500' },
@@ -27,11 +31,23 @@ const Navbar = () => {
     { icon: BarChart3, label: 'Leaderboard', path: '/leaderboard', gradient: 'from-red-500 to-pink-500' },
   ];
 
+  const userMenuItems = [
+    { icon: Gauge, label: 'Dashboard', path: '/dashboard' },
+    { icon: User, label: 'Profile', path: '/profile' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
+  ];
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/problems?search=${encodeURIComponent(searchTerm)}`);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    navigate('/');
   };
 
   const isActive = (path: string) => {
@@ -149,48 +165,111 @@ const Navbar = () => {
             })}
           </div>
 
-          {/* Right side - Search, Theme, Profile */}
-          <div className="flex items-center space-x-4">
-            {showSearch && (
-              <motion.form 
-                onSubmit={handleSearch} 
-                className="relative hidden sm:block"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 h-4 w-4" />
-                  <input
-                    type="text"
-                    placeholder="Search problems..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-64 pl-10 pr-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-300"
-                  />
-                </div>
-              </motion.form>
-            )}
-            
-            <ThemeToggle />
+            {/* Right side - Search, Theme, Auth/Profile */}
+            <div className="flex items-center space-x-4">
+              {showSearch && (
+                <motion.form 
+                  onSubmit={handleSearch} 
+                  className="relative hidden sm:block"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 h-4 w-4" />
+                    <input
+                      type="text"
+                      placeholder="Search problems..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-64 pl-10 pr-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-300"
+                    />
+                  </div>
+                </motion.form>
+              )}
+              
+              <ThemeToggle />
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to="/profile"
-                className={`
-                  flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300
-                  ${isActive('/profile')
-                    ? 'bg-white/10 backdrop-blur-md border border-white/20 text-white' 
-                    : 'text-dark-200 hover:text-white hover:bg-white/5'
-                  }
-                `}
-              >
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-lg">
-                  U
+              {/* Authentication Section */}
+              {isAuthenticated ? (
+                <div className="relative">
+                  <motion.button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-lg">
+                      {user?.username?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                    <span className="hidden lg:block">{user?.username}</span>
+                    <ChevronRight className={`h-4 w-4 transition-transform ${userMenuOpen ? 'rotate-90' : ''}`} />
+                  </motion.button>
+
+                  {/* User Dropdown Menu */}
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 mt-2 w-48 bg-dark-800/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-xl overflow-hidden z-50"
+                      >
+                        <div className="p-3 border-b border-white/10">
+                          <p className="text-white font-medium">{user?.full_name || user?.username}</p>
+                          <p className="text-dark-400 text-sm">{user?.email}</p>
+                        </div>
+                        
+                        <div className="py-2">
+                          {userMenuItems.map((item) => (
+                            <Link
+                              key={item.path}
+                              to={item.path}
+                              onClick={() => setUserMenuOpen(false)}
+                              className="flex items-center space-x-3 px-3 py-2 text-dark-300 hover:text-white hover:bg-white/10 transition-colors"
+                            >
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </Link>
+                          ))}
+                          
+                          <hr className="my-2 border-white/10" />
+                          
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center space-x-3 px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors w-full text-left"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            <span>Logout</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-                <span className="hidden lg:block">Profile</span>
-              </Link>
-            </motion.div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link
+                      to="/login"
+                      className="flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium text-dark-200 hover:text-white hover:bg-white/5 transition-all duration-300"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      <span className="hidden lg:block">Login</span>
+                    </Link>
+                  </motion.div>
+                  
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link
+                      to="/register"
+                      className="flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:from-brand-600 hover:to-brand-700 transition-all duration-300 shadow-lg"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      <span className="hidden lg:block">Sign Up</span>
+                    </Link>
+                  </motion.div>
+                </div>
+              )}
 
             {/* Mobile menu button */}
             <motion.button
@@ -265,6 +344,80 @@ const Navbar = () => {
                     </motion.div>
                   );
                 })}
+                
+                {/* Auth items for mobile */}
+                <div className="pt-2 border-t border-white/10">
+                  {isAuthenticated ? (
+                    <>
+                      {userMenuItems.map((item, index) => (
+                        <motion.div
+                          key={item.path}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: (navigationItems.length + index) * 0.1 }}
+                        >
+                          <Link
+                            to={item.path}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-dark-300 hover:text-white hover:bg-white/5 transition-all duration-200"
+                          >
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </motion.div>
+                      ))}
+                      
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (navigationItems.length + userMenuItems.length) * 0.1 }}
+                      >
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 w-full text-left"
+                        >
+                          <LogOut className="h-5 w-5" />
+                          <span>Logout</span>
+                        </button>
+                      </motion.div>
+                    </>
+                  ) : (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: navigationItems.length * 0.1 }}
+                      >
+                        <Link
+                          to="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-dark-300 hover:text-white hover:bg-white/5 transition-all duration-200"
+                        >
+                          <LogIn className="h-5 w-5" />
+                          <span>Login</span>
+                        </Link>
+                      </motion.div>
+                      
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (navigationItems.length + 1) * 0.1 }}
+                      >
+                        <Link
+                          to="/register"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium bg-gradient-to-r from-brand-500 to-brand-600 text-white transition-all duration-200 mt-2"
+                        >
+                          <UserPlus className="h-5 w-5" />
+                          <span>Sign Up</span>
+                        </Link>
+                      </motion.div>
+                    </>
+                  )}
+                </div>
                 
                 {showSearch && (
                   <motion.form 
