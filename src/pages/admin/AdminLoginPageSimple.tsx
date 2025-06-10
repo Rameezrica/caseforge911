@@ -122,10 +122,6 @@ const AdminLoginPageSimple: React.FC = () => {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-
-        <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.875rem', color: '#6b7280' }}>
-          <p>Admin credentials: Rameezadmin / Qwerty9061#</p>
-        </div>
       </div>
     </div>
   );
