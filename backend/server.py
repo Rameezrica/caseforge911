@@ -1,15 +1,17 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional, Dict, Any
 import os
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 import uuid
 from datetime import datetime, timedelta
-import bcrypt
-import jwt
+# import bcrypt # Replaced by passlib
+# import jwt # Replaced by jose
+from passlib.context import CryptContext # For password hashing
+from jose import JWTError, jwt as jose_jwt # For JWT operations
 
 load_dotenv()
 
@@ -36,6 +38,7 @@ problems_collection = db.problems
 users_collection = db.users
 solutions_collection = db.solutions
 discussions_collection = db.discussions
+competitions_collection = db.competitions # New collection for Competitions
 
 class Problem(BaseModel):
     id: str
@@ -66,6 +69,206 @@ class User(BaseModel):
     solved_problems: List[str] = []
     total_score: int = 0
 
+# --- Competition Models ---
+class CompetitionBase(BaseModel):
+    name: str
+    description: str
+    start_date: datetime
+    end_date: datetime
+    problem_ids: List[str] = []
+    is_active: bool = False
+
+class CompetitionCreate(CompetitionBase):
+    pass # is_active can be set at creation, defaults to False in Competition
+
+class CompetitionUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    problem_ids: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+    updated_at: datetime = datetime.utcnow() # Always update this field
+
+class Competition(CompetitionBase):
+    id: str = uuid.uuid4().hex # Default factory for id
+    created_at: datetime = datetime.utcnow() # Default factory for created_at
+    updated_at: datetime = datetime.utcnow() # Default factory for updated_at
+
+    class Config:
+        # For Pydantic v2, default_factory is preferred inside Field for newer versions
+        # but this structure is common for v1. Let's ensure it's v2 compatible if possible.
+        # For id, created_at, updated_at, using Field(default_factory=...) is more explicit.
+        # For now, this will work as Pydantic v1 style defaults in class body.
+        # If using Pydantic v2 extensively, Field(default_factory=...) is better.
+        pass
+
+
+# --- Authentication Models and Settings ---
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr # Using EmailStr for validation
+    full_name: Optional[str] = None
+
+class UserCreate(UserBase):
+    password: str
+
+class UserInDB(UserBase):
+    id: str
+    hashed_password: str
+    is_admin: bool = False
+    created_at: datetime # This field will be set by db_create_user
+    # solved_problems and total_score are part of the User model, UserInDB will get them if needed from User
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+# Security settings
+SECRET_KEY = os.getenv("SECRET_KEY", "your_super_secret_key_please_change_in_prod")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") # Already using CryptContext
+
+# OAuth2 Scheme
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token") # Adjusted tokenUrl to match router prefix
+
+# --- End Authentication Models and Settings ---
+
+# --- User Database Functions ---
+async def get_user_db(username: str) -> Optional[UserInDB]: # Renamed to avoid conflict with potential endpoint
+    user_data = await users_collection.find_one({"username": username})
+    if user_data:
+        # Ensure all fields for UserInDB are present, providing defaults if necessary
+        # This is important if your DB schema might not perfectly match UserInDB initially
+        user_data_complete = {
+            "id": str(user_data.get("id", uuid.uuid4())), # Ensure ID is a string
+            "username": user_data.get("username"),
+            "email": user_data.get("email"),
+            "full_name": user_data.get("full_name"),
+            "hashed_password": user_data.get("hashed_password"),
+            "is_admin": user_data.get("is_admin", False),
+            "created_at": user_data.get("created_at", datetime.utcnow()),
+            "solved_problems": user_data.get("solved_problems", []),
+            "total_score": user_data.get("total_score", 0)
+        }
+        return UserInDB(**user_data_complete)
+    return None
+
+async def db_create_user(user: UserCreate) -> UserInDB:
+    existing_user_by_username = await users_collection.find_one({"username": user.username})
+    if existing_user_by_username:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already registered")
+
+    existing_user_by_email = await users_collection.find_one({"email": user.email})
+    if existing_user_by_email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+
+    hashed_password = get_password_hash(user.password)
+
+    # Prepare data for UserInDB
+    user_id_val = str(uuid.uuid4())
+    created_at_val = datetime.utcnow()
+
+    user_in_db_data = user.dict(exclude={"password"})
+    user_in_db_data.update({
+        "id": user_id_val,
+        "hashed_password": hashed_password,
+        "is_admin": False,
+        "created_at": created_at_val,
+        # solved_problems and total_score are not part of UserBase/UserCreate
+        # they are part of the main User model and should be handled there or upon retrieval
+    })
+    # Need to ensure all fields required by UserInDB are present
+    # UserInDB inherits UserBase (username, email, full_name)
+    # and adds id, hashed_password, is_admin, created_at.
+    # Let's ensure user_in_db_data matches UserInDB's definition.
+
+    # Minimal UserInDB based on current definition:
+    user_for_db_dict = {
+        "id": user_id_val,
+        "username": user.username,
+        "email": user.email,
+        "full_name": user.full_name,
+        "hashed_password": hashed_password,
+        "is_admin": False,
+        "created_at": created_at_val
+        # solved_problems and total_score are part of the main User model,
+        # not directly part of UserInDB's core definition here.
+        # They would be added when a full User object is constructed from DB.
+    }
+    user_in_db = UserInDB(**user_for_db_dict)
+
+    await users_collection.insert_one(user_in_db.dict())
+    return user_in_db
+# --- End User Database Functions ---
+
+# --- OAuth2 Dependencies ---
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
+    token_data = decode_access_token(token)
+    user = await get_user_db(token_data.username)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or token invalid",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+async def get_current_admin_user(current_user: UserInDB = Depends(get_current_user)) -> UserInDB:
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not an admin"
+        )
+    return current_user
+# --- End OAuth2 Dependencies ---
+
+# --- Authentication Router ---
+auth_router = APIRouter()
+
+@auth_router.post("/register", response_model=User) # Using existing User model for response
+async def register_user(user_create: UserCreate):
+    # db_create_user already handles username/email uniqueness checks and raises HTTPException
+    user_in_db = await db_create_user(user_create)
+    # Convert UserInDB to the User response model
+    # Assuming User model has: id, username, email, created_at, solved_problems, total_score
+    return User(
+        id=user_in_db.id,
+        username=user_in_db.username, # from UserInDB
+        email=user_in_db.email,       # from UserInDB
+        created_at=user_in_db.created_at, # from UserInDB
+        full_name=user_in_db.full_name, # from UserInDB
+        # solved_problems and total_score are part of the main User model.
+        # If UserInDB doesn't store them directly (as per current model def),
+        # they would be defaulted or fetched separately for the User response model.
+        # For now, let's assume they are part of the User model's defaults.
+        solved_problems=[], # Default for new user response
+        total_score=0       # Default for new user response
+    )
+
+@auth_router.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await get_user_db(form_data.username)
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"username": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+# --- End Authentication Router ---
+
 class Discussion(BaseModel):
     id: str
     problem_id: str
@@ -75,6 +278,47 @@ class Discussion(BaseModel):
     upvotes: int = 0
     downvotes: int = 0
     created_at: datetime
+
+# --- Password & JWT Utility Functions ---
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire, "sub": to_encode.get("username")}) # Add "sub" claim
+    encoded_jwt = jose_jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def decode_access_token(token: str) -> TokenData:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jose_jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: Optional[str] = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except jose_jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except jose_jwt.JWTError: # Catching base JWTError from python-jose
+        raise credentials_exception
+    return token_data
+
+# --- End Password & JWT Utility Functions ---
 
 async def init_sample_data():
     existing_count = await problems_collection.count_documents({})
@@ -292,7 +536,28 @@ async def get_categories():
 async def get_platform_stats():
     total_problems = await problems_collection.count_documents({})
     total_solutions = await solutions_collection.count_documents({})
-    total_users = await users_collection.count_documents({})
+    total_users = await users_collection.count_documents({}) # This will count all user documents
+
+    # Example: Create a default admin user if it doesn't exist (for testing)
+    # Note: In production, admin creation should be a secure, separate process.
+    admin_username = os.getenv("ADMIN_USERNAME", "admin")
+    admin_user = await users_collection.find_one({"username": admin_username})
+    if not admin_user:
+        admin_password = os.getenv("ADMIN_PASSWORD", "adminpassword") # Ensure this is strong
+        hashed_password = get_password_hash(admin_password)
+        admin_user_data = {
+            "id": str(uuid.uuid4()),
+            "username": admin_username,
+            "email": os.getenv("ADMIN_EMAIL", "admin@example.com"),
+            "full_name": "Admin User",
+            "hashed_password": hashed_password,
+            "is_admin": True,
+            "created_at": datetime.utcnow(),
+            "solved_problems": [],
+            "total_score": 0
+        }
+        await users_collection.insert_one(admin_user_data)
+        print(f"Created default admin user: {admin_username}")
     
     difficulty_pipeline = [
         {"$group": {"_id": "$difficulty", "count": {"$sum": 1}}}
@@ -326,7 +591,7 @@ async def submit_solution(solution_data: dict):
     return {"message": "Solution submitted successfully", "solution_id": solution["id"]}
 
 @app.get("/api/daily-challenge")
-async def get_daily_challenge():
+async def get_daily_challenge(): # This could be protected if needed
     pipeline = [{"$sample": {"size": 1}}]
     cursor = problems_collection.aggregate(pipeline)
     
@@ -341,6 +606,31 @@ async def get_daily_challenge():
     
     return None
 
+# Placeholder for existing User CRUD - to be replaced/augmented by auth logic
+# For example, the current User model might become UserPublic or UserResponse
+# And user creation will go through the /auth/register endpoint.
+
+# The existing User model:
+# class User(BaseModel):
+#     id: str
+#     username: str
+#     email: str
+#     created_at: datetime
+#     solved_problems: List[str] = []
+#     total_score: int = 0
+# This will be used as the response model for user info, ensuring passwords aren't sent.
+
+app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
+
+# Import and include the admin router
+from backend.admin_router import admin_router as admin_router_instance # renamed to avoid conflict
+app.include_router(admin_router_instance, prefix="/api") # /api prefix will be combined with /admin from admin_router
+
+
 if __name__ == "__main__":
     import uvicorn
+    # Ensure CryptContext is imported for the get_password_hash in init_sample_data
+    # Ensure CryptContext is imported for the get_password_hash in init_sample_data
+    # APIRouter is already imported at the top level
+    # CryptContext is already imported at the top level
     uvicorn.run(app, host="0.0.0.0", port=8001)

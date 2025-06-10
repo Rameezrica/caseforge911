@@ -15,6 +15,15 @@ import CaseSolverPage from './pages/CaseSolverPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
+// Admin panel imports
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminProblemsPage from './pages/admin/AdminProblemsPage';
+import AdminCompetitionsPage from './pages/admin/AdminCompetitionsPage'; // Import for AdminCompetitionsPage
+import AdminLayout from './components/admin/layout/AdminLayout';
+import ProtectedRouteAdmin from './components/admin/ProtectedRouteAdmin';
+
+
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
@@ -29,9 +38,12 @@ const pageTransition = {
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  // Exclude admin routes from the main LayoutWrapper as they have their own layout
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/admin');
 
   if (isAuthPage) {
+    // For /admin/login, and /admin/*, we don't want the main app's LayoutWrapper
+    // The admin section will use its own AdminLayout via ProtectedRouteAdmin
     return <>{children}</>;
   }
 
@@ -83,6 +95,22 @@ const App: React.FC = () => {
           <Route path="/contests" element={<LayoutWrapper><ContestPage /></LayoutWrapper>} />
           <Route path="/study-plans" element={<LayoutWrapper><StudyPlansPage /></LayoutWrapper>} />
           <Route path="/solve/:id" element={<LayoutWrapper><CaseSolverPage /></LayoutWrapper>} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRouteAdmin>
+                <AdminLayout />
+              </ProtectedRouteAdmin>
+            }
+          >
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="problems" element={<AdminProblemsPage />} />
+            <Route path="competitions" element={<AdminCompetitionsPage />} />
+          </Route>
+
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>
