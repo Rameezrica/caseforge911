@@ -2,20 +2,24 @@
 import requests
 import sys
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 class CaseForgeAPITester:
-    def __init__(self, base_url="http://localhost:8001/api"):
+    def __init__(self, base_url="/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
         self.results = []
+        self.admin_token = None
 
-    def run_test(self, name, method, endpoint, expected_status, data=None):
+    def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, form_data=None):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
+        
+        if auth and self.admin_token:
+            headers['Authorization'] = f'Bearer {self.admin_token}'
         
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
@@ -25,7 +29,18 @@ class CaseForgeAPITester:
             if method == 'GET':
                 response = requests.get(url, headers=headers)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=headers)
+                if form_data:
+                    # For form data (like login), don't use JSON
+                    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+                    if auth and self.admin_token:
+                        headers['Authorization'] = f'Bearer {self.admin_token}'
+                    response = requests.post(url, data=form_data, headers=headers)
+                else:
+                    response = requests.post(url, json=data, headers=headers)
+            elif method == 'PUT':
+                response = requests.put(url, json=data, headers=headers)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=headers)
 
             success = response.status_code == expected_status
             if success:
