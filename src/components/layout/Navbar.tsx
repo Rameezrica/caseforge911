@@ -345,6 +345,80 @@ const Navbar = () => {
                   );
                 })}
                 
+                {/* Auth items for mobile */}
+                <div className="pt-2 border-t border-white/10">
+                  {isAuthenticated ? (
+                    <>
+                      {userMenuItems.map((item, index) => (
+                        <motion.div
+                          key={item.path}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: (navigationItems.length + index) * 0.1 }}
+                        >
+                          <Link
+                            to={item.path}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-dark-300 hover:text-white hover:bg-white/5 transition-all duration-200"
+                          >
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </motion.div>
+                      ))}
+                      
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (navigationItems.length + userMenuItems.length) * 0.1 }}
+                      >
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 w-full text-left"
+                        >
+                          <LogOut className="h-5 w-5" />
+                          <span>Logout</span>
+                        </button>
+                      </motion.div>
+                    </>
+                  ) : (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: navigationItems.length * 0.1 }}
+                      >
+                        <Link
+                          to="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-dark-300 hover:text-white hover:bg-white/5 transition-all duration-200"
+                        >
+                          <LogIn className="h-5 w-5" />
+                          <span>Login</span>
+                        </Link>
+                      </motion.div>
+                      
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (navigationItems.length + 1) * 0.1 }}
+                      >
+                        <Link
+                          to="/register"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium bg-gradient-to-r from-brand-500 to-brand-600 text-white transition-all duration-200 mt-2"
+                        >
+                          <UserPlus className="h-5 w-5" />
+                          <span>Sign Up</span>
+                        </Link>
+                      </motion.div>
+                    </>
+                  )}
+                </div>
+                
                 {showSearch && (
                   <motion.form 
                     onSubmit={handleSearch} 
