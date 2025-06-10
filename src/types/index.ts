@@ -34,7 +34,7 @@ export interface Problem {
   tags?: string[];
   companyContext?: string;
   createdAt: string;
-  solvedCount: number;
+  solvedCount?: number;
   averageScore?: number;
   successRate?: number;
   questions: string[];

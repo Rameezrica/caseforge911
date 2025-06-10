@@ -1,5 +1,28 @@
 import axios, { AxiosError } from 'axios';
 
+// Utility function to convert snake_case to camelCase
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(v => toCamelCase(v));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce(
+      (result, key) => {
+        const camelCaseKey = key.replace(/([-_][a-z])/g, group =>
+          group
+            .toUpperCase()
+            .replace('-', '')
+            .replace('_', '')
+        );
+        result[camelCaseKey] = toCamelCase(obj[key]);
+        return result;
+      },
+      {} as Record<string, unknown>
+    );
+  }
+  return obj;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api';
 
 const api = axios.create({
@@ -113,7 +136,7 @@ export const apiService = {
   }) {
     try {
       const response = await api.get('/problems', { params: filters });
-      return response.data as Problem[];
+      return toCamelCase(response.data) as Problem[];
     } catch (error) {
       console.error('Failed to fetch problems:', error);
       throw error;
@@ -123,7 +146,7 @@ export const apiService = {
   async getProblem(id: string) {
     try {
       const response = await api.get(`/problems/${id}`);
-      return response.data as Problem;
+      return toCamelCase(response.data) as Problem;
     } catch (error) {
       console.error(`Failed to fetch problem ${id}:`, error);
       throw error;
@@ -133,7 +156,7 @@ export const apiService = {
   async getCategories() {
     try {
       const response = await api.get('/categories');
-      return response.data as CategoryInfo[];
+      return toCamelCase(response.data) as CategoryInfo[];
     } catch (error) {
       console.error('Failed to fetch categories:', error);
       throw error;
@@ -143,7 +166,7 @@ export const apiService = {
   async getStats() {
     try {
       const response = await api.get('/stats');
-      return response.data as PlatformStats;
+      return toCamelCase(response.data) as PlatformStats;
     } catch (error) {
       console.error('Failed to fetch stats:', error);
       throw error;
@@ -153,7 +176,7 @@ export const apiService = {
   async getDailyChallenge() {
     try {
       const response = await api.get('/daily-challenge');
-      return response.data as DailyChallenge;
+      return toCamelCase(response.data) as DailyChallenge;
     } catch (error) {
       console.error('Failed to fetch daily challenge:', error);
       throw error;

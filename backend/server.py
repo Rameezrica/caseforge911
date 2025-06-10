@@ -327,19 +327,34 @@ async def submit_solution(solution_data: dict):
 
 @app.get("/api/daily-challenge")
 async def get_daily_challenge():
-    pipeline = [{"$sample": {"size": 1}}]
-    cursor = problems_collection.aggregate(pipeline)
+    total_problems = await problems_collection.count_documents({})
+    if total_problems == 0:
+        raise HTTPException(status_code=404, detail="No problems available for daily challenge")
+
+    day_of_year = datetime.utcnow().timetuple().tm_yday
+    challenge_index = (day_of_year - 1) % total_problems
     
-    async for problem in cursor:
-        problem["_id"] = str(problem["_id"])
+    # Sort by 'id' to ensure consistent ordering for skipping
+    # If your 'id' field is the UUID string, this is fine.
+    # If you meant the MongoDB ObjectId, it should be '_id'.
+    # Given the Problem model uses 'id' as the string UUID, we sort by that.
+    cursor = problems_collection.find().sort("id", 1).skip(challenge_index).limit(1)
+
+    problem = await cursor.next() # Get the first document from the cursor
+
+    if problem:
+        problem["_id"] = str(problem["_id"]) # Convert MongoDB ObjectId to string
         return {
             "problem": problem,
             "date": datetime.utcnow().strftime("%Y-%m-%d"),
-            "participants": 0,
-            "completion_rate": 0.0
+            "participants": 0,  # Placeholder
+            "completion_rate": 0.0  # Placeholder
         }
-    
-    return None
+    else:
+        # This case should ideally not be reached if total_problems > 0
+        # and challenge_index is calculated correctly.
+        # However, as a fallback:
+        raise HTTPException(status_code=404, detail="Daily challenge problem not found despite available problems.")
 
 if __name__ == "__main__":
     import uvicorn

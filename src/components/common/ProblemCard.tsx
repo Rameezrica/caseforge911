@@ -38,7 +38,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, viewMode }) => {
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
-                <span>{problem.solvedCount || 0} solved</span>
+                <span>{problem.solvedCount ?? 0} solved</span>
               </div>
               {problem.averageScore && (
                 <div className="flex items-center gap-1">
@@ -73,7 +73,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, viewMode }) => {
       <div className="flex items-center justify-between text-sm text-dark-400">
         <div className="flex items-center gap-1">
           <Users className="h-4 w-4" />
-          <span>{problem.solvedCount || 0} solved</span>
+          <span>{problem.solvedCount ?? 0} solved</span>
         </div>
         {problem.averageScore && (
           <div className="flex items-center gap-1">
