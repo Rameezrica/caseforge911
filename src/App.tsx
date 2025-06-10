@@ -97,7 +97,7 @@ const App: React.FC = () => {
           <Route path="/solve/:id" element={<LayoutWrapper><CaseSolverPage /></LayoutWrapper>} />
 
           {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/login" element={<AdminLoginPageSimple />} />
           <Route
             path="/admin"
             element={
