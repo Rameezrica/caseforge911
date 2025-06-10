@@ -8,7 +8,7 @@ import {
   BookOpen, 
   Clock, 
   Award,
-  Fire,
+  Flame,
   Star,
   BarChart3
 } from 'lucide-react';
@@ -68,7 +68,7 @@ const UserDashboardPage: React.FC = () => {
     {
       title: 'Current Streak',
       value: userProgress?.current_streak || 0,
-      icon: Fire,
+      icon: Flame,
       color: 'text-orange-400',
       bgColor: 'bg-orange-500/10',
       borderColor: 'border-orange-500/20',
