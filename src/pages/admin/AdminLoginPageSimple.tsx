@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { loginAdmin } from '../../services/adminApi';
 
 const AdminLoginPageSimple: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -14,24 +15,7 @@ const AdminLoginPageSimple: React.FC = () => {
     setError(null);
 
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
-
-      const response = await fetch('/api/auth/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString(),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
-        throw new Error(errorData.detail || 'Failed to login');
-      }
-
-      const data = await response.json();
+      const data = await loginAdmin(username, password);
       localStorage.setItem('adminToken', data.access_token);
       navigate('/admin');
     } catch (err: any) {
