@@ -15,11 +15,19 @@ import CaseSolverPage from './pages/CaseSolverPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
+// User authentication imports
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import UserDashboardPage from './pages/UserDashboardPage';
+import UserProfilePage from './pages/UserProfilePage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
+
 // Admin panel imports
 import AdminLoginPageSimple from './pages/admin/AdminLoginPageSimple';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminProblemsPage from './pages/admin/AdminProblemsPage';
-import AdminCompetitionsPage from './pages/admin/AdminCompetitionsPage'; // Import for AdminCompetitionsPage
+import AdminCompetitionsPage from './pages/admin/AdminCompetitionsPage';
 import AdminLayout from './components/admin/layout/AdminLayout';
 import ProtectedRouteAdmin from './components/admin/ProtectedRouteAdmin';
 
