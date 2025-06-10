@@ -46,12 +46,13 @@ const pageTransition = {
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  // Exclude admin routes from the main LayoutWrapper as they have their own layout
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/admin');
+  // Exclude admin routes and auth pages from the main LayoutWrapper as they have their own layout
+  const isAuthPage = location.pathname === '/login' || 
+                     location.pathname === '/register' || 
+                     location.pathname.startsWith('/admin');
 
   if (isAuthPage) {
-    // For /admin/login, and /admin/*, we don't want the main app's LayoutWrapper
-    // The admin section will use its own AdminLayout via ProtectedRouteAdmin
+    // For auth pages and admin routes, don't use the main app layout
     return <>{children}</>;
   }
 
