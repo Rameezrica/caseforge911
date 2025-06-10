@@ -1,85 +1,71 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { loginAdmin, AuthTokenResponse } from '../services/adminApi';
-import { useNavigate } from 'react-router-dom'; // For programmatic navigation
 
 const ADMIN_TOKEN_KEY = 'adminToken';
 
-interface AdminUserState {
-  token: string | null;
-  // Add more admin user details here if needed, e.g., username, roles
-  // For now, just storing the token indicates authentication.
+export interface AdminAuthState {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
 export const useAdminAuth = () => {
-  const [adminUser, setAdminUser] = useState<AdminUserState | null>(null);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true); // Initially true to check auth
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  const checkAuth = useCallback(() => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem(ADMIN_TOKEN_KEY);
-      if (token) {
-        // TODO: Optionally verify token with a backend endpoint here.
-        // For now, presence of token means authenticated.
-        setAdminUser({ token });
-        setIsAdminAuthenticated(true);
-      } else {
-        setAdminUser(null);
-        setIsAdminAuthenticated(false);
-      }
-    } catch (e) {
-      console.error("Failed to check auth status", e);
-      setAdminUser(null);
-      setIsAdminAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [authState, setAuthState] = useState<AdminAuthState>({
+    isAuthenticated: false,
+    isLoading: true,
+    error: null,
+  });
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    checkAuthStatus();
+  }, []);
 
-  const login = async (username, password) => {
-    setLoading(true);
-    setError(null);
+  const checkAuthStatus = () => {
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+    setAuthState(prev => ({
+      ...prev,
+      isAuthenticated: !!token,
+      isLoading: false,
+    }));
+  };
+
+  const login = async (username: string, password: string): Promise<boolean> => {
     try {
+      setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
+      
       const response: AuthTokenResponse = await loginAdmin(username, password);
-      if (response.access_token) {
-        localStorage.setItem(ADMIN_TOKEN_KEY, response.access_token);
-        setAdminUser({ token: response.access_token });
-        setIsAdminAuthenticated(true);
-        navigate('/admin'); // Redirect to admin dashboard on successful login
-      } else {
-        throw new Error('Login response did not contain access token.');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      console.error('Login failed:', errorMessage);
-      setError(errorMessage);
-      setIsAdminAuthenticated(false);
-    } finally {
-      setLoading(false);
+      localStorage.setItem(ADMIN_TOKEN_KEY, response.access_token);
+      
+      setAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+      
+      return true;
+    } catch (error: any) {
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        error: error.message || 'Login failed',
+      });
+      return false;
     }
   };
 
-  const logout = useCallback(() => {
+  const logout = () => {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
-    setAdminUser(null);
-    setIsAdminAuthenticated(false);
-    navigate('/admin/login'); // Redirect to login page on logout
-  }, [navigate]);
+    setAuthState({
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+    });
+  };
 
   return {
-    adminUser,
-    isAdminAuthenticated,
-    loading,
-    error,
+    ...authState,
     login,
     logout,
-    checkAuth, // Exposing checkAuth if manual re-check is needed
+    checkAuthStatus,
   };
 };
