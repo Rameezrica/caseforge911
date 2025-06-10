@@ -308,8 +308,8 @@ class CaseForgeAPITester:
         return self.tests_passed == self.tests_run
 
 def main():
-    # Use the API URL from environment or default to /api
-    api_url = os.environ.get("VITE_API_URL", "/api")
+    # Use the API URL from environment or default to http://localhost:8001/api
+    api_url = "http://localhost:8001/api"
     
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
