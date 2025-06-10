@@ -320,6 +320,149 @@ def decode_access_token(token: str) -> TokenData:
 
 # --- End Password & JWT Utility Functions ---
 
+# --- User Progress and Stats Functions ---
+async def calculate_user_progress(user_id: str):
+    """Calculate comprehensive user progress including streaks"""
+    user_solutions = await solutions_collection.find({"user_id": user_id}).sort("submitted_at", -1).to_list(length=None)
+    
+    if not user_solutions:
+        return {
+            "total_problems_solved": 0,
+            "total_score": 0,
+            "current_streak": 0,
+            "longest_streak": 0,
+            "problems_by_difficulty": {"easy": 0, "medium": 0, "hard": 0},
+            "recent_activity": []
+        }
+    
+    # Get unique problem IDs to count distinct problems solved
+    solved_problem_ids = list(set(solution["problem_id"] for solution in user_solutions))
+    
+    # Calculate difficulty distribution
+    problems_by_difficulty = {"easy": 0, "medium": 0, "hard": 0}
+    recent_activity = []
+    
+    for problem_id in solved_problem_ids[:10]:  # Get last 10 problems
+        problem = await problems_collection.find_one({"id": problem_id})
+        if problem:
+            difficulty = problem["difficulty"].lower()
+            if difficulty in problems_by_difficulty:
+                problems_by_difficulty[difficulty] += 1
+            
+            # Add to recent activity
+            solution = next((s for s in user_solutions if s["problem_id"] == problem_id), None)
+            if solution:
+                recent_activity.append({
+                    "problem_id": problem_id,
+                    "problem_title": problem["title"],
+                    "solved_at": solution["submitted_at"].isoformat(),
+                    "score": solution.get("score")
+                })
+    
+    # Calculate streaks (simplified - count consecutive days with solutions)
+    solution_dates = sorted(set(
+        solution["submitted_at"].date() 
+        for solution in user_solutions 
+        if "submitted_at" in solution
+    ), reverse=True)
+    
+    current_streak = 0
+    longest_streak = 0
+    temp_streak = 0
+    
+    if solution_dates:
+        from datetime import date, timedelta
+        today = date.today()
+        
+        # Check if user solved today or yesterday
+        if solution_dates[0] >= today - timedelta(days=1):
+            current_streak = 1
+            temp_streak = 1
+            
+            # Continue counting streak
+            for i in range(1, len(solution_dates)):
+                if solution_dates[i-1] - solution_dates[i] == timedelta(days=1):
+                    current_streak += 1
+                    temp_streak += 1
+                else:
+                    break
+        
+        # Calculate longest streak
+        temp_streak = 1
+        for i in range(1, len(solution_dates)):
+            if solution_dates[i-1] - solution_dates[i] == timedelta(days=1):
+                temp_streak += 1
+                longest_streak = max(longest_streak, temp_streak)
+            else:
+                temp_streak = 1
+        longest_streak = max(longest_streak, temp_streak)
+    
+    # Calculate total score
+    total_score = sum(solution.get("score", 0) for solution in user_solutions if solution.get("score"))
+    
+    return {
+        "total_problems_solved": len(solved_problem_ids),
+        "total_score": total_score,
+        "current_streak": current_streak,
+        "longest_streak": longest_streak,
+        "problems_by_difficulty": problems_by_difficulty,
+        "recent_activity": recent_activity[:5]  # Return only 5 most recent
+    }
+
+# --- User API Endpoints ---
+@app.get("/api/auth/me", response_model=User)
+async def get_current_user_profile(current_user: UserInDB = Depends(get_current_user)):
+    """Get current user's profile"""
+    return User(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        created_at=current_user.created_at,
+        solved_problems=[],  # Will be populated from solutions
+        total_score=0  # Will be calculated from solutions
+    )
+
+@app.get("/api/user/progress")
+async def get_user_progress(current_user: UserInDB = Depends(get_current_user)):
+    """Get user's learning progress and statistics"""
+    progress = await calculate_user_progress(current_user.id)
+    return progress
+
+@app.get("/api/user/solutions")
+async def get_user_solutions(current_user: UserInDB = Depends(get_current_user)):
+    """Get user's solution history"""
+    user_solutions = await solutions_collection.find({"user_id": current_user.id}).sort("submitted_at", -1).to_list(length=None)
+    
+    # Convert ObjectId to string and format dates
+    for solution in user_solutions:
+        solution["_id"] = str(solution["_id"])
+        if "submitted_at" in solution:
+            solution["submitted_at"] = solution["submitted_at"].isoformat()
+    
+    return user_solutions
+
+@app.post("/api/solutions")
+async def submit_solution_authenticated(
+    solution_data: dict, 
+    current_user: UserInDB = Depends(get_current_user)
+):
+    """Submit a solution (authenticated users)"""
+    solution = {
+        "id": str(uuid.uuid4()),
+        "problem_id": solution_data["problem_id"],
+        "user_id": current_user.id,
+        "content": solution_data["content"],
+        "submitted_at": datetime.utcnow(),
+        "score": solution_data.get("score")
+    }
+    
+    result = await solutions_collection.insert_one(solution)
+    solution["_id"] = str(result.inserted_id)
+    
+    return {"message": "Solution submitted successfully", "solution_id": solution["id"]}
+
+# --- End User Progress and Stats Functions ---
+
 async def init_sample_data():
     existing_count = await problems_collection.count_documents({})
     if existing_count > 0:
