@@ -140,7 +140,7 @@ const AdminLoginPageSimple: React.FC = () => {
         </form>
 
         <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.875rem', color: '#6b7280' }}>
-          <p>Default credentials: admin / adminpassword</p>
+          <p>Admin credentials: Rameezadmin / Qwerty9061#</p>
         </div>
       </div>
     </div>
