@@ -16,7 +16,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
 // Admin panel imports
-import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminLoginPageSimple from './pages/admin/AdminLoginPageSimple';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminProblemsPage from './pages/admin/AdminProblemsPage';
 import AdminCompetitionsPage from './pages/admin/AdminCompetitionsPage'; // Import for AdminCompetitionsPage
