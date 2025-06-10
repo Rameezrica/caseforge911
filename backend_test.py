@@ -82,6 +82,147 @@ class CaseForgeAPITester:
             200
         )
 
+    def test_admin_login(self, username="admin", password="adminpassword"):
+        """Test admin login and get token"""
+        form_data = {
+            "username": username,
+            "password": password
+        }
+        success, response = self.run_test(
+            "Admin Login",
+            "POST",
+            "auth/token",
+            200,
+            form_data=form_data
+        )
+        
+        if success and 'access_token' in response:
+            self.admin_token = response['access_token']
+            print(f"✅ Successfully obtained admin token")
+            return True
+        else:
+            print(f"❌ Failed to obtain admin token")
+            return False
+
+    def test_get_admin_problems(self):
+        """Test getting problems as admin"""
+        return self.run_test(
+            "Get Admin Problems",
+            "GET",
+            "admin/problems",
+            200,
+            auth=True
+        )
+
+    def test_create_admin_problem(self):
+        """Test creating a problem as admin"""
+        problem_data = {
+            "title": f"Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "description": "This is a test problem created by the API test.",
+            "difficulty": "Medium",
+            "category": "Test Category",
+            "domain": "Test Domain",
+            "company": "Test Company",
+            "time_limit": 60,
+            "sample_framework": "Test Framework"
+        }
+        
+        return self.run_test(
+            "Create Admin Problem",
+            "POST",
+            "admin/problems",
+            201,
+            data=problem_data,
+            auth=True
+        )
+
+    def test_update_admin_problem(self, problem_id):
+        """Test updating a problem as admin"""
+        update_data = {
+            "title": f"Updated Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "description": "This problem was updated by the API test."
+        }
+        
+        return self.run_test(
+            "Update Admin Problem",
+            "PUT",
+            f"admin/problems/{problem_id}",
+            200,
+            data=update_data,
+            auth=True
+        )
+
+    def test_delete_admin_problem(self, problem_id):
+        """Test deleting a problem as admin"""
+        return self.run_test(
+            "Delete Admin Problem",
+            "DELETE",
+            f"admin/problems/{problem_id}",
+            204,
+            auth=True
+        )
+
+    def test_get_admin_competitions(self):
+        """Test getting competitions as admin"""
+        return self.run_test(
+            "Get Admin Competitions",
+            "GET",
+            "admin/competitions",
+            200,
+            auth=True
+        )
+
+    def test_create_admin_competition(self):
+        """Test creating a competition as admin"""
+        # Create dates for the competition
+        start_date = (datetime.now() + timedelta(days=1)).isoformat()
+        end_date = (datetime.now() + timedelta(days=8)).isoformat()
+        
+        competition_data = {
+            "name": f"Test Competition {datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "description": "This is a test competition created by the API test.",
+            "start_date": start_date,
+            "end_date": end_date,
+            "problem_ids": [],
+            "is_active": False
+        }
+        
+        return self.run_test(
+            "Create Admin Competition",
+            "POST",
+            "admin/competitions",
+            201,
+            data=competition_data,
+            auth=True
+        )
+
+    def test_update_admin_competition(self, competition_id):
+        """Test updating a competition as admin"""
+        update_data = {
+            "name": f"Updated Test Competition {datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "description": "This competition was updated by the API test.",
+            "is_active": True
+        }
+        
+        return self.run_test(
+            "Update Admin Competition",
+            "PUT",
+            f"admin/competitions/{competition_id}",
+            200,
+            data=update_data,
+            auth=True
+        )
+
+    def test_delete_admin_competition(self, competition_id):
+        """Test deleting a competition as admin"""
+        return self.run_test(
+            "Delete Admin Competition",
+            "DELETE",
+            f"admin/competitions/{competition_id}",
+            204,
+            auth=True
+        )
+
     def test_get_problems(self):
         """Test getting all problems"""
         return self.run_test(
