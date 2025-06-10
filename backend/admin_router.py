@@ -29,7 +29,8 @@ admin_router = APIRouter(
 # These models define the shape of data for creating and updating problems
 # specifically for the admin interface.
 
-class ProblemBase(BaseModel):
+// Missing import for BaseModel
+from pydantic import BaseModel
     title: str
     description: str
     difficulty: str
