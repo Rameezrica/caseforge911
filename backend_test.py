@@ -59,7 +59,8 @@ class CaseForgeAPITester:
                 "name": name,
                 "success": success,
                 "status_code": response.status_code,
-                "expected_status": expected_status
+                "expected_status": expected_status,
+                "url": url
             })
 
             return success, response.json() if success and response.text else {}
@@ -69,7 +70,8 @@ class CaseForgeAPITester:
             self.results.append({
                 "name": name,
                 "success": False,
-                "error": str(e)
+                "error": str(e),
+                "url": url
             })
             return False, {}
 
