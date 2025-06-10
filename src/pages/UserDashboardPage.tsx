@@ -8,7 +8,7 @@ import {
   BookOpen, 
   Clock, 
   Award,
-  Fire,
+  Flame,
   Star,
   BarChart3
 } from 'lucide-react';
