@@ -8,8 +8,8 @@ const ADMIN_TOKEN_KEY = 'adminToken'; // Consistent with useAdminAuth
 
 export interface Problem {
   id: string;
-  title: str;
-  description: str;
+  title: string;
+  description: string;
   difficulty: string; // "Easy", "Medium", "Hard"
   category: string;
   domain: string;
@@ -21,8 +21,8 @@ export interface Problem {
 }
 
 export interface ProblemCreate { // For creating new problems
-  title: str;
-  description: str;
+  title: string;
+  description: string;
   difficulty: string;
   category: string;
   domain: string;
