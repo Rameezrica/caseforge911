@@ -4,6 +4,8 @@ import sys
 import json
 from datetime import datetime, timedelta
 import os
+import uuid
+import random
 
 class CaseForgeAPITester:
     def __init__(self, base_url):
@@ -12,14 +14,19 @@ class CaseForgeAPITester:
         self.tests_passed = 0
         self.results = []
         self.admin_token = None
+        self.user_token = None
+        self.test_user = None
+        self.test_password = None
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, form_data=None):
+    def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, form_data=None, admin=True):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
         
-        if auth and self.admin_token:
-            headers['Authorization'] = f'Bearer {self.admin_token}'
+        if auth:
+            token = self.admin_token if admin else self.user_token
+            if token:
+                headers['Authorization'] = f'Bearer {token}'
         
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
@@ -32,8 +39,10 @@ class CaseForgeAPITester:
                 if form_data:
                     # For form data (like login), don't use JSON
                     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-                    if auth and self.admin_token:
-                        headers['Authorization'] = f'Bearer {self.admin_token}'
+                    if auth:
+                        token = self.admin_token if admin else self.user_token
+                        if token:
+                            headers['Authorization'] = f'Bearer {token}'
                     response = requests.post(url, data=form_data, headers=headers)
                 else:
                     response = requests.post(url, json=data, headers=headers)
@@ -82,6 +91,78 @@ class CaseForgeAPITester:
             "GET",
             "health",
             200
+        )
+
+    def test_user_registration(self):
+        """Test user registration"""
+        # Generate a unique username and email
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        random_suffix = str(random.randint(1000, 9999))
+        self.test_user = f"testuser_{timestamp}_{random_suffix}"
+        self.test_password = "TestPassword123!"
+        
+        user_data = {
+            "username": self.test_user,
+            "email": f"{self.test_user}@example.com",
+            "password": self.test_password,
+            "full_name": "Test User"
+        }
+        
+        return self.run_test(
+            "User Registration",
+            "POST",
+            "auth/register",
+            200,
+            data=user_data
+        )
+
+    def test_user_login(self):
+        """Test user login and get token"""
+        if not self.test_user:
+            print("❌ Cannot test login: No test user created")
+            return False, {}
+            
+        form_data = {
+            "username": self.test_user,
+            "password": self.test_password
+        }
+        
+        success, response = self.run_test(
+            "User Login",
+            "POST",
+            "auth/token",
+            200,
+            form_data=form_data
+        )
+        
+        if success and 'access_token' in response:
+            self.user_token = response['access_token']
+            print(f"✅ Successfully obtained user token")
+            return True, response
+        else:
+            print(f"❌ Failed to obtain user token")
+            return False, response
+
+    def test_get_current_user(self):
+        """Test getting current user profile"""
+        return self.run_test(
+            "Get Current User Profile",
+            "GET",
+            "auth/me",
+            200,
+            auth=True,
+            admin=False
+        )
+
+    def test_get_user_progress(self):
+        """Test getting user progress"""
+        return self.run_test(
+            "Get User Progress",
+            "GET",
+            "user/progress",
+            200,
+            auth=True,
+            admin=False
         )
 
     def test_admin_login(self, username="Rameezadmin", password="Qwerty9061#"):
@@ -280,17 +361,29 @@ class CaseForgeAPITester:
         )
 
     def test_submit_solution(self, problem_id):
-        """Test submitting a solution"""
+        """Test submitting a solution as an authenticated user"""
         return self.run_test(
-            "Submit Solution",
+            "Submit Solution (Authenticated)",
             "POST",
             "solutions",
             200,
             data={
                 "problem_id": problem_id,
-                "content": "This is a test solution for the CaseForge API test.",
-                "user_id": "test_user"
-            }
+                "content": "This is a test solution for the CaseForge API test."
+            },
+            auth=True,
+            admin=False
+        )
+
+    def test_get_user_solutions(self):
+        """Test getting user solutions"""
+        return self.run_test(
+            "Get User Solutions",
+            "GET",
+            "user/solutions",
+            200,
+            auth=True,
+            admin=False
         )
 
     def print_summary(self):
@@ -311,31 +404,102 @@ class CaseForgeAPITester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = os.getenv("VITE_API_BASE_URL", "http://localhost:8001/api")
+    api_url = os.getenv("VITE_API_BASE_URL", "/api")
     
     print(f"Testing CaseForge API at: {api_url}")
     tester = CaseForgeAPITester(api_url)
     
-    # Run basic API tests
+    # Test basic health check
     tester.test_health_check()
     
-    # Focus on admin login testing
+    # Test public endpoints
     print("\n" + "="*50)
-    print("🔐 Testing Admin Login Functionality (CRITICAL)")
+    print("🌐 Testing Public Endpoints")
+    print("="*50)
+    
+    success, problems = tester.test_get_problems()
+    if success and problems:
+        # Get a problem ID for later tests
+        problem_id = problems[0]['id']
+        tester.test_get_problem_by_id(problem_id)
+    
+    tester.test_get_categories()
+    tester.test_get_stats()
+    tester.test_get_daily_challenge()
+    
+    # Test user authentication flow
+    print("\n" + "="*50)
+    print("👤 Testing User Authentication Flow")
+    print("="*50)
+    
+    # Register a new user
+    success, _ = tester.test_user_registration()
+    if success:
+        print("✅ User registration successful")
+        
+        # Login with the new user
+        login_success, _ = tester.test_user_login()
+        if login_success:
+            print("✅ User login successful")
+            
+            # Test protected user endpoints
+            tester.test_get_current_user()
+            tester.test_get_user_progress()
+            
+            # Test solution submission if we have a problem ID
+            if success and problems:
+                problem_id = problems[0]['id']
+                tester.test_submit_solution(problem_id)
+                tester.test_get_user_solutions()
+        else:
+            print("❌ User login failed")
+    else:
+        print("❌ User registration failed")
+    
+    # Test admin authentication and functionality
+    print("\n" + "="*50)
+    print("🔐 Testing Admin Authentication and Functionality")
     print("="*50)
     
     # Login as admin
     if tester.test_admin_login("Rameezadmin", "Qwerty9061#"):
-        print("✅ Admin login successful - Fix has been applied correctly")
+        print("✅ Admin login successful")
         
-        # Test admin problems endpoints to verify admin functionality
+        # Test admin problems endpoints
         success, admin_problems = tester.test_get_admin_problems()
         if success:
-            print("✅ Admin problems endpoint accessible - Admin authentication is working")
-        else:
-            print("❌ Admin problems endpoint not accessible - Admin authentication may have issues")
+            print("✅ Admin problems endpoint accessible")
+            
+            # Test creating a new problem
+            success, new_problem = tester.test_create_admin_problem()
+            if success and 'id' in new_problem:
+                problem_id = new_problem['id']
+                print(f"✅ Created new problem with ID: {problem_id}")
+                
+                # Test updating the problem
+                tester.test_update_admin_problem(problem_id)
+                
+                # Test deleting the problem
+                tester.test_delete_admin_problem(problem_id)
+            
+        # Test admin competitions endpoints
+        success, admin_competitions = tester.test_get_admin_competitions()
+        if success:
+            print("✅ Admin competitions endpoint accessible")
+            
+            # Test creating a new competition
+            success, new_competition = tester.test_create_admin_competition()
+            if success and 'id' in new_competition:
+                competition_id = new_competition['id']
+                print(f"✅ Created new competition with ID: {competition_id}")
+                
+                # Test updating the competition
+                tester.test_update_admin_competition(competition_id)
+                
+                # Test deleting the competition
+                tester.test_delete_admin_competition(competition_id)
     else:
-        print("❌ Admin login failed - Fix may not have been applied correctly")
+        print("❌ Admin login failed")
     
     # Print summary
     success = tester.print_summary()
