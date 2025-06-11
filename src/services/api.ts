@@ -1,6 +1,13 @@
 import axios, { AxiosError } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api';
+// Try multiple possible API URLs for WebContainer compatibility
+const possibleApiUrls = [
+  import.meta.env.VITE_API_BASE_URL || '/api',
+  'http://localhost:8001/api',
+  '/api'
+];
+
+let API_BASE_URL = possibleApiUrls[0];
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,9 +17,29 @@ const api = axios.create({
   },
 });
 
+// Function to test API connectivity and switch URLs if needed
+const testApiConnectivity = async () => {
+  for (const url of possibleApiUrls) {
+    try {
+      const testApi = axios.create({
+        baseURL: url,
+        timeout: 5000,
+      });
+      await testApi.get('/health');
+      console.log(`✅ API accessible at: ${url}`);
+      API_BASE_URL = url;
+      api.defaults.baseURL = url;
+      return true;
+    } catch (error) {
+      console.log(`❌ API not accessible at: ${url}`);
+    }
+  }
+  return false;
+};
+
 api.interceptors.request.use(
   (config) => {
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => {
@@ -23,18 +50,25 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    console.log(`API Response: ${response.status} ${response.config.url}`);
+    console.log(`✅ API Response: ${response.status} ${response.config.url}`);
     return response;
   },
-  (error: AxiosError) => {
-    console.error('API Response Error:', error);
+  async (error: AxiosError) => {
+    console.error('❌ API Response Error:', error);
     
     if (error.code === 'ERR_NETWORK') {
-      throw new Error('Network error: Unable to connect to the server. Please check if the backend is running.');
+      console.log('🔄 Network error detected, trying to find working API URL...');
+      const connected = await testApiConnectivity();
+      if (connected) {
+        console.log('🔄 Retrying request with new API URL...');
+        // Retry the original request with the new URL
+        return api.request(error.config!);
+      }
+      throw new Error('❌ Unable to connect to the backend server. Please ensure the backend is running on port 8001.');
     }
     
     if (error.code === 'ECONNABORTED') {
-      throw new Error('Request timeout: The server took too long to respond.');
+      throw new Error('⏱️ Request timeout: The server took too long to respond.');
     }
     
     if (error.response) {
@@ -43,15 +77,15 @@ api.interceptors.response.use(
       
       switch (status) {
         case 404:
-          throw new Error(`Resource not found: ${message}`);
+          throw new Error(`🔍 Resource not found: ${message}`);
         case 500:
-          throw new Error(`Server error: ${message}`);
+          throw new Error(`🚨 Server error: ${message}`);
         default:
-          throw new Error(`API error (${status}): ${message}`);
+          throw new Error(`⚠️ API error (${status}): ${message}`);
       }
     }
     
-    throw new Error(`Unknown error: ${error.message}`);
+    throw new Error(`❓ Unknown error: ${error.message}`);
   }
 );
 
@@ -94,8 +128,10 @@ export const checkServerHealth = async (): Promise<boolean> => {
     await api.get('/health');
     return true;
   } catch (error) {
-    console.warn('Server health check failed:', error);
-    return false;
+    console.warn('❌ Server health check failed:', error);
+    // Try to find a working API URL
+    const connected = await testApiConnectivity();
+    return connected;
   }
 };
 
@@ -174,3 +210,12 @@ export const apiService = {
     }
   }
 };
+
+// Initialize connectivity test on module load
+testApiConnectivity().then(connected => {
+  if (connected) {
+    console.log('🚀 API connectivity established');
+  } else {
+    console.warn('⚠️ No API connectivity found');
+  }
+});
