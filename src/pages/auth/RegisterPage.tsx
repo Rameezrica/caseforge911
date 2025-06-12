@@ -22,7 +22,7 @@ const RegisterPage: React.FC = () => {
   });
   const [passwordsMatch, setPasswordsMatch] = useState(true);
 
-  const { register, isLoading, error, clearError, isAuthenticated } = useAuth();
+  const { signUp, isLoading, error, clearError, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
