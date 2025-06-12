@@ -343,7 +343,16 @@ async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
     try:
         # Get user count from Supabase
         users_response = admin_supabase.auth.admin.list_users()
-        total_users = len(users_response.users) if users_response.users else 0
+        
+        # Handle both list and object responses
+        if hasattr(users_response, 'users'):
+            users = users_response.users or []
+        elif isinstance(users_response, list):
+            users = users_response
+        else:
+            users = []
+            
+        total_users = len(users)
         
         return {
             "total_problems": len(MOCK_PROBLEMS),
