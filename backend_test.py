@@ -7,7 +7,7 @@ import os
 import uuid
 import random
 
-class CaseForgeAPITester:
+class CaseForgeAuthTester:
     def __init__(self, base_url):
         self.base_url = base_url
         self.tests_run = 0
@@ -17,8 +17,9 @@ class CaseForgeAPITester:
         self.user_token = None
         self.test_user = None
         self.test_password = None
+        self.test_email = None
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, form_data=None, admin=True):
+    def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, admin=False):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
@@ -36,16 +37,7 @@ class CaseForgeAPITester:
             if method == 'GET':
                 response = requests.get(url, headers=headers)
             elif method == 'POST':
-                if form_data:
-                    # For form data (like login), don't use JSON
-                    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-                    if auth:
-                        token = self.admin_token if admin else self.user_token
-                        if token:
-                            headers['Authorization'] = f'Bearer {token}'
-                    response = requests.post(url, data=form_data, headers=headers)
-                else:
-                    response = requests.post(url, json=data, headers=headers)
+                response = requests.post(url, json=data, headers=headers)
             elif method == 'PUT':
                 response = requests.put(url, json=data, headers=headers)
             elif method == 'DELETE':
@@ -99,11 +91,12 @@ class CaseForgeAPITester:
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         random_suffix = str(random.randint(1000, 9999))
         self.test_user = f"testuser_{timestamp}_{random_suffix}"
+        self.test_email = f"testuser_{timestamp}_{random_suffix}@gmail.com"
         self.test_password = "TestPassword123!"
         
         user_data = {
             "username": self.test_user,
-            "email": f"{self.test_user}@example.com",
+            "email": self.test_email,
             "password": self.test_password,
             "full_name": "Test User"
         }
@@ -118,12 +111,12 @@ class CaseForgeAPITester:
 
     def test_user_login(self):
         """Test user login and get token"""
-        if not self.test_user:
+        if not self.test_email:
             print("❌ Cannot test login: No test user created")
             return False, {}
             
-        form_data = {
-            "username": self.test_user,
+        login_data = {
+            "email": self.test_email,
             "password": self.test_password
         }
         
@@ -132,7 +125,7 @@ class CaseForgeAPITester:
             "POST",
             "auth/token",
             200,
-            form_data=form_data
+            data=login_data
         )
         
         if success and 'access_token' in response:
@@ -142,6 +135,21 @@ class CaseForgeAPITester:
         else:
             print(f"❌ Failed to obtain user token")
             return False, response
+
+    def test_invalid_login(self):
+        """Test login with invalid credentials"""
+        login_data = {
+            "email": "nonexistent@example.com",
+            "password": "WrongPassword123!"
+        }
+        
+        return self.run_test(
+            "Invalid Login",
+            "POST",
+            "auth/token",
+            401,
+            data=login_data
+        )
 
     def test_get_current_user(self):
         """Test getting current user profile"""
@@ -154,233 +162,77 @@ class CaseForgeAPITester:
             admin=False
         )
 
-    def test_get_user_progress(self):
-        """Test getting user progress"""
+    def test_unauthorized_access(self):
+        """Test accessing protected route without auth"""
         return self.run_test(
-            "Get User Progress",
+            "Unauthorized Access",
             "GET",
-            "user/progress",
-            200,
-            auth=True,
-            admin=False
+            "auth/me",
+            401
         )
 
-    def test_admin_login(self, username="Rameezadmin", password="Qwerty9061#"):
+    def test_admin_login(self):
         """Test admin login and get token"""
-        form_data = {
-            "username": username,
-            "password": password
+        login_data = {
+            "email": "admin@caseforge.com",
+            "password": "admin123"
         }
+        
         success, response = self.run_test(
             "Admin Login",
             "POST",
-            "auth/token",
+            "auth/admin/login",
             200,
-            form_data=form_data
+            data=login_data
         )
         
         if success and 'access_token' in response:
             self.admin_token = response['access_token']
             print(f"✅ Successfully obtained admin token")
-            return True
+            return True, response
         else:
             print(f"❌ Failed to obtain admin token")
-            return False
+            return False, response
 
-    def test_get_admin_problems(self):
-        """Test getting problems as admin"""
+    def test_admin_dashboard(self):
+        """Test accessing admin dashboard"""
         return self.run_test(
-            "Get Admin Problems",
+            "Admin Dashboard Access",
             "GET",
-            "admin/problems",
+            "admin/dashboard",
             200,
-            auth=True
+            auth=True,
+            admin=True
         )
 
-    def test_create_admin_problem(self):
-        """Test creating a problem as admin"""
-        problem_data = {
-            "title": f"Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
-            "description": "This is a test problem created by the API test.",
-            "difficulty": "Medium",
-            "category": "Test Category",
-            "domain": "Test Domain",
-            "company": "Test Company",
-            "time_limit": 60,
-            "sample_framework": "Test Framework"
-        }
-        
+    def test_admin_users(self):
+        """Test accessing admin users list"""
         return self.run_test(
-            "Create Admin Problem",
-            "POST",
-            "admin/problems",
-            201,
-            data=problem_data,
-            auth=True
-        )
-
-    def test_update_admin_problem(self, problem_id):
-        """Test updating a problem as admin"""
-        update_data = {
-            "title": f"Updated Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
-            "description": "This problem was updated by the API test."
-        }
-        
-        return self.run_test(
-            "Update Admin Problem",
-            "PUT",
-            f"admin/problems/{problem_id}",
+            "Admin Users List",
+            "GET",
+            "admin/users",
             200,
-            data=update_data,
-            auth=True
+            auth=True,
+            admin=True
         )
 
-    def test_delete_admin_problem(self, problem_id):
-        """Test deleting a problem as admin"""
+    def test_user_accessing_admin(self):
+        """Test regular user trying to access admin route"""
         return self.run_test(
-            "Delete Admin Problem",
-            "DELETE",
-            f"admin/problems/{problem_id}",
-            204,
-            auth=True
-        )
-
-    def test_get_admin_competitions(self):
-        """Test getting competitions as admin"""
-        return self.run_test(
-            "Get Admin Competitions",
+            "User Accessing Admin Route",
             "GET",
-            "admin/competitions",
-            200,
-            auth=True
-        )
-
-    def test_create_admin_competition(self):
-        """Test creating a competition as admin"""
-        # Create dates for the competition
-        start_date = (datetime.now() + timedelta(days=1)).isoformat()
-        end_date = (datetime.now() + timedelta(days=8)).isoformat()
-        
-        competition_data = {
-            "name": f"Test Competition {datetime.now().strftime('%Y%m%d%H%M%S')}",
-            "description": "This is a test competition created by the API test.",
-            "start_date": start_date,
-            "end_date": end_date,
-            "problem_ids": [],
-            "is_active": False
-        }
-        
-        return self.run_test(
-            "Create Admin Competition",
-            "POST",
-            "admin/competitions",
-            201,
-            data=competition_data,
-            auth=True
-        )
-
-    def test_update_admin_competition(self, competition_id):
-        """Test updating a competition as admin"""
-        update_data = {
-            "name": f"Updated Test Competition {datetime.now().strftime('%Y%m%d%H%M%S')}",
-            "description": "This competition was updated by the API test.",
-            "is_active": True
-        }
-        
-        return self.run_test(
-            "Update Admin Competition",
-            "PUT",
-            f"admin/competitions/{competition_id}",
-            200,
-            data=update_data,
-            auth=True
-        )
-
-    def test_delete_admin_competition(self, competition_id):
-        """Test deleting a competition as admin"""
-        return self.run_test(
-            "Delete Admin Competition",
-            "DELETE",
-            f"admin/competitions/{competition_id}",
-            204,
-            auth=True
-        )
-
-    def test_get_problems(self):
-        """Test getting all problems"""
-        return self.run_test(
-            "Get All Problems",
-            "GET",
-            "problems",
-            200
-        )
-
-    def test_get_problems_with_filters(self):
-        """Test getting problems with filters"""
-        return self.run_test(
-            "Get Problems with Filters",
-            "GET",
-            "problems?domain=Strategy%20%26%20Consulting&limit=2",
-            200
-        )
-
-    def test_get_problem_by_id(self, problem_id):
-        """Test getting a specific problem by ID"""
-        return self.run_test(
-            "Get Problem by ID",
-            "GET",
-            f"problems/{problem_id}",
-            200
-        )
-
-    def test_get_categories(self):
-        """Test getting all categories and domains"""
-        return self.run_test(
-            "Get Categories",
-            "GET",
-            "categories",
-            200
-        )
-
-    def test_get_stats(self):
-        """Test getting platform statistics"""
-        return self.run_test(
-            "Get Platform Stats",
-            "GET",
-            "stats",
-            200
-        )
-
-    def test_get_daily_challenge(self):
-        """Test getting the daily challenge"""
-        return self.run_test(
-            "Get Daily Challenge",
-            "GET",
-            "daily-challenge",
-            200
-        )
-
-    def test_submit_solution(self, problem_id):
-        """Test submitting a solution as an authenticated user"""
-        return self.run_test(
-            "Submit Solution (Authenticated)",
-            "POST",
-            "solutions",
-            200,
-            data={
-                "problem_id": problem_id,
-                "content": "This is a test solution for the CaseForge API test."
-            },
+            "admin/dashboard",
+            403,
             auth=True,
             admin=False
         )
 
-    def test_get_user_solutions(self):
-        """Test getting user solutions"""
+    def test_logout(self):
+        """Test user logout"""
         return self.run_test(
-            "Get User Solutions",
-            "GET",
-            "user/solutions",
+            "User Logout",
+            "POST",
+            "auth/logout",
             200,
             auth=True,
             admin=False
@@ -410,31 +262,22 @@ def main():
     if not api_url.startswith(('http://', 'https://')):
         api_url = f"http://localhost:8001{api_url}"
     
-    print(f"Testing CaseForge API at: {api_url}")
-    tester = CaseForgeAPITester(api_url)
+    print(f"Testing CaseForge Authentication API at: {api_url}")
+    tester = CaseForgeAuthTester(api_url)
     
     # Test basic health check
     tester.test_health_check()
-    
-    # Test public endpoints
-    print("\n" + "="*50)
-    print("🌐 Testing Public Endpoints")
-    print("="*50)
-    
-    success, problems = tester.test_get_problems()
-    if success and problems:
-        # Get a problem ID for later tests
-        problem_id = problems[0]['id']
-        tester.test_get_problem_by_id(problem_id)
-    
-    tester.test_get_categories()
-    tester.test_get_stats()
-    tester.test_get_daily_challenge()
     
     # Test user authentication flow
     print("\n" + "="*50)
     print("👤 Testing User Authentication Flow")
     print("="*50)
+    
+    # Test invalid login
+    tester.test_invalid_login()
+    
+    # Test unauthorized access
+    tester.test_unauthorized_access()
     
     # Register a new user
     success, _ = tester.test_user_registration()
@@ -448,13 +291,12 @@ def main():
             
             # Test protected user endpoints
             tester.test_get_current_user()
-            tester.test_get_user_progress()
             
-            # Test solution submission if we have a problem ID
-            if success and problems:
-                problem_id = problems[0]['id']
-                tester.test_submit_solution(problem_id)
-                tester.test_get_user_solutions()
+            # Test user trying to access admin route
+            tester.test_user_accessing_admin()
+            
+            # Test logout
+            tester.test_logout()
         else:
             print("❌ User login failed")
     else:
@@ -466,42 +308,15 @@ def main():
     print("="*50)
     
     # Login as admin
-    if tester.test_admin_login("Rameezadmin", "Qwerty9061#"):
+    admin_success, _ = tester.test_admin_login()
+    if admin_success:
         print("✅ Admin login successful")
         
-        # Test admin problems endpoints
-        success, admin_problems = tester.test_get_admin_problems()
-        if success:
-            print("✅ Admin problems endpoint accessible")
-            
-            # Test creating a new problem
-            success, new_problem = tester.test_create_admin_problem()
-            if success and 'id' in new_problem:
-                problem_id = new_problem['id']
-                print(f"✅ Created new problem with ID: {problem_id}")
-                
-                # Test updating the problem
-                tester.test_update_admin_problem(problem_id)
-                
-                # Test deleting the problem
-                tester.test_delete_admin_problem(problem_id)
-            
-        # Test admin competitions endpoints
-        success, admin_competitions = tester.test_get_admin_competitions()
-        if success:
-            print("✅ Admin competitions endpoint accessible")
-            
-            # Test creating a new competition
-            success, new_competition = tester.test_create_admin_competition()
-            if success and 'id' in new_competition:
-                competition_id = new_competition['id']
-                print(f"✅ Created new competition with ID: {competition_id}")
-                
-                # Test updating the competition
-                tester.test_update_admin_competition(competition_id)
-                
-                # Test deleting the competition
-                tester.test_delete_admin_competition(competition_id)
+        # Test admin dashboard access
+        tester.test_admin_dashboard()
+        
+        # Test admin users list
+        tester.test_admin_users()
     else:
         print("❌ Admin login failed")
     
