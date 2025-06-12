@@ -94,81 +94,83 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Auth Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+        <AdminAuthProvider>
+          <Router>
+            <Routes>
+              {/* Auth Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-            {/* Public Routes */}
-            <Route path="/" element={<LayoutWrapper><HomePage /></LayoutWrapper>} />
-            <Route path="/problems" element={<LayoutWrapper><ProblemsPage /></LayoutWrapper>} />
-            <Route path="/problem/:id" element={<LayoutWrapper><ProblemDetailPage /></LayoutWrapper>} />
-            <Route path="/leaderboard" element={<LayoutWrapper><LeaderboardPage /></LayoutWrapper>} />
-            <Route path="/community" element={<LayoutWrapper><CommunityPage /></LayoutWrapper>} />
-            <Route path="/contests" element={<LayoutWrapper><ContestPage /></LayoutWrapper>} />
-            <Route path="/study-plans" element={<LayoutWrapper><StudyPlansPage /></LayoutWrapper>} />
+              {/* Public Routes */}
+              <Route path="/" element={<LayoutWrapper><HomePage /></LayoutWrapper>} />
+              <Route path="/problems" element={<LayoutWrapper><ProblemsPage /></LayoutWrapper>} />
+              <Route path="/problem/:id" element={<LayoutWrapper><ProblemDetailPage /></LayoutWrapper>} />
+              <Route path="/leaderboard" element={<LayoutWrapper><LeaderboardPage /></LayoutWrapper>} />
+              <Route path="/community" element={<LayoutWrapper><CommunityPage /></LayoutWrapper>} />
+              <Route path="/contests" element={<LayoutWrapper><ContestPage /></LayoutWrapper>} />
+              <Route path="/study-plans" element={<LayoutWrapper><StudyPlansPage /></LayoutWrapper>} />
 
-            {/* Protected User Routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <LayoutWrapper><UserDashboardPage /></LayoutWrapper>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <LayoutWrapper><UserProfilePage /></LayoutWrapper>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/my-profile" 
-              element={
-                <ProtectedRoute>
-                  <LayoutWrapper><ProfilePage /></LayoutWrapper>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/solution/:id" 
-              element={
-                <ProtectedRoute>
-                  <LayoutWrapper><SolutionPage /></LayoutWrapper>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/solve/:id" 
-              element={
-                <ProtectedRoute>
-                  <LayoutWrapper><CaseSolverPage /></LayoutWrapper>
-                </ProtectedRoute>
-              } 
-            />
+              {/* Protected User Routes */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <LayoutWrapper><UserDashboardPage /></LayoutWrapper>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <LayoutWrapper><UserProfilePage /></LayoutWrapper>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/my-profile" 
+                element={
+                  <ProtectedRoute>
+                    <LayoutWrapper><ProfilePage /></LayoutWrapper>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/solution/:id" 
+                element={
+                  <ProtectedRoute>
+                    <LayoutWrapper><SolutionPage /></LayoutWrapper>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/solve/:id" 
+                element={
+                  <ProtectedRoute>
+                    <LayoutWrapper><CaseSolverPage /></LayoutWrapper>
+                  </ProtectedRoute>
+                } 
+              />
 
-            {/* Admin Routes */}
-            <Route path="/admin/login" element={<AdminLoginPageSimple />} />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRouteAdmin>
-                  <AdminLayout />
-                </ProtectedRouteAdmin>
-              }
-            >
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="problems" element={<AdminProblemsPage />} />
-              <Route path="competitions" element={<AdminCompetitionsPage />} />
-            </Route>
+              {/* Admin Routes */}
+              <Route path="/admin/login" element={<AdminLoginPageSimple />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRouteAdmin>
+                    <AdminLayout />
+                  </ProtectedRouteAdmin>
+                }
+              >
+                <Route index element={<AdminDashboardPage />} />
+                <Route path="problems" element={<AdminProblemsPage />} />
+                <Route path="competitions" element={<AdminCompetitionsPage />} />
+              </Route>
 
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Router>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Router>
+        </AdminAuthProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
