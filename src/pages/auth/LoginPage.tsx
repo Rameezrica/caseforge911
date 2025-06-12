@@ -5,10 +5,10 @@ import { LogIn, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuth();
+  const { signIn, isLoading, error, clearError, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,11 +22,11 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     clearError();
-  }, [username, password, clearError]);
+  }, [email, password, clearError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login({ username, password });
+    const success = await signIn(email, password);
     if (success) {
       navigate(from, { replace: true });
     }
