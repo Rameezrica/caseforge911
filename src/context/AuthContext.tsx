@@ -1,28 +1,47 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { 
-  User, 
-  UserCreate, 
-  UserLogin, 
-  UserProgress,
-  registerUser, 
-  loginUser, 
-  getCurrentUser, 
-  getUserProgress,
-  getStoredToken,
-  setStoredToken,
-  removeStoredToken,
-  isTokenValid
-} from '../services/userApi';
+import { User, Session, AuthError } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 
-interface AuthContextType {
+// Types
+export interface UserProfile {
+  id: string;
+  email: string;
+  username: string;
+  full_name: string;
+  created_at: string;
+  solved_problems: string[];
+  total_score: number;
+}
+
+export interface UserProgress {
+  total_problems_solved: number;
+  total_score: number;
+  current_streak: number;
+  longest_streak: number;
+  problems_by_difficulty: {
+    easy: number;
+    medium: number;
+    hard: number;
+  };
+  recent_activity: Array<{
+    problem_id: string;
+    problem_title: string;
+    solved_at: string;
+    score?: number;
+  }>;
+}
+
+export interface AuthContextType {
   user: User | null;
+  session: Session | null;
+  userProfile: UserProfile | null;
   userProgress: UserProgress | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (credentials: UserLogin) => Promise<boolean>;
-  register: (userData: UserCreate) => Promise<boolean>;
-  logout: () => void;
+  signUp: (email: string, password: string, username: string, fullName?: string) => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signOut: () => Promise<void>;
   refreshUserData: () => Promise<void>;
   clearError: () => void;
 }
@@ -43,6 +62,8 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,64 +76,151 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const initializeAuth = async () => {
     try {
       setIsLoading(true);
-      const token = getStoredToken();
       
-      if (token && isTokenValid()) {
-        await loadUserData();
-      } else {
-        removeStoredToken();
-        setIsAuthenticated(false);
+      // Get initial session
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+      } else if (session) {
+        setSession(session);
+        setUser(session.user);
+        setIsAuthenticated(true);
+        await loadUserData(session);
       }
-    } catch (error) {
+
+      // Listen for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log('Auth state changed:', event, session?.user?.email);
+          
+          setSession(session);
+          setUser(session?.user ?? null);
+          setIsAuthenticated(!!session?.user);
+          
+          if (session?.user) {
+            await loadUserData(session);
+          } else {
+            setUserProfile(null);
+            setUserProgress(null);
+          }
+        }
+      );
+
+      return () => subscription.unsubscribe();
+    } catch (error: any) {
       console.error('Auth initialization error:', error);
-      removeStoredToken();
-      setIsAuthenticated(false);
+      setError(error.message || 'Authentication initialization failed');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loadUserData = async () => {
+  const loadUserData = async (session: Session) => {
     try {
-      const [userData, progressData] = await Promise.all([
-        getCurrentUser(),
-        getUserProgress().catch(() => null) // Progress might not be available for new users
-      ]);
-      
-      setUser(userData);
-      setUserProgress(progressData);
-      setIsAuthenticated(true);
-      setError(null);
+      // Get user profile from backend
+      const profileResponse = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json();
+        setUserProfile(profile);
+      }
+
+      // Get user progress from backend
+      const progressResponse = await fetch('/api/user/progress', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (progressResponse.ok) {
+        const progress = await progressResponse.json();
+        setUserProgress(progress);
+      }
     } catch (error: any) {
-      throw new Error(error.message || 'Failed to load user data');
+      console.error('Failed to load user data:', error);
     }
   };
 
-  const refreshUserData = async () => {
-    if (!isAuthenticated) return;
-    
-    try {
-      const [userData, progressData] = await Promise.all([
-        getCurrentUser(),
-        getUserProgress().catch(() => null)
-      ]);
-      
-      setUser(userData);
-      setUserProgress(progressData);
-    } catch (error: any) {
-      console.error('Failed to refresh user data:', error);
-    }
-  };
-
-  const login = async (credentials: UserLogin): Promise<boolean> => {
+  const signUp = async (
+    email: string, 
+    password: string, 
+    username: string, 
+    fullName?: string
+  ): Promise<boolean> => {
     try {
       setIsLoading(true);
       setError(null);
+
+      // Use backend registration endpoint
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          username,
+          full_name: fullName,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Registration failed');
+      }
+
+      // After successful registration, sign in the user
+      return await signIn(email, password);
+    } catch (error: any) {
+      setError(error.message || 'Registration failed');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signIn = async (email: string, password: string): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Use backend login endpoint
+      const response = await fetch('/api/auth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Login failed');
+      }
+
+      const data = await response.json();
       
-      const tokenResponse = await loginUser(credentials);
-      setStoredToken(tokenResponse.access_token);
-      
-      await loadUserData();
+      // Set the session manually using the token from backend
+      const { data: sessionData, error } = await supabase.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+      });
+
+      if (error) {
+        throw error;
+      }
+
       return true;
     } catch (error: any) {
       setError(error.message || 'Login failed');
@@ -122,34 +230,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (userData: UserCreate): Promise<boolean> => {
+  const signOut = async (): Promise<void> => {
     try {
-      setIsLoading(true);
       setError(null);
+      await supabase.auth.signOut();
       
-      const newUser = await registerUser(userData);
-      
-      // Auto-login after registration
-      const loginSuccess = await login({
-        username: userData.username,
-        password: userData.password,
-      });
-      
-      return loginSuccess;
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
+      setUserProgress(null);
+      setIsAuthenticated(false);
     } catch (error: any) {
-      setError(error.message || 'Registration failed');
-      return false;
-    } finally {
-      setIsLoading(false);
+      console.error('Sign out error:', error);
+      // Even if sign out fails, clear local state
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
+      setUserProgress(null);
+      setIsAuthenticated(false);
     }
   };
 
-  const logout = () => {
-    removeStoredToken();
-    setUser(null);
-    setUserProgress(null);
-    setIsAuthenticated(false);
-    setError(null);
+  const refreshUserData = async (): Promise<void> => {
+    if (!session) return;
+    await loadUserData(session);
   };
 
   const clearError = () => {
@@ -158,13 +263,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const contextValue: AuthContextType = {
     user,
+    session,
+    userProfile,
     userProgress,
     isAuthenticated,
     isLoading,
     error,
-    login,
-    register,
-    logout,
+    signUp,
+    signIn,
+    signOut,
     refreshUserData,
     clearError,
   };
