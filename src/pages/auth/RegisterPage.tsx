@@ -70,12 +70,12 @@ const RegisterPage: React.FC = () => {
     
     if (!canSubmit) return;
 
-    const success = await register({
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      full_name: formData.full_name || undefined,
-    });
+    const success = await signUp(
+      formData.email,
+      formData.password,
+      formData.username,
+      formData.full_name || undefined
+    );
 
     if (success) {
       navigate('/', { replace: true });
