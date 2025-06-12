@@ -30,6 +30,7 @@ import AdminProblemsPage from './pages/admin/AdminProblemsPage';
 import AdminCompetitionsPage from './pages/admin/AdminCompetitionsPage';
 import AdminLayout from './components/admin/layout/AdminLayout';
 import ProtectedRouteAdmin from './components/admin/ProtectedRouteAdmin';
+import { AdminAuthProvider } from './context/AdminAuthContext';
 
 
 const pageVariants = {
