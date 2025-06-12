@@ -375,7 +375,14 @@ async def get_admin_users(
     """Get all users for admin management"""
     try:
         users_response = admin_supabase.auth.admin.list_users()
-        users = users_response.users or []
+        
+        # Handle both list and object responses
+        if hasattr(users_response, 'users'):
+            users = users_response.users or []
+        elif isinstance(users_response, list):
+            users = users_response
+        else:
+            users = []
         
         # Convert to the expected format
         formatted_users = []
@@ -386,6 +393,7 @@ async def get_admin_users(
                 "email": user.email,
                 "created_at": user.created_at,
                 "is_active": True,
+                "email_confirmed": user.email_confirmed_at is not None,
                 "problems_solved": 0  # TODO: Implement from database
             })
         
