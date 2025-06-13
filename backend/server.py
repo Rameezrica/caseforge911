@@ -54,8 +54,8 @@ except Exception as e:
     print(f"MongoDB connection failed: {e}")
     db = None
 
-# Admin email - replace with your actual email
-ADMIN_EMAIL = "admin@caseforge.com"
+# Admin email from environment
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
 
 # Pydantic models
 class UserSignUp(BaseModel):
