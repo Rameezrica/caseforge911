@@ -20,7 +20,7 @@ const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-    logout();
+    signOut();
     navigate('/admin/login');
   };
 
