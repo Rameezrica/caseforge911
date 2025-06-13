@@ -531,18 +531,22 @@ async def get_user_solutions(current_user=Depends(get_current_user)):
 async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
     """Get admin dashboard data"""
     try:
-        # Get user count from Supabase
-        users_response = admin_supabase.auth.admin.list_users()
-        
-        # Handle both list and object responses
-        if hasattr(users_response, 'users'):
-            users = users_response.users or []
-        elif isinstance(users_response, list):
-            users = users_response
+        if FALLBACK_MODE:
+            # Use fallback data
+            total_users = len(FALLBACK_USERS)
         else:
-            users = []
+            # Get user count from Supabase
+            users_response = admin_supabase.auth.admin.list_users()
             
-        total_users = len(users)
+            # Handle both list and object responses
+            if hasattr(users_response, 'users'):
+                users = users_response.users or []
+            elif isinstance(users_response, list):
+                users = users_response
+            else:
+                users = []
+                
+            total_users = len(users)
         
         return {
             "total_problems": len(MOCK_PROBLEMS),
@@ -556,10 +560,10 @@ async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
             ]
         }
     except Exception as e:
-        # Fallback to mock data if Supabase fails
+        # Fallback to mock data if anything fails
         return {
             "total_problems": len(MOCK_PROBLEMS),
-            "total_users": 10,
+            "total_users": len(FALLBACK_USERS) if FALLBACK_MODE else 10,
             "total_solutions": 0,
             "active_competitions": 0,
             "recent_activity": []
