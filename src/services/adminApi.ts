@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-const ADMIN_TOKEN_KEY = 'adminToken'; // Consistent with useAdminAuth
+const ADMIN_TOKEN_KEY = 'caseforge_admin_access_token'; // Match AdminAuthContext
 
 // --- TypeScript Interfaces for Problem Data ---
 // Mirroring Pydantic models from backend/admin_router.py and backend/server.py
