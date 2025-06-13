@@ -16,7 +16,7 @@ import { useState } from 'react';
 const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAdminAuth();
+  const { signOut } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
