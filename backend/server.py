@@ -71,6 +71,28 @@ except Exception as e:
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
 
+# JWT secret for fallback mode
+JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret-key-for-testing-only")
+JWT_ALGORITHM = "HS256"
+
+# Fallback user storage (in production, this would be in a database)
+FALLBACK_USERS = {
+    ADMIN_EMAIL: {
+        "id": "admin_user_id",
+        "email": ADMIN_EMAIL,
+        "password_hash": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # secret
+        "username": "admin",
+        "full_name": "Administrator", 
+        "is_admin": True,
+        "created_at": datetime.now().isoformat(),
+        "user_metadata": {
+            "username": "admin",
+            "full_name": "Administrator",
+            "admin": True
+        }
+    }
+}
+
 # Pydantic models
 class UserSignUp(BaseModel):
     email: EmailStr
