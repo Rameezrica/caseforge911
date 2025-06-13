@@ -10,6 +10,7 @@ import motor.motor_asyncio
 from bson import ObjectId
 import json
 import jwt
+from passlib.context import CryptContext
 from dotenv import load_dotenv
 from supabase import create_client, Client
 import asyncio
