@@ -40,6 +40,18 @@ const testApiConnectivity = async () => {
 api.interceptors.request.use(
   (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    
+    // Add authentication headers
+    const userToken = localStorage.getItem('caseforge_access_token');
+    const adminToken = localStorage.getItem('caseforge_admin_access_token');
+    
+    // Prioritize admin token for admin routes
+    if (config.url?.includes('/admin') && adminToken) {
+      config.headers.Authorization = `Bearer ${adminToken}`;
+    } else if (userToken) {
+      config.headers.Authorization = `Bearer ${userToken}`;
+    }
+    
     return config;
   },
   (error) => {
