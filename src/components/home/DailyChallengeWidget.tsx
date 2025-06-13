@@ -73,15 +73,15 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="flex items-center text-dark-400">
               <Users className="h-4 w-4 mr-2" />
-              {challenge.participants} participants
+              {participants} participants
             </div>
             <div className="flex items-center text-dark-400">
               <Clock className="h-4 w-4 mr-2" />
-              ~{challenge.problem.time_limit || 60} min avg
+              ~{problem.time_limit || 60} min avg
             </div>
             <div className="flex items-center text-dark-400">
               <TrendingUp className="h-4 w-4 mr-2" />
-              {(challenge.completion_rate * 100).toFixed(1)}% completion
+              {(completionRate * 100).toFixed(1)}% completion
             </div>
             <div className="flex items-center text-dark-400">
               <MessageSquare className="h-4 w-4 mr-2" />
@@ -91,7 +91,7 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
 
           <div className="flex flex-wrap gap-4">
             <Link
-              to={`/solve/${challenge.problem.id}`}
+              to={`/solve/${problem.id}`}
               className="px-6 py-3 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200 flex items-center"
             >
               Start Challenge
