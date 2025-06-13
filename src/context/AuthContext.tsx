@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
+// Check if we're in fallback mode based on environment
+const FALLBACK_MODE = import.meta.env.VITE_FALLBACK_MODE === 'true' || true; // Default to true for now
+
 // Types
 export interface UserProfile {
   id: string;
@@ -31,9 +34,17 @@ export interface UserProgress {
   }>;
 }
 
+// Fallback user type
+interface FallbackUser {
+  id: string;
+  email: string;
+  user_metadata: Record<string, any>;
+  created_at: string;
+}
+
 export interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: User | FallbackUser | null;
+  session: Session | any | null;
   userProfile: UserProfile | null;
   userProgress: UserProgress | null;
   isAuthenticated: boolean;
