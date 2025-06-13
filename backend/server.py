@@ -84,7 +84,7 @@ FALLBACK_USERS = {
     ADMIN_EMAIL: {
         "id": "admin_user_id",
         "email": ADMIN_EMAIL,
-        "password_hash": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # secret
+        "password_hash": "$2b$12$q7/jZcq9ECnch4YLz/H19eDh5UPC6olC0ImxsrgN4UvshvAVphU6e",  # Qwerty9061#
         "username": "admin",
         "full_name": "Administrator", 
         "is_admin": True,
