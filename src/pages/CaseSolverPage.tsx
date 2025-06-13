@@ -108,6 +108,8 @@ const CaseSolverPage: React.FC = () => {
                     Write your solution to this business case:
                   </label>
                   <textarea
+                    value={solution}
+                    onChange={(e) => setSolution(e.target.value)}
                     className="w-full h-96 px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
                     placeholder="Start writing your solution here...
 
