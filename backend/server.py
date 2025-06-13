@@ -406,40 +406,71 @@ async def login_for_access_token(credentials: UserSignIn):
 async def admin_login(credentials: AdminSignIn):
     """Admin login endpoint"""
     try:
-        # Authenticate with Supabase
-        auth_response = supabase.auth.sign_in_with_password({
-            "email": credentials.email,
-            "password": credentials.password
-        })
-        
-        if not auth_response.session:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid admin credentials"
-            )
-        
-        # Check if user is admin
-        user = auth_response.user
-        is_admin = (user.email == ADMIN_EMAIL or 
-                   user.user_metadata.get("admin", False))
-        
-        if not is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin access required"
-            )
-        
-        return {
-            "access_token": auth_response.session.access_token,
-            "refresh_token": auth_response.session.refresh_token,
-            "token_type": "bearer",
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "username": user.user_metadata.get("username", "admin"),
-                "is_admin": True
+        if FALLBACK_MODE:
+            # Use fallback authentication
+            user = authenticate_fallback_user(credentials.email, credentials.password)
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid admin credentials"
+                )
+            
+            # Check if user is admin
+            if not user.get("is_admin"):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Admin access required"
+                )
+            
+            # Create JWT tokens
+            access_token = create_jwt_token(user)
+            
+            return {
+                "access_token": access_token,
+                "refresh_token": access_token,  # For simplicity, using same token
+                "token_type": "bearer",
+                "user": {
+                    "id": user["id"],
+                    "email": user["email"],
+                    "username": user.get("username", "admin"),
+                    "is_admin": True
+                }
             }
-        }
+        else:
+            # Authenticate with Supabase
+            auth_response = supabase.auth.sign_in_with_password({
+                "email": credentials.email,
+                "password": credentials.password
+            })
+            
+            if not auth_response.session:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid admin credentials"
+                )
+            
+            # Check if user is admin
+            user = auth_response.user
+            is_admin = (user.email == ADMIN_EMAIL or 
+                       user.user_metadata.get("admin", False))
+            
+            if not is_admin:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Admin access required"
+                )
+            
+            return {
+                "access_token": auth_response.session.access_token,
+                "refresh_token": auth_response.session.refresh_token,
+                "token_type": "bearer",
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "username": user.user_metadata.get("username", "admin"),
+                    "is_admin": True
+                }
+            }
     except HTTPException:
         raise
     except Exception as e:
