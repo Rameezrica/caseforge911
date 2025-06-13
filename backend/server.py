@@ -35,13 +35,27 @@ security = HTTPBearer()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+FALLBACK_MODE = os.getenv("FALLBACK_MODE", "false").lower() == "true"
 
-if not all([SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY]):
-    raise ValueError("Missing Supabase environment variables")
+if not all([SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY]) and not FALLBACK_MODE:
+    raise ValueError("Missing Supabase environment variables. Set FALLBACK_MODE=true for testing without Supabase")
 
-# Create Supabase clients
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-admin_supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+# Create Supabase clients with error handling
+try:
+    if not FALLBACK_MODE:
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+        admin_supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        print("✅ Supabase connected successfully")
+    else:
+        supabase = None
+        admin_supabase = None
+        print("⚠️  Running in fallback mode without Supabase")
+except Exception as e:
+    print(f"❌ Supabase connection failed: {e}")
+    print("🔄 Switching to fallback mode...")
+    FALLBACK_MODE = True
+    supabase = None
+    admin_supabase = None
 
 # MongoDB connection (keeping for problems data)
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/")
