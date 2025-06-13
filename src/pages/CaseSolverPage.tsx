@@ -130,12 +130,18 @@ Consider the following structure:
                     Cancel
                   </button>
                   <button
-                    onClick={() => {
-                      navigate(`/problem/${problem.id}`);
-                    }}
-                    className="px-6 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200"
+                    onClick={handleSubmitSolution}
+                    disabled={isSubmitting || !solution.trim()}
+                    className="px-6 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
                   >
-                    Submit Solution
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit Solution'
+                    )}
                   </button>
                 </div>
               </div>
