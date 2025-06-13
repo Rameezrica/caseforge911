@@ -3,7 +3,8 @@ import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
 // Check if we're in fallback mode based on environment
-const FALLBACK_MODE = import.meta.env.VITE_FALLBACK_MODE === 'true' || true; // Default to true for now
+const FALLBACK_MODE = import.meta.env.VITE_FALLBACK_MODE === 'true';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Types
 export interface UserProfile {
@@ -42,9 +43,17 @@ interface FallbackUser {
   created_at: string;
 }
 
+// Local session type for fallback mode
+interface LocalSession {
+  access_token: string;
+  refresh_token: string;
+  user: FallbackUser;
+  expires_at?: number;
+}
+
 export interface AuthContextType {
   user: User | FallbackUser | null;
-  session: Session | any | null;
+  session: Session | LocalSession | null;
   userProfile: UserProfile | null;
   userProgress: UserProgress | null;
   isAuthenticated: boolean;
@@ -72,8 +81,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | FallbackUser | null>(null);
+  const [session, setSession] = useState<Session | LocalSession | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -88,37 +97,69 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       
-      // Get initial session
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-      } else if (session) {
-        setSession(session);
-        setUser(session.user);
-        setIsAuthenticated(true);
-        await loadUserData(session);
-      }
-
-      // Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          console.log('Auth state changed:', event, session?.user?.email);
-          
-          setSession(session);
-          setUser(session?.user ?? null);
-          setIsAuthenticated(!!session?.user);
-          
-          if (session?.user) {
-            await loadUserData(session);
-          } else {
-            setUserProfile(null);
-            setUserProgress(null);
+      if (FALLBACK_MODE) {
+        // In fallback mode, check for stored session
+        const storedToken = localStorage.getItem('caseforge_access_token');
+        const storedUser = localStorage.getItem('caseforge_user');
+        
+        if (storedToken && storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            const localSession: LocalSession = {
+              access_token: storedToken,
+              refresh_token: localStorage.getItem('caseforge_refresh_token') || storedToken,
+              user: userData
+            };
+            
+            // Verify token with backend
+            const isValid = await validateTokenWithBackend(storedToken);
+            if (isValid) {
+              setSession(localSession);
+              setUser(userData);
+              setIsAuthenticated(true);
+              await loadUserData(localSession);
+            } else {
+              // Token invalid, clear storage
+              clearLocalStorage();
+            }
+          } catch (error) {
+            console.error('Error parsing stored user data:', error);
+            clearLocalStorage();
           }
         }
-      );
+      } else {
+        // Use Supabase authentication
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+        } else if (session) {
+          setSession(session);
+          setUser(session.user);
+          setIsAuthenticated(true);
+          await loadUserData(session);
+        }
 
-      return () => subscription.unsubscribe();
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log('Auth state changed:', event, session?.user?.email);
+            
+            setSession(session);
+            setUser(session?.user ?? null);
+            setIsAuthenticated(!!session?.user);
+            
+            if (session?.user) {
+              await loadUserData(session);
+            } else {
+              setUserProfile(null);
+              setUserProgress(null);
+            }
+          }
+        );
+
+        return () => subscription.unsubscribe();
+      }
     } catch (error: any) {
       console.error('Auth initialization error:', error);
       setError(error.message || 'Authentication initialization failed');
@@ -127,12 +168,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const loadUserData = async (session: Session) => {
+  const validateTokenWithBackend = async (token: string): Promise<boolean> => {
     try {
-      // Get user profile from backend
-      const profileResponse = await fetch('/api/auth/me', {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return false;
+    }
+  };
+
+  const clearLocalStorage = () => {
+    localStorage.removeItem('caseforge_access_token');
+    localStorage.removeItem('caseforge_refresh_token');
+    localStorage.removeItem('caseforge_user');
+  };
+
+  const loadUserData = async (session: Session | LocalSession) => {
+    try {
+      const token = session.access_token;
+      
+      // Get user profile from backend
+      const profileResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -143,9 +207,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Get user progress from backend
-      const progressResponse = await fetch('/api/user/progress', {
+      const progressResponse = await fetch(`${API_BASE_URL}/user/progress`, {
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -170,7 +234,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
 
       // Use backend registration endpoint
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,7 +268,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
 
       // Use backend login endpoint
-      const response = await fetch('/api/auth/token', {
+      const response = await fetch(`${API_BASE_URL}/auth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -222,14 +286,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const data = await response.json();
       
-      // Set the session manually using the token from backend
-      const { data: sessionData, error } = await supabase.auth.setSession({
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-      });
+      if (FALLBACK_MODE) {
+        // In fallback mode, store tokens locally and create local session
+        const userData: FallbackUser = {
+          id: data.user.id,
+          email: data.user.email,
+          user_metadata: {
+            username: data.user.username,
+            full_name: data.user.full_name
+          },
+          created_at: new Date().toISOString()
+        };
 
-      if (error) {
-        throw error;
+        const localSession: LocalSession = {
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          user: userData
+        };
+
+        // Store in localStorage
+        localStorage.setItem('caseforge_access_token', data.access_token);
+        localStorage.setItem('caseforge_refresh_token', data.refresh_token);
+        localStorage.setItem('caseforge_user', JSON.stringify(userData));
+
+        // Update state
+        setSession(localSession);
+        setUser(userData);
+        setIsAuthenticated(true);
+        await loadUserData(localSession);
+      } else {
+        // Use Supabase session
+        const { error } = await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+
+        if (error) {
+          throw error;
+        }
       }
 
       return true;
@@ -244,17 +338,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async (): Promise<void> => {
     try {
       setError(null);
-      await supabase.auth.signOut();
       
-      // Clear local state
-      setUser(null);
-      setSession(null);
-      setUserProfile(null);
-      setUserProgress(null);
-      setIsAuthenticated(false);
+      if (FALLBACK_MODE) {
+        // In fallback mode, clear local storage and state
+        clearLocalStorage();
+        setUser(null);
+        setSession(null);
+        setUserProfile(null);
+        setUserProgress(null);
+        setIsAuthenticated(false);
+      } else {
+        // Use Supabase sign out
+        await supabase.auth.signOut();
+        
+        // Clear local state
+        setUser(null);
+        setSession(null);
+        setUserProfile(null);
+        setUserProgress(null);
+        setIsAuthenticated(false);
+      }
     } catch (error: any) {
       console.error('Sign out error:', error);
       // Even if sign out fails, clear local state
+      if (FALLBACK_MODE) {
+        clearLocalStorage();
+      }
       setUser(null);
       setSession(null);
       setUserProfile(null);
