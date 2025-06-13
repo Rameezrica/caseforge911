@@ -54,7 +54,6 @@ except Exception as e:
     print(f"MongoDB connection failed: {e}")
     db = None
 
-# Admin email from environment
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
 
 # Pydantic models
