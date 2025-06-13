@@ -172,14 +172,25 @@ const AdminDashboardPage: React.FC = () => {
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
         <div className="space-y-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <Calendar className="h-4 w-4 mr-2" />
-            <span>System initialized with sample problems</span>
-          </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <Activity className="h-4 w-4 mr-2" />
-            <span>Admin panel ready for management</span>
-          </div>
+          {stats.recent_activity.length > 0 ? (
+            stats.recent_activity.map((activity, index) => (
+              <div key={index} className="flex items-center text-sm text-gray-600">
+                <Activity className="h-4 w-4 mr-2" />
+                <span>{activity.type.replace('_', ' ')}: {activity.count} ({new Date(activity.date).toLocaleDateString()})</span>
+              </div>
+            ))
+          ) : (
+            <>
+              <div className="flex items-center text-sm text-gray-600">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>System initialized with sample problems</span>
+              </div>
+              <div className="flex items-center text-sm text-gray-600">
+                <Activity className="h-4 w-4 mr-2" />
+                <span>Admin panel ready for management</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
