@@ -289,33 +289,54 @@ async def get_admin_user(current_user=Depends(get_current_user)):
 async def register_user(user_data: UserSignUp):
     """Register a new user"""
     try:
-        # Sign up user with Supabase
-        auth_response = supabase.auth.sign_up({
-            "email": user_data.email,
-            "password": user_data.password,
-            "options": {
-                "data": {
+        if FALLBACK_MODE:
+            # Use fallback registration
+            user = register_fallback_user(
+                user_data.email, 
+                user_data.password,
+                user_data.username,
+                user_data.full_name
+            )
+            
+            return {
+                "message": "User registered successfully",
+                "user": {
+                    "id": user["id"],
+                    "email": user["email"],
+                    "username": user["username"],
+                    "full_name": user["full_name"],
+                }
+            }
+        else:
+            # Sign up user with Supabase
+            auth_response = supabase.auth.sign_up({
+                "email": user_data.email,
+                "password": user_data.password,
+                "options": {
+                    "data": {
+                        "username": user_data.username,
+                        "full_name": user_data.full_name or user_data.username,
+                    }
+                }
+            })
+            
+            if auth_response.user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Registration failed. Email may already be in use."
+                )
+            
+            return {
+                "message": "User registered successfully",
+                "user": {
+                    "id": auth_response.user.id,
+                    "email": auth_response.user.email,
                     "username": user_data.username,
                     "full_name": user_data.full_name or user_data.username,
                 }
             }
-        })
-        
-        if auth_response.user is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Registration failed. Email may already be in use."
-            )
-        
-        return {
-            "message": "User registered successfully",
-            "user": {
-                "id": auth_response.user.id,
-                "email": auth_response.user.email,
-                "username": user_data.username,
-                "full_name": user_data.full_name or user_data.username,
-            }
-        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
