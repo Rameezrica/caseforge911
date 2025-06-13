@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProblem } from '../hooks/useProblems';
-import { Clock, ArrowLeft, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { apiService } from '../services/api';
+import { Clock, ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
 
 const CaseSolverPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
