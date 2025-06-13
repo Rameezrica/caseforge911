@@ -14,35 +14,11 @@ const CaseSolverPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmitSolution = async () => {
-    if (!solution.trim() || !problem || !user) return;
-    
-    setIsSubmitting(true);
-    try {
-      await apiService.submitSolution(problem.id, solution, user.id);
-      setSubmitted(true);
-      setTimeout(() => {
-        navigate(`/problem/${problem.id}`);
-      }, 2000);
-    } catch (error) {
-      console.error('Failed to submit solution:', error);
-      alert('Failed to submit solution. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+  useEffect(() => {
+    if (problem) {
+      document.title = `Solve: ${problem.title} - CaseForge`;
     }
-  };
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
-        <div className="text-center">
-          <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-dark-50 mb-2">Solution Submitted!</h1>
-          <p className="text-dark-400">Redirecting you back to the problem...</p>
-        </div>
-      </div>
-    );
-  }
+  }, [problem]);
 
   if (loading) {
     return (
