@@ -174,8 +174,8 @@ class CaseForgeAuthTester:
     def test_admin_login(self):
         """Test admin login and get token"""
         login_data = {
-            "email": "admin@caseforge.com",
-            "password": "admin123"
+            "email": "rameezuddinmohammed61@gmail.com",
+            "password": "Qwerty9061#"
         }
         
         success, response = self.run_test(
@@ -255,12 +255,8 @@ class CaseForgeAuthTester:
         return self.tests_passed == self.tests_run
 
 def main():
-    # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = os.getenv("VITE_API_BASE_URL", "/api")
-    
-    # Ensure the URL has a scheme
-    if not api_url.startswith(('http://', 'https://')):
-        api_url = f"http://localhost:8001{api_url}"
+    # Get the API URL from the environment
+    api_url = "/api"
     
     print(f"Testing CaseForge Authentication API at: {api_url}")
     tester = CaseForgeAuthTester(api_url)
