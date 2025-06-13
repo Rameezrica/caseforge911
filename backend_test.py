@@ -7,7 +7,7 @@ import os
 import uuid
 import random
 
-class CaseForgeAuthTester:
+class CaseForgeBackendTester:
     def __init__(self, base_url):
         self.base_url = base_url
         self.tests_run = 0
@@ -18,6 +18,7 @@ class CaseForgeAuthTester:
         self.test_user = None
         self.test_password = None
         self.test_email = None
+        self.test_problem_id = None
 
     def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, admin=False):
         """Run a single API test"""
@@ -76,6 +77,7 @@ class CaseForgeAuthTester:
             })
             return False, {}
 
+    # ===== HEALTH CHECK =====
     def test_health_check(self):
         """Test the health check endpoint"""
         return self.run_test(
@@ -85,6 +87,7 @@ class CaseForgeAuthTester:
             200
         )
 
+    # ===== AUTHENTICATION SYSTEM =====
     def test_user_registration(self):
         """Test user registration"""
         # Generate a unique username and email
@@ -194,6 +197,41 @@ class CaseForgeAuthTester:
             print(f"❌ Failed to obtain admin token")
             return False, response
 
+    def test_logout(self):
+        """Test user logout"""
+        return self.run_test(
+            "User Logout",
+            "POST",
+            "auth/logout",
+            200,
+            auth=True,
+            admin=False
+        )
+
+    # ===== USER MANAGEMENT =====
+    def test_user_progress(self):
+        """Test getting user progress"""
+        return self.run_test(
+            "User Progress",
+            "GET",
+            "user/progress",
+            200,
+            auth=True,
+            admin=False
+        )
+
+    def test_user_solutions(self):
+        """Test getting user solutions"""
+        return self.run_test(
+            "User Solutions",
+            "GET",
+            "user/solutions",
+            200,
+            auth=True,
+            admin=False
+        )
+
+    # ===== ADMIN FUNCTIONALITY =====
     def test_admin_dashboard(self):
         """Test accessing admin dashboard"""
         return self.run_test(
@@ -216,6 +254,86 @@ class CaseForgeAuthTester:
             admin=True
         )
 
+    def test_admin_problems(self):
+        """Test accessing admin problems list"""
+        return self.run_test(
+            "Admin Problems List",
+            "GET",
+            "admin/problems",
+            200,
+            auth=True,
+            admin=True
+        )
+
+    def test_admin_create_problem(self):
+        """Test creating a new problem as admin"""
+        problem_data = {
+            "title": f"Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "description": "This is a test problem created by the automated test suite",
+            "category": "Testing",
+            "domain": "Software",
+            "difficulty": "Medium",
+            "company": "Test Company",
+            "tags": ["test", "automation"]
+        }
+        
+        success, response = self.run_test(
+            "Admin Create Problem",
+            "POST",
+            "admin/problems",
+            200,
+            data=problem_data,
+            auth=True,
+            admin=True
+        )
+        
+        if success and 'problem' in response and 'id' in response['problem']:
+            self.test_problem_id = response['problem']['id']
+            print(f"✅ Successfully created test problem with ID: {self.test_problem_id}")
+        
+        return success, response
+
+    def test_admin_update_problem(self):
+        """Test updating a problem as admin"""
+        if not self.test_problem_id:
+            print("❌ Cannot test problem update: No test problem created")
+            return False, {}
+            
+        problem_data = {
+            "title": f"Updated Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "description": "This problem was updated by the automated test suite",
+            "category": "Testing",
+            "domain": "Software",
+            "difficulty": "Hard",
+            "company": "Updated Test Company",
+            "tags": ["test", "automation", "updated"]
+        }
+        
+        return self.run_test(
+            "Admin Update Problem",
+            "PUT",
+            f"admin/problems/{self.test_problem_id}",
+            200,
+            data=problem_data,
+            auth=True,
+            admin=True
+        )
+
+    def test_admin_delete_problem(self):
+        """Test deleting a problem as admin"""
+        if not self.test_problem_id:
+            print("❌ Cannot test problem deletion: No test problem created")
+            return False, {}
+            
+        return self.run_test(
+            "Admin Delete Problem",
+            "DELETE",
+            f"admin/problems/{self.test_problem_id}",
+            200,
+            auth=True,
+            admin=True
+        )
+
     def test_user_accessing_admin(self):
         """Test regular user trying to access admin route"""
         return self.run_test(
@@ -227,13 +345,48 @@ class CaseForgeAuthTester:
             admin=False
         )
 
-    def test_logout(self):
-        """Test user logout"""
+    # ===== PROBLEMS AND PUBLIC ENDPOINTS =====
+    def test_get_all_problems(self):
+        """Test getting all problems"""
         return self.run_test(
-            "User Logout",
+            "Get All Problems",
+            "GET",
+            "problems",
+            200
+        )
+
+    def test_get_specific_problem(self):
+        """Test getting a specific problem"""
+        return self.run_test(
+            "Get Specific Problem",
+            "GET",
+            "problems/1",
+            200
+        )
+
+    def test_get_categories(self):
+        """Test getting categories"""
+        return self.run_test(
+            "Get Categories",
+            "GET",
+            "categories",
+            200
+        )
+
+    def test_submit_solution(self):
+        """Test submitting a solution"""
+        solution_data = {
+            "problem_id": "1",
+            "user_id": "user_id_placeholder",  # Will be replaced with actual user ID
+            "content": "This is a test solution submitted by the automated test suite"
+        }
+        
+        return self.run_test(
+            "Submit Solution",
             "POST",
-            "auth/logout",
+            "solutions",
             200,
+            data=solution_data,
             auth=True,
             admin=False
         )
@@ -258,15 +411,15 @@ def main():
     # Use the API URL from environment or default to http://localhost:8001/api
     api_url = "http://localhost:8001/api"
     
-    print(f"Testing CaseForge Authentication API at: {api_url}")
-    tester = CaseForgeAuthTester(api_url)
+    print(f"Testing CaseForge Backend API at: {api_url}")
+    tester = CaseForgeBackendTester(api_url)
     
     # Test basic health check
     tester.test_health_check()
     
-    # Test user authentication flow
+    # ===== AUTHENTICATION SYSTEM TESTS =====
     print("\n" + "="*50)
-    print("👤 Testing User Authentication Flow")
+    print("👤 Testing Authentication System")
     print("="*50)
     
     # Test invalid login
@@ -291,6 +444,34 @@ def main():
             # Test user trying to access admin route
             tester.test_user_accessing_admin()
             
+            # ===== USER MANAGEMENT TESTS =====
+            print("\n" + "="*50)
+            print("👤 Testing User Management")
+            print("="*50)
+            
+            # Test user progress
+            tester.test_user_progress()
+            
+            # Test user solutions
+            tester.test_user_solutions()
+            
+            # ===== PROBLEMS AND PUBLIC ENDPOINTS TESTS =====
+            print("\n" + "="*50)
+            print("📚 Testing Problems and Public Endpoints")
+            print("="*50)
+            
+            # Test getting all problems
+            tester.test_get_all_problems()
+            
+            # Test getting a specific problem
+            tester.test_get_specific_problem()
+            
+            # Test getting categories
+            tester.test_get_categories()
+            
+            # Test submitting a solution
+            tester.test_submit_solution()
+            
             # Test logout
             tester.test_logout()
         else:
@@ -298,9 +479,9 @@ def main():
     else:
         print("❌ User registration failed")
     
-    # Test admin authentication and functionality
+    # ===== ADMIN FUNCTIONALITY TESTS =====
     print("\n" + "="*50)
-    print("🔐 Testing Admin Authentication and Functionality")
+    print("🔐 Testing Admin Functionality")
     print("="*50)
     
     # Login as admin
@@ -313,6 +494,14 @@ def main():
         
         # Test admin users list
         tester.test_admin_users()
+        
+        # Test admin problems list
+        tester.test_admin_problems()
+        
+        # Test admin problem management
+        tester.test_admin_create_problem()
+        tester.test_admin_update_problem()
+        tester.test_admin_delete_problem()
     else:
         print("❌ Admin login failed")
     
