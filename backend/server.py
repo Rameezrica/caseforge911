@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import motor.motor_asyncio
 from bson import ObjectId
 import json
+import jwt
 from dotenv import load_dotenv
 from supabase import create_client, Client
 import asyncio
