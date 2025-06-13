@@ -1,23 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Trophy, Users, TrendingUp, Calendar, Activity } from 'lucide-react';
-import { getProblems, getCompetitions } from '../../services/adminApi';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 
 interface DashboardStats {
-  totalProblems: number;
-  totalCompetitions: number;
-  activeCompetitions: number;
-  totalUsers: number; // This would come from a users API endpoint
+  total_problems: number;
+  total_users: number;
+  total_solutions: number;
+  active_competitions: number;
+  recent_activity: Array<{
+    type: string;
+    count: number;
+    date: string;
+  }>;
 }
 
 const AdminDashboardPage: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats>({
-    totalProblems: 0,
-    totalCompetitions: 0,
-    activeCompetitions: 0,
-    totalUsers: 0,
+    total_problems: 0,
+    total_users: 0,
+    total_solutions: 0,
+    active_competitions: 0,
+    recent_activity: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { session } = useAdminAuth();
 
   useEffect(() => {
     loadDashboardData();
@@ -26,17 +33,24 @@ const AdminDashboardPage: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [problems, competitions] = await Promise.all([
-        getProblems(0, 1000), // Get all problems for counting
-        getCompetitions(0, 1000), // Get all competitions for counting
-      ]);
+      
+      if (!session?.access_token) {
+        throw new Error('No admin token available');
+      }
 
-      setStats({
-        totalProblems: problems.length,
-        totalCompetitions: competitions.length,
-        activeCompetitions: competitions.filter(c => c.is_active).length,
-        totalUsers: 0, // TODO: Implement users API endpoint
+      const response = await fetch('/api/admin/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
+
+      const data = await response.json();
+      setStats(data);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to load dashboard data');
@@ -56,31 +70,31 @@ const AdminDashboardPage: React.FC = () => {
   const statCards = [
     {
       title: 'Total Problems',
-      value: stats.totalProblems,
+      value: stats.total_problems,
       icon: FileText,
       color: 'bg-blue-500',
       textColor: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
-      title: 'Total Competitions',
-      value: stats.totalCompetitions,
-      icon: Trophy,
-      color: 'bg-yellow-500',
-      textColor: 'text-yellow-600',
-      bgColor: 'bg-yellow-50',
-    },
-    {
       title: 'Active Competitions',
-      value: stats.activeCompetitions,
+      value: stats.active_competitions,
       icon: Activity,
       color: 'bg-green-500',
       textColor: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
+      title: 'Total Solutions',
+      value: stats.total_solutions,
+      icon: Trophy,
+      color: 'bg-yellow-500',
+      textColor: 'text-yellow-600',
+      bgColor: 'bg-yellow-50',
+    },
+    {
       title: 'Total Users',
-      value: stats.totalUsers,
+      value: stats.total_users,
       icon: Users,
       color: 'bg-purple-500',
       textColor: 'text-purple-600',
