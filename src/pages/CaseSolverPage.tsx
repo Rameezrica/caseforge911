@@ -9,6 +9,10 @@ const CaseSolverPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { problem, loading, error } = useProblem(id || '');
+  const { user } = useAuth();
+  const [solution, setSolution] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     if (problem) {
