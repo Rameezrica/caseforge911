@@ -30,6 +30,28 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
     });
   };
 
+  // Handle both data structures: challenge.problem or challenge directly
+  const problem = challenge?.problem || challenge;
+  const challengeDate = challenge?.date || new Date().toISOString();
+  const participants = challenge?.participants || 0;
+  const completionRate = challenge?.completion_rate || 0;
+
+  if (!problem) {
+    return (
+      <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <Calendar className="h-6 w-6 text-emerald-500 mr-2" />
+            <h2 className="text-xl font-bold text-dark-50">Daily Challenge</h2>
+          </div>
+        </div>
+        <div className="text-center py-8 text-dark-400">
+          Loading daily challenge...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
       <div className="flex items-center justify-between mb-6">
@@ -45,8 +67,8 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1">
-          <div className="text-dark-400 mb-2">{formatDate(challenge.date)}</div>
-          <h3 className="text-2xl font-bold text-dark-50 mb-4">{challenge.problem.title}</h3>
+          <div className="text-dark-400 mb-2">{formatDate(challengeDate)}</div>
+          <h3 className="text-2xl font-bold text-dark-50 mb-4">{problem.title}</h3>
           
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="flex items-center text-dark-400">
