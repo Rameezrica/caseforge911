@@ -220,6 +220,67 @@ export const apiService = {
       console.error('Failed to submit solution:', error);
       throw error;
     }
+  },
+
+  // Admin endpoints
+  async getAdminDashboard() {
+    try {
+      const response = await api.get('/admin/dashboard');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch admin dashboard:', error);
+      throw error;
+    }
+  },
+
+  async getAdminUsers(page = 1, limit = 50) {
+    try {
+      const response = await api.get('/admin/users', { params: { page, limit } });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch admin users:', error);
+      throw error;
+    }
+  },
+
+  async getAdminProblems() {
+    try {
+      const response = await api.get('/admin/problems');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch admin problems:', error);
+      throw error;
+    }
+  },
+
+  async createAdminProblem(problemData: any) {
+    try {
+      const response = await api.post('/admin/problems', problemData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create problem:', error);
+      throw error;
+    }
+  },
+
+  async updateAdminProblem(problemId: string, problemData: any) {
+    try {
+      const response = await api.put(`/admin/problems/${problemId}`, problemData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to update problem:', error);
+      throw error;
+    }
+  },
+
+  async deleteAdminProblem(problemId: string) {
+    try {
+      const response = await api.delete(`/admin/problems/${problemId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to delete problem:', error);
+      throw error;
+    }
   }
 };
 
