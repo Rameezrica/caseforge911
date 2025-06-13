@@ -18,6 +18,9 @@ import asyncio
 # Load environment variables
 load_dotenv()
 
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 # Initialize FastAPI app
 app = FastAPI(title="CaseForge API", version="1.0.0")
 
