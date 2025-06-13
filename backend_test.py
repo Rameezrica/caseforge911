@@ -255,8 +255,8 @@ class CaseForgeAuthTester:
         return self.tests_passed == self.tests_run
 
 def main():
-    # Get the API URL from the environment
-    api_url = "/api"
+    # Use the API URL from environment or default to http://localhost:8001/api
+    api_url = "http://localhost:8001/api"
     
     print(f"Testing CaseForge Authentication API at: {api_url}")
     tester = CaseForgeAuthTester(api_url)
