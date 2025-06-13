@@ -577,28 +577,43 @@ async def get_admin_users(
 ):
     """Get all users for admin management"""
     try:
-        users_response = admin_supabase.auth.admin.list_users()
-        
-        # Handle both list and object responses
-        if hasattr(users_response, 'users'):
-            users = users_response.users or []
-        elif isinstance(users_response, list):
-            users = users_response
+        if FALLBACK_MODE:
+            # Use fallback users
+            users = list(FALLBACK_USERS.values())
+            formatted_users = []
+            for user in users:
+                formatted_users.append({
+                    "id": user["id"],
+                    "username": user.get("username", ""),
+                    "email": user["email"],
+                    "created_at": user.get("created_at"),
+                    "is_active": True,
+                    "email_confirmed": True,  # Assume confirmed in fallback mode
+                    "problems_solved": 0  # TODO: Implement from database
+                })
         else:
-            users = []
-        
-        # Convert to the expected format
-        formatted_users = []
-        for user in users:
-            formatted_users.append({
-                "id": user.id,
-                "username": user.user_metadata.get("username", ""),
-                "email": user.email,
-                "created_at": user.created_at,
-                "is_active": True,
-                "email_confirmed": user.email_confirmed_at is not None,
-                "problems_solved": 0  # TODO: Implement from database
-            })
+            users_response = admin_supabase.auth.admin.list_users()
+            
+            # Handle both list and object responses
+            if hasattr(users_response, 'users'):
+                users = users_response.users or []
+            elif isinstance(users_response, list):
+                users = users_response
+            else:
+                users = []
+            
+            # Convert to the expected format
+            formatted_users = []
+            for user in users:
+                formatted_users.append({
+                    "id": user.id,
+                    "username": user.user_metadata.get("username", ""),
+                    "email": user.email,
+                    "created_at": user.created_at,
+                    "is_active": True,
+                    "email_confirmed": user.email_confirmed_at is not None,
+                    "problems_solved": 0  # TODO: Implement from database
+                })
         
         return {
             "users": formatted_users[(page-1)*limit:page*limit],
