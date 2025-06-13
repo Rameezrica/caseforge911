@@ -166,6 +166,58 @@ MOCK_PROBLEMS = [
     }
 ]
 
+# Fallback authentication functions
+def create_jwt_token(user_data: dict) -> str:
+    """Create JWT token for fallback authentication"""
+    expiry = datetime.utcnow() + timedelta(hours=24)
+    payload = {
+        "sub": user_data["id"],
+        "email": user_data["email"],
+        "exp": expiry,
+        "iat": datetime.utcnow(),
+        "user_metadata": user_data.get("user_metadata", {})
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def verify_jwt_token(token: str) -> dict:
+    """Verify JWT token for fallback authentication"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+def authenticate_fallback_user(email: str, password: str) -> Optional[dict]:
+    """Authenticate user in fallback mode"""
+    user = FALLBACK_USERS.get(email)
+    if user and pwd_context.verify(password, user["password_hash"]):
+        return user
+    return None
+
+def register_fallback_user(email: str, password: str, username: str, full_name: str = None) -> dict:
+    """Register user in fallback mode"""
+    if email in FALLBACK_USERS:
+        raise HTTPException(status_code=400, detail="User already exists")
+    
+    user_id = f"user_{len(FALLBACK_USERS) + 1}"
+    user_data = {
+        "id": user_id,
+        "email": email,
+        "password_hash": pwd_context.hash(password),
+        "username": username,
+        "full_name": full_name or username,
+        "is_admin": False,
+        "created_at": datetime.now().isoformat(),
+        "user_metadata": {
+            "username": username,
+            "full_name": full_name or username,
+        }
+    }
+    FALLBACK_USERS[email] = user_data
+    return user_data
+
 MOCK_STATS = {
     "total_problems": len(MOCK_PROBLEMS),
     "total_users": 1250,
