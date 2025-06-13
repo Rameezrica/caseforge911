@@ -227,7 +227,7 @@ MOCK_STATS = {
 
 # Helper functions
 async def get_current_user(request: Request):
-    """Get current user from Supabase JWT token"""
+    """Get current user from Supabase JWT token or fallback authentication"""
     try:
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
@@ -237,15 +237,35 @@ async def get_current_user(request: Request):
             )
         
         jwt_token = auth_header.split("Bearer ")[1]
-        user_response = supabase.auth.get_user(jwt_token)
         
-        if not user_response.user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token"
-            )
-        
-        return user_response.user
+        if FALLBACK_MODE:
+            # Use fallback authentication
+            payload = verify_jwt_token(jwt_token)
+            user_email = payload.get("email")
+            user = FALLBACK_USERS.get(user_email)
+            if not user:
+                raise HTTPException(status_code=401, detail="User not found")
+            
+            # Create a user object similar to Supabase format
+            class FallbackUser:
+                def __init__(self, user_data):
+                    self.id = user_data["id"]
+                    self.email = user_data["email"]
+                    self.user_metadata = user_data.get("user_metadata", {})
+                    self.created_at = user_data.get("created_at")
+            
+            return FallbackUser(user)
+        else:
+            # Use Supabase authentication
+            user_response = supabase.auth.get_user(jwt_token)
+            
+            if not user_response.user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid token"
+                )
+            
+            return user_response.user
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
