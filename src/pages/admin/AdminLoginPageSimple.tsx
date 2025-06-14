@@ -25,11 +25,8 @@ const AdminLoginPageSimple: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Attempting admin login...');
     const success = await signIn(email, password);
-    console.log('Login result:', success);
     if (success) {
-      console.log('Login successful, navigating to admin...');
       navigate('/admin', { replace: true });
     }
   };
