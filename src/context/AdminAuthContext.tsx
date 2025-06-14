@@ -61,7 +61,6 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     initializeAdminAuth();
