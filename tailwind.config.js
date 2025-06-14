@@ -42,6 +42,21 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Windows 11 color system
+        'win11-blue': "hsl(var(--win11-blue))",
+        'win11-light-blue': "hsl(var(--win11-light-blue))",
+        'win11-gray': {
+          50: "hsl(var(--win11-gray-50))",
+          100: "hsl(var(--win11-gray-100))",
+          200: "hsl(var(--win11-gray-200))",
+          300: "hsl(var(--win11-gray-300))",
+          400: "hsl(var(--win11-gray-400))",
+          500: "hsl(var(--win11-gray-500))",
+          600: "hsl(var(--win11-gray-600))",
+          700: "hsl(var(--win11-gray-700))",
+          800: "hsl(var(--win11-gray-800))",
+          900: "hsl(var(--win11-gray-900))",
+        },
         // Kaggle-inspired color system
         kaggle: {
           blue: {
