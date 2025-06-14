@@ -805,5 +805,37 @@ async def get_admin_analytics(admin_user=Depends(get_admin_user)):
         ]
     }
 
+@app.get("/api/admin/solutions")
+async def get_admin_solutions(admin_user=Depends(get_admin_user)):
+    """Get all submitted solutions for admin review"""
+    # Add problem titles to solutions for easier viewing
+    solutions_with_problems = []
+    for solution in MOCK_SOLUTIONS:
+        problem = next((p for p in MOCK_PROBLEMS if p["id"] == solution["problem_id"]), None)
+        solution_with_problem = solution.copy()
+        solution_with_problem["problem_title"] = problem["title"] if problem else "Unknown Problem"
+        solution_with_problem["problem_difficulty"] = problem["difficulty"] if problem else "Unknown"
+        solutions_with_problems.append(solution_with_problem)
+    
+    return {
+        "solutions": solutions_with_problems,
+        "total": len(solutions_with_problems)
+    }
+
+@app.get("/api/admin/solutions/{problem_id}")
+async def get_problem_solutions(problem_id: str, admin_user=Depends(get_admin_user)):
+    """Get all solutions for a specific problem"""
+    problem_solutions = [s for s in MOCK_SOLUTIONS if s["problem_id"] == problem_id]
+    problem = next((p for p in MOCK_PROBLEMS if p["id"] == problem_id), None)
+    
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    return {
+        "problem": problem,
+        "solutions": problem_solutions,
+        "total": len(problem_solutions)
+    }
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
