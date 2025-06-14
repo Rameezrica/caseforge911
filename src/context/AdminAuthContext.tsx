@@ -313,6 +313,13 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     clearError,
   };
 
+
+  useEffect(() => {
+    // Only navigate if we're authenticated and not currently on an admin route
+    if (isAuthenticated && !window.location.pathname.startsWith('/admin')) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
   return (
     <AdminAuthContext.Provider value={contextValue}>
       {children}
