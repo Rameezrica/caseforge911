@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Clock, Briefcase, Tag, ArrowLeft, 
   FileText, MessageSquare, Award, ExternalLink,
-  Loader2
+  Loader2, CheckCircle, X
 } from 'lucide-react';
 import { useProblem } from '../hooks/useProblems';
 import DifficultyBadge from '../components/common/DifficultyBadge';
