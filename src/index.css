@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,50 +6,64 @@
 
 @layer base {
   :root {
-    /* Light theme - clean and professional */
-    --background: 0 0 100; /* White */
-    --foreground: 210 17% 25%; /* Dark Slate Blue/Grey */
-    --card: 0 0 100; /* White */
-    --card-foreground: 210 17% 25%; /* Dark Slate Blue/Grey */
-    --popover: 0 0 100; /* White */
-    --popover-foreground: 210 17% 25%; /* Dark Slate Blue/Grey */
-    --primary: 199 100 37; /* Kaggle Blue #008ABC */
-    --primary-foreground: 0 0 100; /* White */
-    --secondary: 210 30% 96%; /* Very Light Blue/Grey */
-    --secondary-foreground: 210 17% 25%; /* Dark Slate Blue/Grey */
-    --muted: 210 30% 96%; /* Very Light Blue/Grey */
-    --muted-foreground: 210 15% 65%; /* Medium Slate Grey */
-    --accent: 210 30% 96%; /* Very Light Blue/Grey */
-    --accent-foreground: 199 100 37; /* Kaggle Blue */
-    --destructive: 0 84 60; /* Red */
-    --destructive-foreground: 0 0 100; /* White */
-    --border: 210 20% 88%; /* Light Blue/Grey Border */
-    --input: 210 20% 88%; /* Light Blue/Grey Input Border */
-    --ring: 199 100 37; /* Kaggle Blue for focus rings */
-    --radius: 0.5rem;
+    /* Windows 11 Light theme */
+    --background: 0 0% 100%; /* Pure White */
+    --foreground: 0 0% 9%; /* Near Black */
+    --card: 0 0% 100%; /* Pure White */
+    --card-foreground: 0 0% 9%; /* Near Black */
+    --popover: 0 0% 100%; /* Pure White */
+    --popover-foreground: 0 0% 9%; /* Near Black */
+    --primary: 206 100% 50%; /* Windows 11 Blue #0078D4 */
+    --primary-foreground: 0 0% 100%; /* White */
+    --secondary: 0 0% 96%; /* Light Gray */
+    --secondary-foreground: 0 0% 9%; /* Near Black */
+    --muted: 0 0% 96%; /* Light Gray */
+    --muted-foreground: 0 0% 45%; /* Medium Gray */
+    --accent: 0 0% 96%; /* Light Gray */
+    --accent-foreground: 206 100% 50%; /* Windows 11 Blue */
+    --destructive: 0 84% 60%; /* Red */
+    --destructive-foreground: 0 0% 100%; /* White */
+    --border: 0 0% 90%; /* Light Border */
+    --input: 0 0% 90%; /* Light Input Border */
+    --ring: 206 100% 50%; /* Windows 11 Blue for focus rings */
+    --radius: 0.375rem; /* Windows 11 corner radius */
+    
+    /* Windows 11 specific colors */
+    --win11-blue: 206 100% 50%;
+    --win11-light-blue: 206 100% 95%;
+    --win11-gray-50: 0 0% 98%;
+    --win11-gray-100: 0 0% 96%;
+    --win11-gray-200: 0 0% 90%;
+    --win11-gray-300: 0 0% 83%;
+    --win11-gray-400: 0 0% 64%;
+    --win11-gray-500: 0 0% 45%;
+    --win11-gray-600: 0 0% 32%;
+    --win11-gray-700: 0 0% 25%;
+    --win11-gray-800: 0 0% 15%;
+    --win11-gray-900: 0 0% 9%;
   }
  
   .dark {
-    /* Dark theme - clean and professional */
-    --background: 222 47% 11%; /* Very Dark Blue */
-    --foreground: 210 40% 98%; /* Off-White */
-    --card: 222 47% 14%; /* Slightly Lighter Dark Blue */
-    --card-foreground: 210 40% 98%; /* Off-White */
-    --popover: 222 47% 11%; /* Very Dark Blue */
-    --popover-foreground: 210 40% 98%; /* Off-White */
-    --primary: 205 90% 58%; /* Brighter Blue for Dark Mode */
-    --primary-foreground: 222 47% 11%; /* Very Dark Blue for text on primary */
-    --secondary: 215 28% 17%; /* Dark Blue/Grey */
-    --secondary-foreground: 210 40% 98%; /* Off-White */
-    --muted: 215 28% 17%; /* Dark Blue/Grey */
-    --muted-foreground: 215 20% 65%; /* Medium Grey for Dark */
-    --accent: 215 28% 17%; /* Dark Blue/Grey */
-    --accent-foreground: 205 90% 58%; /* Brighter Blue for Dark Mode */
+    /* Windows 11 Dark theme */
+    --background: 0 0% 7%; /* Very Dark */
+    --foreground: 0 0% 98%; /* Off-White */
+    --card: 0 0% 10%; /* Dark Card */
+    --card-foreground: 0 0% 98%; /* Off-White */
+    --popover: 0 0% 7%; /* Very Dark */
+    --popover-foreground: 0 0% 98%; /* Off-White */
+    --primary: 206 100% 65%; /* Brighter Blue for Dark Mode */
+    --primary-foreground: 0 0% 7%; /* Very Dark for text on primary */
+    --secondary: 0 0% 15%; /* Dark Gray */
+    --secondary-foreground: 0 0% 98%; /* Off-White */
+    --muted: 0 0% 15%; /* Dark Gray */
+    --muted-foreground: 0 0% 64%; /* Medium Gray for Dark */
+    --accent: 0 0% 15%; /* Dark Gray */
+    --accent-foreground: 206 100% 65%; /* Brighter Blue for Dark Mode */
     --destructive: 0 72% 51%; /* Red for Dark Mode */
-    --destructive-foreground: 0 0 100; /* White, changed from 0 0 100% to match convention */
-    --border: 215 28% 17%; /* Dark Blue/Grey Border */
-    --input: 215 28% 17%; /* Dark Blue/Grey Input Border */
-    --ring: 205 90% 58%; /* Brighter Blue for focus rings */
+    --destructive-foreground: 0 0% 100%; /* White */
+    --border: 0 0% 20%; /* Dark Border */
+    --input: 0 0% 20%; /* Dark Input Border */
+    --ring: 206 100% 65%; /* Brighter Blue for focus rings */
   }
 }
 
@@ -63,78 +77,147 @@
   }
   
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
   
-  /* Clean scrollbar */
+  /* Windows 11 style scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 12px;
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    @apply bg-win11-gray-100;
+    border-radius: 6px;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
+    @apply bg-win11-gray-400;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+    @apply bg-win11-gray-500;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--win11-gray-400)) hsl(var(--win11-gray-100));
   }
 }
 
 @layer components {
-  /* Clean card components */
+  /* Windows 11 card components */
   .card {
-    @apply bg-card text-card-foreground rounded-lg border shadow-card;
+    @apply bg-card text-card-foreground rounded-lg border shadow-sm;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   }
   
   .card-hover {
-    @apply transition-shadow duration-200 hover:shadow-card-hover;
+    @apply transition-all duration-200;
+  }
+  
+  .card-hover:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    transform: translateY(-1px);
   }
   
   .card-interactive {
-    @apply cursor-pointer transition-all duration-200 hover:shadow-card-hover hover:scale-[1.02];
+    @apply cursor-pointer transition-all duration-200 card-hover;
   }
   
-  /* Button components */
+  /* Windows 11 button components */
   .btn {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+  
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.1);
   }
   
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+    @apply bg-primary text-primary-foreground;
+  }
+  
+  .btn-primary:hover {
+    filter: brightness(1.05);
   }
   
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+    @apply bg-secondary text-secondary-foreground border;
+  }
+  
+  .btn-secondary:hover {
+    @apply bg-win11-gray-200;
   }
   
   .btn-outline {
-    @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground;
+    @apply border border-input bg-background text-foreground;
+  }
+  
+  .btn-outline:hover {
+    @apply bg-win11-gray-50;
   }
   
   .btn-ghost {
-    @apply hover:bg-accent hover:text-accent-foreground;
+    @apply text-foreground;
+  }
+  
+  .btn-ghost:hover {
+    @apply bg-win11-gray-100;
   }
   
   .btn-sm {
-    @apply h-9 px-3;
+    @apply h-8 px-3 text-xs;
   }
   
   .btn-md {
-    @apply h-10 px-4 py-2;
+    @apply h-9 px-4 text-sm;
   }
   
   .btn-lg {
-    @apply h-11 px-8;
+    @apply h-10 px-6 text-base;
   }
   
-  /* Input components */
+  /* Windows 11 input components */
   .input {
-    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .input:focus {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+  }
+  
+  /* Windows 11 toggle switch */
+  .toggle {
+    @apply relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .toggle[data-state="checked"] {
+    @apply bg-primary;
+  }
+  
+  .toggle[data-state="unchecked"] {
+    @apply bg-win11-gray-300;
+  }
+  
+  .toggle-thumb {
+    @apply pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform;
+  }
+  
+  .toggle[data-state="checked"] .toggle-thumb {
+    @apply translate-x-4;
+  }
+  
+  .toggle[data-state="unchecked"] .toggle-thumb {
+    @apply translate-x-0.5;
   }
   
   /* Layout components */
@@ -143,12 +226,26 @@
   }
   
   .section {
-    @apply py-12 lg:py-16;
+    @apply py-8 lg:py-12;
+  }
+  
+  /* Windows 11 navigation */
+  .nav-item {
+    @apply flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200;
+  }
+  
+  .nav-item:hover {
+    @apply bg-win11-gray-100;
+    transform: translateY(-1px);
+  }
+  
+  .nav-item.active {
+    @apply bg-win11-light-blue text-primary;
   }
   
   /* Text utilities */
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent;
   }
   
   /* Focus states */
@@ -156,7 +253,22 @@
     @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
   }
   
-  /* Domain-specific components */
+  /* Windows 11 specific components */
+  .win11-card {
+    @apply bg-card rounded-lg border p-6;
+    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+  }
+  
+  .win11-card:hover {
+    box-shadow: 0 4px 12px 0 rgb(0 0 0 / 0.12);
+    transform: translateY(-2px);
+  }
+  
+  .win11-section {
+    @apply bg-card rounded-lg border p-4 mb-6;
+  }
+  
+  /* Domain-specific components with Windows 11 colors */
   .domain-finance {
     @apply text-emerald-600 dark:text-emerald-400;
   }
@@ -181,45 +293,63 @@
     @apply text-rose-600 dark:text-rose-400;
   }
   
-  /* Difficulty badges */
+  /* Difficulty badges - Windows 11 style */
   .difficulty-easy {
-    @apply bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800;
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 px-2 py-1 rounded-full text-xs font-medium;
   }
   
   .difficulty-medium {
-    @apply bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800;
+    @apply bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800 px-2 py-1 rounded-full text-xs font-medium;
   }
   
   .difficulty-hard {
-    @apply bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800;
+    @apply bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 px-2 py-1 rounded-full text-xs font-medium;
   }
   
   /* Status components */
   .status-online {
-    @apply bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800;
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 px-2 py-1 rounded-full text-xs font-medium;
   }
   
   .status-offline {
-    @apply bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800;
+    @apply bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 px-2 py-1 rounded-full text-xs font-medium;
   }
   
   /* Loading states */
   .loading-shimmer {
-    @apply animate-pulse bg-muted rounded;
+    @apply animate-pulse bg-win11-gray-200 rounded;
   }
   
   .loading-spinner {
-    @apply animate-spin rounded-full border-2 border-muted border-t-primary;
+    @apply animate-spin rounded-full border-2 border-win11-gray-200 border-t-primary;
   }
 }
 
 @layer utilities {
-  /* Spacing utilities */
-  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-y-reverse: 0;
-    margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
-    margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
-  }
+  /* Windows 11 color utilities */
+  .bg-win11-gray-50 { background-color: hsl(var(--win11-gray-50)); }
+  .bg-win11-gray-100 { background-color: hsl(var(--win11-gray-100)); }
+  .bg-win11-gray-200 { background-color: hsl(var(--win11-gray-200)); }
+  .bg-win11-gray-300 { background-color: hsl(var(--win11-gray-300)); }
+  .bg-win11-gray-400 { background-color: hsl(var(--win11-gray-400)); }
+  .bg-win11-gray-500 { background-color: hsl(var(--win11-gray-500)); }
+  .bg-win11-gray-600 { background-color: hsl(var(--win11-gray-600)); }
+  .bg-win11-gray-700 { background-color: hsl(var(--win11-gray-700)); }
+  .bg-win11-gray-800 { background-color: hsl(var(--win11-gray-800)); }
+  .bg-win11-gray-900 { background-color: hsl(var(--win11-gray-900)); }
+  
+  .text-win11-gray-400 { color: hsl(var(--win11-gray-400)); }
+  .text-win11-gray-500 { color: hsl(var(--win11-gray-500)); }
+  .text-win11-gray-600 { color: hsl(var(--win11-gray-600)); }
+  .text-win11-gray-700 { color: hsl(var(--win11-gray-700)); }
+  
+  .bg-win11-blue { background-color: hsl(var(--win11-blue)); }
+  .bg-win11-light-blue { background-color: hsl(var(--win11-light-blue)); }
+  
+  /* Spacing utilities */  
+  .win11-spacing-sm { padding: 8px 12px; }
+  .win11-spacing-md { padding: 12px 16px; }
+  .win11-spacing-lg { padding: 16px 20px; }
   
   /* Text utilities */
   .text-balance {
@@ -258,6 +388,23 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  
+  /* Windows 11 elevation utilities */
+  .elevation-1 {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+  
+  .elevation-2 {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+  
+  .elevation-3 {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+  
+  .elevation-4 {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
 }
 
 /* Remove all glassmorphism and heavy effects */
@@ -272,6 +419,37 @@
   backdrop-filter: unset;
   box-shadow: unset;
   animation: unset;
+}
+
+/* Windows 11 animations */
+@keyframes win11-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes win11-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-win11-fade-in {
+  animation: win11-fade-in 0.2s ease-out;
+}
+
+.animate-win11-scale-in {
+  animation: win11-scale-in 0.2s ease-out;
 }
 
 /* Ensure dark mode works properly */

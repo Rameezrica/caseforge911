@@ -59,17 +59,17 @@ const Navbar = () => {
     const match = location.pathname.match(/\/solve\/(.+)$/);
     const problemId = match ? match[1] : '';
     return (
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 w-full border-b border-win11-gray-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 elevation-1">
         <div className="container">
           <div className="flex h-14 items-center justify-between">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground elevation-1">
                 <BookOpen className="h-4 w-4" />
               </div>
-              <span className="text-lg font-semibold">CaseForge</span>
+              <span className="text-lg font-semibold text-foreground">CaseForge</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="flex items-center text-muted-foreground">
+              <div className="flex items-center text-win11-gray-600">
                 <Calendar className="mr-2 h-4 w-4" />
                 <span className="text-sm font-medium">Solving Mode</span>
               </div>
@@ -89,16 +89,16 @@ const Navbar = () => {
   const showSearch = location.pathname !== '/';
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b border-win11-gray-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 elevation-1">
       <div className="container">
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Link to="/" className="flex items-center space-x-3 group transition-all duration-200">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground elevation-1 group-hover:elevation-2 transition-all duration-200">
                 <BookOpen className="h-4 w-4" />
               </div>
-              <span className="text-lg font-semibold">CaseForge</span>
+              <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-200">CaseForge</span>
             </Link>
           </div>
 
@@ -113,15 +113,15 @@ const Navbar = () => {
                   key={item.path}
                   to={item.path}
                   className={`
-                    flex items-center space-x-1 px-3 py-2 text-sm font-medium rounded-md transition-colors
+                    nav-item group
                     ${active 
-                      ? 'bg-accent text-accent-foreground' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                      ? 'active' 
+                      : 'text-win11-gray-600 hover:text-foreground hover:bg-win11-gray-100'
                     }
                   `}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Icon className="h-4 w-4 transition-colors duration-200" />
+                  <span className="transition-colors duration-200">{item.label}</span>
                 </Link>
               );
             })}
@@ -131,13 +131,13 @@ const Navbar = () => {
           <div className="flex items-center space-x-3">
             {showSearch && (
               <form onSubmit={handleSearch} className="relative hidden sm:block">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 text-win11-gray-500 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search problems..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="input pl-8 w-64"
+                  className="input pl-9 w-64 bg-win11-gray-50 border-win11-gray-200 focus:bg-background transition-colors duration-200"
                 />
               </form>
             )}
@@ -149,38 +149,38 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center space-x-2 text-sm font-medium rounded-md px-3 py-2 transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="flex items-center space-x-2 text-sm font-medium rounded-lg px-3 py-2 transition-all duration-200 hover:bg-win11-gray-100 hover:elevation-1"
                 >
-                  <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">
+                  <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium elevation-1">
                     {user?.username?.[0]?.toUpperCase() || 'U'}
                   </div>
-                  <span className="hidden lg:block">{user?.username}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  <span className="hidden lg:block text-foreground">{user?.username}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* User Dropdown Menu */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-fade-in">
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                  <div className="absolute right-0 mt-2 w-56 rounded-lg border border-win11-gray-200 bg-background p-2 text-foreground elevation-3 animate-win11-scale-in">
+                    <div className="px-3 py-2 text-sm text-win11-gray-600">
                       <p className="font-medium text-foreground">{user?.full_name || user?.username}</p>
-                      <p className="truncate">{user?.email}</p>
+                      <p className="truncate text-win11-gray-500">{user?.email}</p>
                     </div>
-                    <div className="h-px bg-border my-1" />
+                    <div className="h-px bg-win11-gray-200 my-2" />
                     {userMenuItems.map((item) => (
                       <Link
                         key={item.path}
                         to={item.path}
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center space-x-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                        className="flex items-center space-x-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-win11-gray-100 text-foreground"
                       >
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="h-4 w-4 text-win11-gray-600" />
                         <span>{item.label}</span>
                       </Link>
                     ))}
-                    <div className="h-px bg-border my-1" />
+                    <div className="h-px bg-win11-gray-200 my-2" />
                     <button
                       onClick={handleLogout}
-                      className="flex w-full items-center space-x-2 rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                      className="flex w-full items-center space-x-3 rounded-md px-3 py-2 text-sm text-red-600 transition-all duration-200 hover:bg-red-50"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>Logout</span>
@@ -194,14 +194,14 @@ const Navbar = () => {
                   to="/login"
                   className="btn btn-ghost btn-sm"
                 >
-                  <LogIn className="mr-1 h-4 w-4" />
+                  <LogIn className="mr-2 h-4 w-4" />
                   <span className="hidden lg:block">Login</span>
                 </Link>
                 <Link
                   to="/register"
                   className="btn btn-primary btn-sm"
                 >
-                  <UserPlus className="mr-1 h-4 w-4" />
+                  <UserPlus className="mr-2 h-4 w-4" />
                   <span className="hidden lg:block">Sign Up</span>
                 </Link>
               </div>
@@ -210,7 +210,7 @@ const Navbar = () => {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              className="md:hidden p-2 rounded-md hover:bg-win11-gray-100 transition-colors duration-200"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -223,7 +223,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-background">
+          <div className="md:hidden border-t border-win11-gray-200 bg-background animate-win11-fade-in">
             <div className="space-y-1 px-2 pb-3 pt-2">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
@@ -235,10 +235,10 @@ const Navbar = () => {
                     to={item.path}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`
-                      flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors
+                      flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200
                       ${active 
-                        ? 'bg-accent text-accent-foreground' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                        ? 'bg-win11-light-blue text-primary' 
+                        : 'text-win11-gray-600 hover:text-foreground hover:bg-win11-gray-100'
                       }
                     `}
                   >
@@ -249,7 +249,7 @@ const Navbar = () => {
               })}
               
               {/* Auth items for mobile */}
-              <div className="border-t pt-2 mt-2">
+              <div className="border-t border-win11-gray-200 pt-3 mt-3">
                 {isAuthenticated ? (
                   <>
                     {userMenuItems.map((item) => (
@@ -257,7 +257,7 @@ const Navbar = () => {
                         key={item.path}
                         to={item.path}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                        className="flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium text-win11-gray-600 hover:text-foreground hover:bg-win11-gray-100 transition-all duration-200"
                       >
                         <item.icon className="h-5 w-5" />
                         <span>{item.label}</span>
@@ -268,7 +268,7 @@ const Navbar = () => {
                         handleLogout();
                         setMobileMenuOpen(false);
                       }}
-                      className="flex w-full items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                      className="flex w-full items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium text-red-600 hover:bg-red-50 transition-all duration-200"
                     >
                       <LogOut className="h-5 w-5" />
                       <span>Logout</span>
@@ -279,7 +279,7 @@ const Navbar = () => {
                     <Link
                       to="/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                      className="flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium text-win11-gray-600 hover:text-foreground hover:bg-win11-gray-100 transition-all duration-200"
                     >
                       <LogIn className="h-5 w-5" />
                       <span>Login</span>
@@ -287,7 +287,7 @@ const Navbar = () => {
                     <Link
                       to="/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium bg-primary text-primary-foreground transition-colors"
+                      className="flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium bg-primary text-primary-foreground hover:brightness-105 transition-all duration-200"
                     >
                       <UserPlus className="h-5 w-5" />
                       <span>Sign Up</span>
@@ -297,15 +297,15 @@ const Navbar = () => {
               </div>
               
               {showSearch && (
-                <form onSubmit={handleSearch} className="pt-2 sm:hidden">
+                <form onSubmit={handleSearch} className="pt-3 sm:hidden">
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 text-win11-gray-500 -translate-y-1/2" />
                     <input
                       type="text"
                       placeholder="Search problems..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="input pl-8 w-full"
+                      className="input pl-9 w-full bg-win11-gray-50 border-win11-gray-200 focus:bg-background transition-colors duration-200"
                     />
                   </div>
                 </form>
