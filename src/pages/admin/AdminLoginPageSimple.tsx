@@ -11,12 +11,13 @@ const AdminLoginPageSimple: React.FC = () => {
   const { signIn, isLoading, error, clearError, isAuthenticated } = useAdminAuth();
   const navigate = useNavigate();
 
+  // Only redirect if authenticated and not loading
   useEffect(() => {
-    // Only redirect if authenticated and not already navigating
-    if (isAuthenticated && window.location.pathname === '/admin/login') {
+    if (isAuthenticated && !isLoading) {
+      console.log('Admin authenticated, redirecting to admin dashboard...');
       navigate('/admin', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   useEffect(() => {
     clearError();
@@ -24,11 +25,19 @@ const AdminLoginPageSimple: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Attempting admin login...');
     const success = await signIn(email, password);
+    console.log('Login result:', success);
     if (success) {
+      console.log('Login successful, navigating to admin...');
       navigate('/admin', { replace: true });
     }
   };
+
+  // Don't show anything if authenticated (will redirect)
+  if (isAuthenticated && !isLoading) {
+    return <Navigate to="/admin" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
@@ -124,7 +133,7 @@ const AdminLoginPageSimple: React.FC = () => {
 
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-xs text-gray-500">
-              Default admin: admin@caseforge.com
+              Default admin: rameezuddinmohammed61@gmail.com
             </p>
           </div>
         </div>
