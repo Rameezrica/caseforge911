@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
+import PromotionPage from './pages/PromotionPage';
 import ProblemsPage from './pages/ProblemsPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
 import LeaderboardPage from './pages/LeaderboardPage';
@@ -21,6 +22,7 @@ import UserDashboardPage from './pages/UserDashboardPage';
 import UserProfilePage from './pages/UserProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 
 // Admin panel imports
 import AdminLoginPageSimple from './pages/admin/AdminLoginPageSimple';
