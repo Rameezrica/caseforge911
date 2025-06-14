@@ -85,8 +85,7 @@ const AdminProblemsPage: React.FC = () => {
       category: problem.category,
       domain: problem.domain,
       company: problem.company || '',
-      time_limit: problem.time_limit || 60,
-      sample_framework: problem.sample_framework || '',
+      tags: problem.tags || [],
     });
     setShowModal(true);
   };
