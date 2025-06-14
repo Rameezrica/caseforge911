@@ -1,14 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
-import { 
-  getProblems, 
-  createProblem, 
-  updateProblem, 
-  deleteProblem, 
-  Problem, 
-  ProblemCreate, 
-  ProblemUpdate 
-} from '../../services/adminApi';
+import { apiService } from '../../services/api';
+
+interface Problem {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  category: string;
+  domain: string;
+  company?: string;
+  tags?: string[];
+  created_at: string;
+}
+
+interface ProblemCreate {
+  title: string;
+  description: string;
+  difficulty: string;
+  category: string;
+  domain: string;
+  company?: string;
+  tags?: string[];
+}
 
 const AdminProblemsPage: React.FC = () => {
   const [problems, setProblems] = useState<Problem[]>([]);
