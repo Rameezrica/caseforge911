@@ -733,7 +733,17 @@ async def update_problem(
     admin_user=Depends(get_admin_user)
 ):
     """Update an existing problem"""
-    return {"message": f"Problem {problem_id} updated successfully"}
+    # Find and update the problem in MOCK_PROBLEMS
+    for i, p in enumerate(MOCK_PROBLEMS):
+        if p["id"] == problem_id:
+            problem_data = problem.dict()
+            problem_data["id"] = problem_id
+            problem_data["created_at"] = p.get("created_at", datetime.now())
+            problem_data["updated_at"] = datetime.now()
+            MOCK_PROBLEMS[i] = problem_data
+            return problem_data
+    
+    raise HTTPException(status_code=404, detail="Problem not found")
 
 @app.delete("/api/admin/problems/{problem_id}")
 async def delete_problem(problem_id: str, admin_user=Depends(get_admin_user)):
