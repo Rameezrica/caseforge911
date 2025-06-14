@@ -13,10 +13,12 @@ import {
   LogOut,
   Edit3,
   Save,
-  X
+  X,
+  Palette
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getUserSolutions, Solution } from '../services/userApi';
+import ThemeSelector from '../components/common/ThemeSelector';
 
 const UserProfilePage: React.FC = () => {
   const { user, userProgress, logout, refreshUserData } = useAuth();
