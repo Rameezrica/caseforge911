@@ -143,8 +143,8 @@ const Navbar = () => {
                     className={`
                       relative flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
                       ${active 
-                        ? 'text-white' 
-                        : 'text-dark-300 hover:text-white'
+                        ? 'text-gray-900 dark:text-white' 
+                        : 'text-gray-600 hover:text-gray-900 dark:text-dark-300 dark:hover:text-white'
                       }
                     `}
                   >
