@@ -22,6 +22,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     leftIcon,
     rightIcon,
     disabled,
+    asChild = false,
     ...props 
   }, ref) => {
     
@@ -40,16 +41,25 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       md: "btn-md", 
       lg: "btn-lg"
     };
+
+    const classes = cn(
+      baseClasses,
+      variants[variant],
+      sizes[size],
+      className
+    );
+
+    if (asChild) {
+      return React.cloneElement(children as React.ReactElement, {
+        className: classes,
+        ...props
+      });
+    }
     
     return (
       <button
         ref={ref}
-        className={cn(
-          baseClasses,
-          variants[variant],
-          sizes[size],
-          className
-        )}
+        className={classes}
         disabled={disabled || loading}
         {...props}
       >
