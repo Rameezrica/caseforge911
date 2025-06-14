@@ -136,7 +136,7 @@
   }
   
   .card-interactive {
-    @apply bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg p-6 cursor-pointer dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:hover:shadow-premium transition-all duration-500 hover:scale-105 hover:border-blue-300 dark:hover:border-brand-500/50 dark:hover:shadow-neon group;
+    @apply bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg p-6 cursor-pointer dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:hover:shadow-premium transition-all duration-500 hover:scale-105 hover:border-blue-300 dark:hover:border-brand-500/50 dark:hover:shadow-neon;
   }
   
   /* Gradient Text */
