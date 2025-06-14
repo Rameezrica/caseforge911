@@ -185,7 +185,7 @@ const HomePage = () => {
           className="relative"
         >
           <Card variant="glass" className="p-12 text-center overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-500/10 via-purple-500/5 to-cyan-500/10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 dark:from-brand-500/10 dark:via-purple-500/5 dark:to-cyan-500/10" />
             <div className="relative z-10">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -193,7 +193,7 @@ const HomePage = () => {
                 transition={{ delay: 0.2, duration: 0.6 }}
                 className="mb-6"
               >
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-brand-500 to-purple-600 rounded-2xl mb-6 shadow-neon">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-brand-500 dark:to-purple-600 rounded-2xl mb-6 shadow-lg dark:shadow-neon">
                   <Brain className="h-10 w-10 text-white" />
                 </div>
               </motion.div>
@@ -206,14 +206,14 @@ const HomePage = () => {
               >
                 <span className="text-gradient">Master Business Cases</span>
                 <br />
-                <span className="text-white">Like Never Before</span>
+                <span className="text-gray-900 dark:text-white">Like Never Before</span>
               </motion.h1>
               
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
-                className="text-xl text-dark-300 mb-8 max-w-3xl mx-auto leading-relaxed"
+                className="text-xl text-gray-600 dark:text-dark-300 mb-8 max-w-3xl mx-auto leading-relaxed"
               >
                 Transform your business acumen with AI-powered case studies across Finance, Operations, Strategy, Marketing & Analytics
               </motion.p>
