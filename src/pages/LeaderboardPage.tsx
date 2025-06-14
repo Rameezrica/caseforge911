@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { leaderboard } from '../data/mockData';
 import { Trophy, Medal, Award } from 'lucide-react';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
 const LeaderboardPage: React.FC = () => {
   const [timeframe, setTimeframe] = useState<'all-time' | 'monthly' | 'weekly'>('all-time');
