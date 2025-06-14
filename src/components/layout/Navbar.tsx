@@ -114,13 +114,13 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center group">
               <motion.div 
-                className="w-8 h-8 bg-gradient-to-br from-brand-500 to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-neon"
+                className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-brand-500 dark:to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg dark:shadow-neon"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
                 <Brain className="h-5 w-5 text-white" />
               </motion.div>
-              <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                 CaseForge
               </span>
             </Link>
