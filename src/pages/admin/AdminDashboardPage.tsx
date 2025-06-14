@@ -148,6 +148,17 @@ const AdminDashboardPage: React.FC = () => {
           </a>
           
           <a
+            href="/admin/solutions"
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Users className="h-8 w-8 text-green-600 mr-3" />
+            <div>
+              <h3 className="font-medium text-gray-900">View Solutions</h3>
+              <p className="text-sm text-gray-600">Review submitted solutions</p>
+            </div>
+          </a>
+          
+          <a
             href="/admin/competitions"
             className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
@@ -157,14 +168,6 @@ const AdminDashboardPage: React.FC = () => {
               <p className="text-sm text-gray-600">Create and manage competitions</p>
             </div>
           </a>
-          
-          <div className="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50">
-            <Users className="h-8 w-8 text-gray-400 mr-3" />
-            <div>
-              <h3 className="font-medium text-gray-500">Manage Users</h3>
-              <p className="text-sm text-gray-400">Coming soon</p>
-            </div>
-          </div>
         </div>
       </div>
 
