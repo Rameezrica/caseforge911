@@ -193,6 +193,7 @@ test_plan:
   current_focus:
     - "Problem Solving Interface"
     - "Admin Login and Dashboard"
+    - "Windows 11 UI Transformation"
   stuck_tasks: 
     - "Problem Solving Interface"
   test_all: false
