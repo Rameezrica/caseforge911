@@ -20,128 +20,112 @@ const LeaderboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 pb-16">
-      <div className="bg-dark-800 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Award className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-dark-50 mb-4">Leaderboard</h1>
-          <p className="text-xl text-dark-400 max-w-2xl mx-auto">
+    <div className="container py-8 space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center w-16 h-16 bg-warning/10 text-warning rounded-xl mx-auto">
+          <Award className="h-8 w-8" />
+        </div>
+        <div>
+          <h1 className="text-4xl font-bold text-foreground mb-2">Leaderboard</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             See how you stack up against other business case solvers
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-dark-800 rounded-lg border border-dark-700 p-4 mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <label className="block text-sm font-medium text-dark-300 mb-1">Timeframe</label>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setTimeframe('all-time')}
-                  className={`px-3 py-1.5 text-sm rounded-md ${
-                    timeframe === 'all-time'
-                      ? 'bg-emerald-500 text-dark-900 font-medium'
-                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                  }`}
-                >
-                  All Time
-                </button>
-                <button
-                  onClick={() => setTimeframe('monthly')}
-                  className={`px-3 py-1.5 text-sm rounded-md ${
-                    timeframe === 'monthly'
-                      ? 'bg-emerald-500 text-dark-900 font-medium'
-                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                  }`}
-                >
-                  This Month
-                </button>
-                <button
-                  onClick={() => setTimeframe('weekly')}
-                  className={`px-3 py-1.5 text-sm rounded-md ${
-                    timeframe === 'weekly'
-                      ? 'bg-emerald-500 text-dark-900 font-medium'
-                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                  }`}
-                >
-                  This Week
-                </button>
-              </div>
+      {/* Controls */}
+      <Card className="p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-3">Timeframe</label>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={timeframe === 'all-time' ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setTimeframe('all-time')}
+              >
+                All Time
+              </Button>
+              <Button
+                variant={timeframe === 'monthly' ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setTimeframe('monthly')}
+              >
+                This Month
+              </Button>
+              <Button
+                variant={timeframe === 'weekly' ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setTimeframe('weekly')}
+              >
+                This Week
+              </Button>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-dark-300 mb-1">Category</label>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setCategory('all')}
-                  className={`px-3 py-1.5 text-sm rounded-md ${
-                    category === 'all'
-                      ? 'bg-emerald-500 text-dark-900 font-medium'
-                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                  }`}
-                >
-                  Overall
-                </button>
-                <button
-                  onClick={() => setCategory('problems')}
-                  className={`px-3 py-1.5 text-sm rounded-md ${
-                    category === 'problems'
-                      ? 'bg-emerald-500 text-dark-900 font-medium'
-                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                  }`}
-                >
-                  Problems Solved
-                </button>
-                <button
-                  onClick={() => setCategory('solutions')}
-                  className={`px-3 py-1.5 text-sm rounded-md ${
-                    category === 'solutions'
-                      ? 'bg-emerald-500 text-dark-900 font-medium'
-                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                  }`}
-                >
-                  Best Solutions
-                </button>
-                <button
-                  onClick={() => setCategory('community')}
-                  className={`px-3 py-1.5 text-sm rounded-md ${
-                    category === 'community'
-                      ? 'bg-emerald-500 text-dark-900 font-medium'
-                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                  }`}
-                >
-                  Community
-                </button>
-              </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-3">Category</label>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={category === 'all' ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setCategory('all')}
+              >
+                Overall
+              </Button>
+              <Button
+                variant={category === 'problems' ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setCategory('problems')}
+              >
+                Problems Solved
+              </Button>
+              <Button
+                variant={category === 'solutions' ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setCategory('solutions')}
+              >
+                Best Solutions
+              </Button>
+              <Button
+                variant={category === 'community' ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setCategory('community')}
+              >
+                Community
+              </Button>
             </div>
           </div>
         </div>
+      </Card>
 
-        <div className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden">
-          <table className="min-w-full divide-y divide-dark-700">
-            <thead className="bg-dark-700">
+      {/* Leaderboard Table */}
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-300 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Rank
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-300 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   User
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-300 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Problems Solved
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-300 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   University
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-300 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Achievement
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-dark-800 divide-y divide-dark-700">
+            <tbody className="bg-card divide-y divide-border">
               {leaderboard.map((user) => (
-                <tr key={user.userId} className="hover:bg-dark-700">
+                <tr key={user.userId} className="hover:bg-muted/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center justify-center w-8 h-8">
                       {getRankIcon(user.rank)}
@@ -149,18 +133,18 @@ const LeaderboardPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center">
-                        <span className="text-dark-900 font-medium">{user.userName.charAt(0)}</span>
+                      <div className="flex-shrink-0 h-10 w-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                        <span className="font-medium">{user.userName.charAt(0)}</span>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-dark-50">{user.userName}</div>
+                        <div className="text-sm font-medium text-foreground">{user.userName}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-200">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                     {user.problemsSolved}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {user.rank === 1 && "Harvard Business School"}
                     {user.rank === 2 && "Stanford GSB"}
                     {user.rank === 3 && "Wharton"}
@@ -168,15 +152,15 @@ const LeaderboardPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {user.rank <= 3 ? (
-                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-900 text-yellow-200">
+                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-warning/10 text-warning">
                         Top Performer
                       </span>
                     ) : user.rank <= 5 ? (
-                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-900 text-emerald-200">
+                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-success/10 text-success">
                         Rising Star
                       </span>
                     ) : (
-                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-dark-700 text-dark-300">
+                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-muted text-muted-foreground">
                         Case Solver
                       </span>
                     )}
@@ -186,19 +170,17 @@ const LeaderboardPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-        
-        <div className="mt-8 text-center">
-          <p className="text-sm text-dark-400 mb-4">
-            Rankings are updated daily. Keep solving problems to improve your position!
-          </p>
-          <a 
-            href="#" 
-            className="inline-flex items-center text-emerald-500 hover:text-emerald-400"
-          >
-            <Trophy className="h-4 w-4 mr-1" />
-            View historical rankings
-          </a>
-        </div>
+      </Card>
+      
+      {/* Footer */}
+      <div className="text-center space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Rankings are updated daily. Keep solving problems to improve your position!
+        </p>
+        <Button variant="outline" className="gap-2">
+          <Trophy className="h-4 w-4" />
+          View historical rankings
+        </Button>
       </div>
     </div>
   );
