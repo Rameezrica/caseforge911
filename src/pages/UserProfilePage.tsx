@@ -128,26 +128,26 @@ const UserProfilePage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-6 rounded-2xl border border-dark-700 bg-dark-800/50 backdrop-blur-sm"
+        className="p-6 rounded-2xl border border-gray-200 bg-white/50 backdrop-blur-sm dark:border-dark-700 dark:bg-dark-800/50"
       >
         <div className="flex flex-col md:flex-row items-start gap-6">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 dark:from-brand-500 dark:to-brand-600 flex items-center justify-center">
             <UserIcon className="h-12 w-12 text-white" />
           </div>
           
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-4">
-              <h1 className="text-3xl font-bold text-white">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {user?.full_name || user?.username}
               </h1>
               <button
                 onClick={handleEditToggle}
-                className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors"
+                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-dark-700 dark:hover:bg-dark-600 transition-colors"
               >
                 {isEditing ? (
-                  <X className="h-4 w-4 text-gray-400" />
+                  <X className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 ) : (
-                  <Edit3 className="h-4 w-4 text-gray-400" />
+                  <Edit3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 )}
               </button>
             </div>
@@ -155,30 +155,30 @@ const UserProfilePage: React.FC = () => {
             {isEditing ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Full Name
                   </label>
                   <input
                     type="text"
                     value={editForm.full_name}
                     onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 dark:bg-dark-700 dark:border-dark-600 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     value={editForm.email}
                     onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 dark:bg-dark-700 dark:border-dark-600 dark:text-white"
                   />
                 </div>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-brand-600 dark:hover:bg-brand-700 text-white rounded-lg transition-colors"
                 >
                   <Save className="h-4 w-4" />
                   Save Changes
@@ -186,15 +186,15 @@ const UserProfilePage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-gray-300">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                   <UserIcon className="h-4 w-4" />
                   <span>@{user?.username}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-300">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                   <Mail className="h-4 w-4" />
                   <span>{user?.email}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-300">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                   <Calendar className="h-4 w-4" />
                   <span>Joined {joinDate}</span>
                 </div>
@@ -203,18 +203,39 @@ const UserProfilePage: React.FC = () => {
           </div>
 
           <div className="flex gap-2">
-            <button className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors">
-              <Settings className="h-5 w-5 text-gray-400" />
+            <button 
+              onClick={() => setShowThemeSelector(!showThemeSelector)}
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-dark-700 dark:hover:bg-dark-600 transition-colors"
+              title="Theme Settings"
+            >
+              <Palette className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            </button>
+            <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-dark-700 dark:hover:bg-dark-600 transition-colors">
+              <Settings className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             </button>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 transition-colors"
+              className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-600/20 dark:hover:bg-red-600/30 transition-colors"
             >
-              <LogOut className="h-5 w-5 text-red-400" />
+              <LogOut className="h-5 w-5 text-red-600 dark:text-red-400" />
             </button>
           </div>
         </div>
       </motion.div>
+
+      {/* Theme Selector */}
+      {showThemeSelector && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="overflow-hidden"
+        >
+          <div className="p-6 rounded-2xl border border-gray-200 bg-white/50 backdrop-blur-sm dark:border-dark-700 dark:bg-dark-800/50">
+            <ThemeSelector />
+          </div>
+        </motion.div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
