@@ -724,7 +724,7 @@ async def create_problem(problem: Problem, admin_user=Depends(get_admin_user)):
     problem_data["created_at"] = datetime.now()
     
     MOCK_PROBLEMS.append(problem_data)
-    return {"message": "Problem created successfully", "problem": problem_data}
+    return problem_data
 
 @app.put("/api/admin/problems/{problem_id}")
 async def update_problem(
