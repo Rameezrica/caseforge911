@@ -62,6 +62,7 @@ export interface AuthContextType {
   signUp: (email: string, password: string, username: string, fullName?: string) => Promise<boolean>;
   signIn: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>; // Add alias for signOut
   refreshUserData: () => Promise<void>;
   clearError: () => void;
 }
