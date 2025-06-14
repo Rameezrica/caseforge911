@@ -118,32 +118,32 @@ const HomePage = () => {
       duration: '12 weeks',
       problems: 120,
       progress: 0,
-      icon: <TrendingUp className="h-5 w-5" />,
-      gradient: 'from-emerald-500 to-teal-600'
+      icon: <TrendingUp className="h-4 w-4" />,
+      color: 'domain-finance'
     },
     {
       title: 'Consulting Track',
       duration: '16 weeks',
       problems: 160,
       progress: 0,
-      icon: <Briefcase className="h-5 w-5" />,
-      gradient: 'from-blue-500 to-cyan-600'
+      icon: <Briefcase className="h-4 w-4" />,
+      color: 'domain-strategy'
     },
     {
       title: 'Product Management',
       duration: '10 weeks',
       problems: 100,
       progress: 0,
-      icon: <Rocket className="h-5 w-5" />,
-      gradient: 'from-purple-500 to-pink-600'
+      icon: <Rocket className="h-4 w-4" />,
+      color: 'domain-operations'
     },
     {
       title: 'Data Analytics',
       duration: '8 weeks',
       problems: 80,
       progress: 0,
-      icon: <BarChart2 className="h-5 w-5" />,
-      gradient: 'from-orange-500 to-red-600'
+      icon: <BarChart2 className="h-4 w-4" />,
+      color: 'domain-analytics'
     }
   ];
 
