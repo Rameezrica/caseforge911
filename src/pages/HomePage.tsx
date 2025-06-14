@@ -157,7 +157,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <section className="py-12 lg:py-20">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 bg-primary text-primary-foreground rounded-xl">
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 bg-primary text-primary-foreground rounded-xl elevation-2">
             <Brain className="h-8 w-8" />
           </div>
           
@@ -167,7 +167,7 @@ const HomePage = () => {
             <span className="text-foreground">Like Never Before</span>
           </h1>
           
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-win11-gray-600 mb-8 max-w-3xl mx-auto">
             Transform your business acumen with practical case studies across Finance, Operations, Strategy, Marketing & Analytics
           </p>
           
