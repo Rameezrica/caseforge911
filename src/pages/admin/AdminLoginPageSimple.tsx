@@ -12,7 +12,8 @@ const AdminLoginPageSimple: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Only redirect if authenticated and not already navigating
+    if (isAuthenticated && window.location.pathname === '/admin/login') {
       navigate('/admin', { replace: true });
     }
   }, [isAuthenticated, navigate]);
