@@ -33,6 +33,7 @@ const AdminDashboardPage: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       if (!session?.access_token) {
         throw new Error('No admin token available');
@@ -46,14 +47,22 @@ const AdminDashboardPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch dashboard data');
+        throw new Error(`Failed to fetch dashboard data: ${response.status}`);
       }
 
       const data = await response.json();
       setStats(data);
-      setError(null);
     } catch (err: any) {
+      console.error('Error loading dashboard data:', err);
       setError(err.message || 'Failed to load dashboard data');
+      // Set fallback data
+      setStats({
+        total_problems: 5,
+        total_users: 10,
+        total_solutions: 0,
+        active_competitions: 0,
+        recent_activity: [],
+      });
     } finally {
       setLoading(false);
     }
@@ -110,8 +119,10 @@ const AdminDashboardPage: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg">
+          <p className="font-medium">Notice:</p>
+          <p>{error}</p>
+          <p className="text-sm mt-1">Showing fallback data. Please check your connection.</p>
         </div>
       )}
 
