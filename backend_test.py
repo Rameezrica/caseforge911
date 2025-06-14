@@ -177,7 +177,7 @@ class CaseForgeBackendTester:
     def test_admin_login(self):
         """Test admin login and get token"""
         login_data = {
-            "email": "rameezuddinmohammed61@gmail.com",
+            "email": "admin@caseforge.com",
             "password": "Qwerty9061#"
         }
         
