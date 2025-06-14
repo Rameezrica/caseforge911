@@ -567,7 +567,7 @@ async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
         return {
             "total_problems": len(MOCK_PROBLEMS),
             "total_users": len(FALLBACK_USERS) if FALLBACK_MODE else 10,
-            "total_solutions": 0,
+            "total_solutions": len(MOCK_SOLUTIONS),
             "active_competitions": 0,
             "recent_activity": []
         }
