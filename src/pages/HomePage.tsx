@@ -8,11 +8,13 @@ import {
 } from 'lucide-react';
 import DailyChallengeWidget from '../components/home/DailyChallengeWidget';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ProfileSection from '../components/profile/ProfileSection';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { useStats } from '../hooks/useStats';
 import { useDailyChallenge } from '../hooks/useDailyChallenge';
 import { useProblems } from '../hooks/useProblems';
+import { useAuth } from '../context/AuthContext';
 
 const HomePage = () => {
   const { stats, loading: statsLoading } = useStats();
