@@ -77,7 +77,7 @@ const StudyPlansPage: React.FC = () => {
       progress: 0,
       locked: true,
       comingSoon: true,
-      icon: <BarChart2 className="h-6 w-6 text-orange-500" />,
+      icon: <BarChart2 className="h-6 w-6 text-orange-600" />,
       topics: ['Data Analysis', 'Business Metrics', 'Visualization', 'SQL'],
       skills: ['Data Analysis', 'Dashboard Creation', 'Statistical Analysis']
     }
