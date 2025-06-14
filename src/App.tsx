@@ -165,6 +165,7 @@ const App: React.FC = () => {
               >
                 <Route index element={<AdminDashboardPage />} />
                 <Route path="problems" element={<AdminProblemsPage />} />
+                <Route path="solutions" element={<AdminSolutionsPage />} />
                 <Route path="competitions" element={<AdminCompetitionsPage />} />
               </Route>
 
