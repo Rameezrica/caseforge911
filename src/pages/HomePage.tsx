@@ -15,9 +15,9 @@ import { useDailyChallenge } from '../hooks/useDailyChallenge';
 import { useProblems } from '../hooks/useProblems';
 
 const HomePage = () => {
-  const { stats, loading: statsLoading, isServerOnline: statsOnline, retry: retryStats } = useStats();
-  const { challenge, loading: challengeLoading, isServerOnline: challengeOnline, retry: retryChallenge } = useDailyChallenge();
-  const { problems, loading: problemsLoading, isServerOnline: problemsOnline, retry: retryProblems } = useProblems({ limit: 10 });
+  const { stats, loading: statsLoading } = useStats();
+  const { challenge, loading: challengeLoading } = useDailyChallenge();
+  const { problems, loading: problemsLoading } = useProblems({ limit: 10 });
   
   const totalProblems = stats?.total_problems || 0;
   const solvedCount = 0;
@@ -26,20 +26,12 @@ const HomePage = () => {
   const nextMilestone = 25;
   const [loading, setLoading] = useState(true);
 
-  const isAnyServiceOffline = !statsOnline || !challengeOnline || !problemsOnline;
-
   useEffect(() => {
     if (!statsLoading && !challengeLoading && !problemsLoading) {
       const timer = setTimeout(() => setLoading(false), 500);
       return () => clearTimeout(timer);
     }
   }, [statsLoading, challengeLoading, problemsLoading]);
-
-  const handleRetryAll = () => {
-    retryStats();
-    retryChallenge();
-    retryProblems();
-  };
 
   if (loading) {
     return (
