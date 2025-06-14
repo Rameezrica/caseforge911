@@ -5,6 +5,8 @@ import {
   Briefcase, BarChart2, Users, CheckCircle,
   Lock, Star, Clock
 } from 'lucide-react';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
 interface StudyPlan {
   id: string;
