@@ -13,10 +13,10 @@ const LeaderboardPage: React.FC = () => {
   }, []);
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Trophy className="h-5 w-5 text-yellow-500" />;
-    if (rank === 2) return <Medal className="h-5 w-5 text-gray-400" />;
-    if (rank === 3) return <Medal className="h-5 w-5 text-amber-700" />;
-    return <span className="text-gray-600 font-medium">{rank}</span>;
+    if (rank === 1) return <Trophy className="h-5 w-5 text-warning" />;
+    if (rank === 2) return <Medal className="h-5 w-5 text-muted-foreground" />;
+    if (rank === 3) return <Medal className="h-5 w-5 text-orange-600" />;
+    return <span className="text-muted-foreground font-medium">{rank}</span>;
   };
 
   return (
