@@ -63,7 +63,7 @@ const StudyPlansPage: React.FC = () => {
       progress: 0,
       locked: true,
       comingSoon: true,
-      icon: <Target className="h-6 w-6 text-purple-500" />,
+      icon: <Target className="h-6 w-6 text-purple-600" />,
       topics: ['Product Strategy', 'Market Analysis', 'UX Design', 'Roadmap Planning'],
       skills: ['Product Development', 'User Research', 'Stakeholder Management']
     },
