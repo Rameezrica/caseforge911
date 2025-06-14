@@ -282,17 +282,6 @@ const AdminProblemsPage: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Time Limit (minutes)</label>
-                    <input
-                      type="number"
-                      value={formData.time_limit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, time_limit: parseInt(e.target.value) }))}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
                     <label className="block text-sm font-medium text-gray-700">Category</label>
                     <input
                       type="text"
@@ -302,6 +291,8 @@ const AdminProblemsPage: React.FC = () => {
                       required
                     />
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Domain</label>
                     <input
@@ -312,24 +303,15 @@ const AdminProblemsPage: React.FC = () => {
                       required
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Company (Optional)</label>
-                  <input
-                    type="text"
-                    value={formData.company}
-                    onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Sample Framework (Optional)</label>
-                  <input
-                    type="text"
-                    value={formData.sample_framework}
-                    onChange={(e) => setFormData(prev => ({ ...prev, sample_framework: e.target.value }))}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Company (Optional)</label>
+                    <input
+                      type="text"
+                      value={formData.company}
+                      onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
