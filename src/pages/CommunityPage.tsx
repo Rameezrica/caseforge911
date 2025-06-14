@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   MessageSquare, TrendingUp, Clock, Award, Filter, Search, Plus,
-  ChevronRight, ChevronLeft, ThumbsUp, Share, Bookmark, Users
+  ChevronRight, ChevronLeft, ThumbsUp, Share, Bookmark, Users,
+  ArrowUp, ArrowDown
 } from 'lucide-react';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
 const CommunityPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'hot' | 'new' | 'top' | 'rising'>('hot');
