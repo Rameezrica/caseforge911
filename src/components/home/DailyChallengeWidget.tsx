@@ -4,6 +4,8 @@ import {
   Calendar, Clock, Users, Trophy, 
   Flame, ArrowRight, TrendingUp, MessageSquare 
 } from 'lucide-react';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 import { DailyChallenge } from '../../services/api';
 
 interface DailyChallengeWidgetProps {
