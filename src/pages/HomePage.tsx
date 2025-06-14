@@ -20,12 +20,15 @@ const HomePage = () => {
   const { stats, loading: statsLoading } = useStats();
   const { challenge, loading: challengeLoading } = useDailyChallenge();
   const { problems, loading: problemsLoading } = useProblems({ limit: 10 });
+  const { user, userProgress } = useAuth();
   
   const totalProblems = stats?.total_problems || 0;
-  const solvedCount = 0;
-  const currentStreak = 7;
-  const skillLevel = "Beginner";
-  const nextMilestone = 25;
+  const solvedCount = userProgress?.total_problems_solved || 0;
+  const currentStreak = userProgress?.current_streak || 0;
+  const skillLevel = userProgress?.total_score >= 1000 ? "Expert" :
+                    userProgress?.total_score >= 500 ? "Advanced" :
+                    userProgress?.total_score >= 100 ? "Intermediate" : "Beginner";
+  const nextMilestone = solvedCount < 25 ? 25 : solvedCount < 50 ? 50 : solvedCount < 100 ? 100 : 250;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
