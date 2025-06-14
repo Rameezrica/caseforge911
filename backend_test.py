@@ -177,7 +177,7 @@ class CaseForgeBackendTester:
     def test_admin_login(self):
         """Test admin login and get token"""
         login_data = {
-            "email": "rameezuddinmohammed61@gmail.com",
+            "email": "admin@caseforge.com",
             "password": "Qwerty9061#"
         }
         
@@ -287,8 +287,8 @@ class CaseForgeBackendTester:
             admin=True
         )
         
-        if success and 'problem' in response and 'id' in response['problem']:
-            self.test_problem_id = response['problem']['id']
+        if success and 'id' in response:
+            self.test_problem_id = response['id']
             print(f"✅ Successfully created test problem with ID: {self.test_problem_id}")
         
         return success, response
@@ -409,7 +409,7 @@ class CaseForgeBackendTester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = "http://localhost:8001/api"
+    api_url = os.getenv("REACT_APP_BACKEND_URL", "http://localhost:8001") + "/api"
     
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
