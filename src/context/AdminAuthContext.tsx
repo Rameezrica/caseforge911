@@ -214,8 +214,8 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
       const data = await response.json();
       
-      if (FALLBACK_MODE) {
-        // In fallback mode, store tokens locally and create local session
+      if (FALLBACK_MODE || true) { // Always use fallback mode for admin
+        // Store tokens locally and create local session
         const userData: FallbackAdminUser = {
           id: data.user.id,
           email: data.user.email,
@@ -232,7 +232,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
           user: userData
         };
 
-        // Store in localStorage
+        // Store in localStorage with proper keys
         localStorage.setItem('caseforge_admin_access_token', data.access_token);
         localStorage.setItem('caseforge_admin_refresh_token', data.refresh_token);
         localStorage.setItem('caseforge_admin_user', JSON.stringify(userData));
@@ -271,27 +271,20 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     try {
       setError(null);
       
-      if (FALLBACK_MODE) {
-        // In fallback mode, clear local storage and state
-        clearAdminLocalStorage();
-        setAdminUser(null);
-        setSession(null);
-        setIsAuthenticated(false);
-      } else {
-        // Use Supabase sign out
+      // Always clear local storage for admin
+      clearAdminLocalStorage();
+      setAdminUser(null);
+      setSession(null);
+      setIsAuthenticated(false);
+      
+      if (!FALLBACK_MODE) {
+        // Also sign out from Supabase if not in fallback mode
         await supabase.auth.signOut();
-        
-        // Clear local state
-        setAdminUser(null);
-        setSession(null);
-        setIsAuthenticated(false);
       }
     } catch (error: any) {
       console.error('Admin sign out error:', error);
       // Even if sign out fails, clear local state
-      if (FALLBACK_MODE) {
-        clearAdminLocalStorage();
-      }
+      clearAdminLocalStorage();
       setAdminUser(null);
       setSession(null);
       setIsAuthenticated(false);
