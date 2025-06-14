@@ -250,10 +250,10 @@ const UserProfilePage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="p-4 rounded-xl border border-dark-700 bg-dark-800/50 text-center"
+            className="p-4 rounded-xl border border-gray-200 bg-white/50 text-center dark:border-dark-700 dark:bg-dark-800/50"
           >
-            <p className="text-2xl font-bold text-white">{stat.value}</p>
-            <p className="text-gray-400 text-sm">{stat.label}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">{stat.label}</p>
           </motion.div>
         ))}
       </div>
