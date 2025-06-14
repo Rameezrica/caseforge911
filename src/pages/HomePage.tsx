@@ -194,7 +194,7 @@ const HomePage = () => {
 
       {/* Stats Cards */}
       <section className="mb-12">
-        <Card className="p-6">
+        <div className="win11-card">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
@@ -227,19 +227,19 @@ const HomePage = () => {
               }
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className={`inline-flex items-center justify-center w-10 h-10 mb-3 rounded-lg bg-accent ${stat.color}`}>
+                <div className={`inline-flex items-center justify-center w-12 h-12 mb-4 rounded-xl bg-win11-gray-100 ${stat.color} elevation-1`}>
                   {stat.icon}
                 </div>
-                <h3 className="text-sm text-muted-foreground mb-1">{stat.label}</h3>
-                <p className="text-2xl font-bold mb-1">{stat.value}</p>
+                <h3 className="text-sm text-win11-gray-600 mb-2 font-medium">{stat.label}</h3>
+                <p className="text-2xl font-bold mb-1 text-foreground">{stat.value}</p>
                 {stat.subtitle && (
-                  <p className="text-xs text-muted-foreground">{stat.subtitle}</p>
+                  <p className="text-xs text-win11-gray-500">{stat.subtitle}</p>
                 )}
                 {stat.progress !== undefined && (
-                  <div className="mt-2">
-                    <div className="w-full bg-muted rounded-full h-1.5">
+                  <div className="mt-3">
+                    <div className="w-full bg-win11-gray-200 rounded-full h-2">
                       <div 
-                        className={`h-1.5 rounded-full bg-primary`}
+                        className={`h-2 rounded-full bg-primary transition-all duration-500`}
                         style={{ width: `${stat.progress}%` }}
                       />
                     </div>
@@ -248,7 +248,7 @@ const HomePage = () => {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       </section>
 
       {/* Quick Start */}
