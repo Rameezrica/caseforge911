@@ -84,84 +84,75 @@ const StudyPlansPage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="bg-dark-800 rounded-xl border border-dark-700 p-8">
+    <div className="container py-8 space-y-8">
+      {/* Header */}
+      <Card className="p-8">
         <div className="max-w-3xl">
-          <h1 className="text-3xl font-bold text-dark-50 mb-3">Study Plans</h1>
-          <p className="text-dark-400 mb-6">
+          <h1 className="text-4xl font-bold text-foreground mb-4">Study Plans</h1>
+          <p className="text-muted-foreground mb-6 text-lg">
             Follow structured learning paths to master specific business domains and prepare for your career
           </p>
-          <div className="flex space-x-4">
-            <button
+          <div className="flex space-x-2">
+            <Button
+              variant={activeTab === 'all' ? 'secondary' : 'outline'}
               onClick={() => setActiveTab('all')}
-              className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                activeTab === 'all'
-                  ? 'bg-emerald-500 text-dark-900'
-                  : 'bg-dark-700 text-dark-400 hover:text-dark-200'
-              }`}
             >
               All Plans
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={activeTab === 'my-plans' ? 'secondary' : 'outline'}
               onClick={() => setActiveTab('my-plans')}
-              className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                activeTab === 'my-plans'
-                  ? 'bg-emerald-500 text-dark-900'
-                  : 'bg-dark-700 text-dark-400 hover:text-dark-200'
-              }`}
             >
               My Plans
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Study Plans Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {studyPlans.map(plan => (
-          <div 
-            key={plan.id}
-            className="bg-dark-800 rounded-xl border border-dark-700 p-6 relative"
-          >
+          <Card key={plan.id} className="p-6 relative">
             {plan.locked && !plan.comingSoon && (
               <div className="absolute top-4 right-4">
-                <Lock className="h-5 w-5 text-dark-400" />
+                <Lock className="h-5 w-5 text-muted-foreground" />
               </div>
             )}
             
             <div className="flex items-start space-x-4">
-              <div className="p-3 bg-dark-700 rounded-lg">
+              <div className="p-3 bg-muted rounded-lg">
                 {plan.icon}
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-semibold text-dark-50 mb-2">{plan.title}</h3>
-                <p className="text-dark-400 mb-4">{plan.description}</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">{plan.title}</h3>
+                <p className="text-muted-foreground mb-4">{plan.description}</p>
                 
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="flex items-center text-dark-400">
+                  <div className="flex items-center text-muted-foreground">
                     <Clock className="h-4 w-4 mr-2" />
                     {plan.duration}
                   </div>
-                  <div className="flex items-center text-dark-400">
+                  <div className="flex items-center text-muted-foreground">
                     <BookOpen className="h-4 w-4 mr-2" />
                     {plan.problemCount} problems
                   </div>
-                  <div className="flex items-center text-dark-400">
+                  <div className="flex items-center text-muted-foreground">
                     <Target className="h-4 w-4 mr-2" />
                     {plan.difficulty}
                   </div>
-                  <div className="flex items-center text-dark-400">
+                  <div className="flex items-center text-muted-foreground">
                     <Users className="h-4 w-4 mr-2" />
                     1.2k enrolled
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <div className="text-sm text-dark-400 mb-2">Topics covered:</div>
+                  <div className="text-sm text-muted-foreground mb-2">Topics covered:</div>
                   <div className="flex flex-wrap gap-2">
                     {plan.topics.map((topic, index) => (
                       <span 
                         key={index}
-                        className="px-2 py-1 bg-dark-700 text-dark-200 rounded-full text-sm"
+                        className="px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-sm"
                       >
                         {topic}
                       </span>
@@ -170,12 +161,12 @@ const StudyPlansPage: React.FC = () => {
                 </div>
 
                 <div className="mb-6">
-                  <div className="text-sm text-dark-400 mb-2">Skills you'll gain:</div>
+                  <div className="text-sm text-muted-foreground mb-2">Skills you'll gain:</div>
                   <div className="flex flex-wrap gap-2">
                     {plan.skills.map((skill, index) => (
                       <span 
                         key={index}
-                        className="flex items-center px-2 py-1 bg-dark-700 text-dark-200 rounded-full text-sm"
+                        className="flex items-center px-2 py-1 bg-success/10 text-success rounded-full text-sm"
                       >
                         <CheckCircle className="h-3 w-3 mr-1" />
                         {skill}
@@ -185,32 +176,28 @@ const StudyPlansPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center text-dark-400">
-                    <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                  <div className="flex items-center text-muted-foreground">
+                    <Star className="h-4 w-4 text-warning mr-1" />
                     <span>4.8</span>
                     <span className="mx-1">•</span>
                     <span>2.1k reviews</span>
                   </div>
                   {plan.comingSoon ? (
-                    <div className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-medium">
+                    <span className="px-4 py-2 bg-info/10 text-info rounded-lg text-sm font-medium">
                       Coming Soon
-                    </div>
+                    </span>
                   ) : (
-                    <button
-                      className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                        plan.locked
-                          ? 'bg-dark-700 text-dark-400 cursor-not-allowed'
-                          : 'bg-emerald-500 text-dark-900 hover:bg-emerald-600'
-                      }`}
+                    <Button
+                      variant={plan.locked ? 'outline' : 'default'}
                       disabled={plan.locked}
                     >
                       {plan.locked ? 'Premium Plan' : 'Start Learning'}
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>
