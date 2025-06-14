@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   MessageSquare, TrendingUp, Clock, Award, Filter, Search, Plus,
-  ChevronRight, ChevronLeft, ThumbsUp, Share, Bookmark, Users
+  ChevronRight, ChevronLeft, ThumbsUp, Share, Bookmark, Users,
+  ArrowUp, ArrowDown
 } from 'lucide-react';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
 const CommunityPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'hot' | 'new' | 'top' | 'rising'>('hot');
@@ -63,173 +66,185 @@ const CommunityPage: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="container py-8">
       <div className="flex gap-6">
         <div className="flex-1">
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 mb-6">
+          {/* Create Post */}
+          <Card className="p-4 mb-6">
             <Link 
               to="/community/create-post"
-              className="flex items-center space-x-4 text-dark-400"
+              className="flex items-center space-x-4 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <div className="h-10 w-10 rounded-full bg-dark-700 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
                 <Plus className="h-5 w-5" />
               </div>
-              <div className="flex-1 px-4 py-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors duration-200">
+              <div className="flex-1 px-4 py-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
                 Create Post
               </div>
             </Link>
-          </div>
+          </Card>
 
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 mb-6">
-            <div className="flex space-x-4">
-              <button 
+          {/* Sort Controls */}
+          <Card className="p-4 mb-6">
+            <div className="flex space-x-2">
+              <Button 
+                variant={sortBy === 'hot' ? 'secondary' : 'ghost'}
+                size="sm"
                 onClick={() => setSortBy('hot')}
-                className={`flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
-                  sortBy === 'hot' ? 'bg-dark-700 text-emerald-500' : 'text-dark-400 hover:bg-dark-700'
-                }`}
+                className="gap-2"
               >
-                <TrendingUp className="h-4 w-4 mr-2" />
+                <TrendingUp className="h-4 w-4" />
                 Hot
-              </button>
-              <button 
+              </Button>
+              <Button 
+                variant={sortBy === 'new' ? 'secondary' : 'ghost'}
+                size="sm"
                 onClick={() => setSortBy('new')}
-                className={`flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
-                  sortBy === 'new' ? 'bg-dark-700 text-emerald-500' : 'text-dark-400 hover:bg-dark-700'
-                }`}
+                className="gap-2"
               >
-                <Clock className="h-4 w-4 mr-2" />
+                <Clock className="h-4 w-4" />
                 New
-              </button>
-              <button 
+              </Button>
+              <Button 
+                variant={sortBy === 'top' ? 'secondary' : 'ghost'}
+                size="sm"
                 onClick={() => setSortBy('top')}
-                className={`flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
-                  sortBy === 'top' ? 'bg-dark-700 text-emerald-500' : 'text-dark-400 hover:bg-dark-700'
-                }`}
+                className="gap-2"
               >
-                <Award className="h-4 w-4 mr-2" />
+                <Award className="h-4 w-4" />
                 Top
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
 
+          {/* Posts */}
           <div className="space-y-4">
             {mockPosts.map((post) => (
-              <div key={post.id} className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+              <Card key={post.id} className="p-6">
                 <div className="flex items-start space-x-4">
+                  {/* Voting */}
                   <div className="flex flex-col items-center space-y-2">
-                    <button className="text-dark-400 hover:text-emerald-500 transition-colors duration-200">
-                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                      </svg>
-                    </button>
-                    <span className="text-dark-200 font-medium">{post.votes}</span>
-                    <button className="text-dark-400 hover:text-red-500 transition-colors duration-200">
-                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                    <span className="text-foreground font-medium text-sm">{post.votes}</span>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
                   </div>
+                  
+                  {/* Content */}
                   <div className="flex-1">
-                    <div className="flex items-center space-x-2 text-sm text-dark-400 mb-2">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-2">
                       <span>Posted by</span>
-                      <a href="#" className="hover:text-emerald-500 transition-colors duration-200">{post.author}</a>
+                      <a href="#" className="hover:text-primary transition-colors">{post.author}</a>
                       <span>{post.postedAt}</span>
                     </div>
-                    <h2 className="text-xl font-semibold text-dark-50 mb-2">
+                    <h2 className="text-xl font-semibold text-foreground mb-2">
                       {post.title}
                     </h2>
-                    <p className="text-dark-300 mb-4">
+                    <p className="text-muted-foreground mb-4">
                       {post.content}
                     </p>
+                    
+                    {/* Tags */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {post.tags.map((tag, index) => (
                         <span 
                           key={index}
-                          className="px-2 py-1 bg-dark-700 text-dark-200 rounded-full text-sm"
+                          className="px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-sm"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <div className="flex items-center space-x-4 text-dark-400">
-                      <button className="flex items-center space-x-2 hover:text-dark-200 transition-colors duration-200">
+                    
+                    {/* Actions */}
+                    <div className="flex items-center space-x-4 text-muted-foreground">
+                      <Button variant="ghost" size="sm" className="gap-2 h-auto p-0">
                         <MessageSquare className="h-4 w-4" />
                         <span>{post.commentCount} Comments</span>
-                      </button>
-                      <button className="flex items-center space-x-2 hover:text-dark-200 transition-colors duration-200">
+                      </Button>
+                      <Button variant="ghost" size="sm" className="gap-2 h-auto p-0">
                         <Share className="h-4 w-4" />
                         <span>Share</span>
-                      </button>
-                      <button className="flex items-center space-x-2 hover:text-dark-200 transition-colors duration-200">
+                      </Button>
+                      <Button variant="ghost" size="sm" className="gap-2 h-auto p-0">
                         <Bookmark className="h-4 w-4" />
                         <span>Save</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
 
+        {/* Sidebar */}
         <div className={`transition-all duration-300 ${sidebarOpen ? 'w-80' : 'w-12'}`}>
           <div className="relative">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="absolute -left-3 top-1/2 transform -translate-y-1/2 bg-dark-700 rounded-full p-1 text-dark-400 hover:text-dark-200 transition-colors duration-200"
+              className="absolute -left-3 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 bg-card border shadow-sm"
             >
               {sidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </button>
+            </Button>
             
             <div className={`space-y-6 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
-              <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                <h2 className="text-lg font-semibold text-dark-50 mb-4">About Community</h2>
-                <p className="text-dark-300 mb-6">
+              {/* About Community */}
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">About Community</h2>
+                <p className="text-muted-foreground mb-6">
                   A place to discuss business cases, share insights, and help each other prepare for case interviews.
                 </p>
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-dark-400">Members</span>
-                    <span className="text-dark-200 font-medium">12.5k</span>
+                    <span className="text-muted-foreground">Members</span>
+                    <span className="text-foreground font-medium">12.5k</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-dark-400">Online</span>
-                    <span className="text-dark-200 font-medium">234</span>
+                    <span className="text-muted-foreground">Online</span>
+                    <span className="text-foreground font-medium">234</span>
                   </div>
                 </div>
-              </div>
+              </Card>
 
-              <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                <h2 className="text-lg font-semibold text-dark-50 mb-4">Community Rules</h2>
+              {/* Community Rules */}
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Community Rules</h2>
                 <ol className="space-y-4">
                   <li className="flex items-start">
-                    <span className="text-dark-200 font-medium mr-2">1.</span>
-                    <span className="text-dark-300">Be respectful and helpful</span>
+                    <span className="text-foreground font-medium mr-2">1.</span>
+                    <span className="text-muted-foreground">Be respectful and helpful</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-dark-200 font-medium mr-2">2.</span>
-                    <span className="text-dark-300">No spam or self-promotion</span>
+                    <span className="text-foreground font-medium mr-2">2.</span>
+                    <span className="text-muted-foreground">No spam or self-promotion</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-dark-200 font-medium mr-2">3.</span>
-                    <span className="text-dark-300">Use appropriate post flairs</span>
+                    <span className="text-foreground font-medium mr-2">3.</span>
+                    <span className="text-muted-foreground">Use appropriate post flairs</span>
                   </li>
                 </ol>
-              </div>
+              </Card>
 
-              <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                <h2 className="text-lg font-semibold text-dark-50 mb-4">Moderators</h2>
+              {/* Moderators */}
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Moderators</h2>
                 <div className="space-y-3">
                   <div className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-dark-700"></div>
-                    <span className="ml-2 text-dark-200">moderator1</span>
+                    <div className="h-8 w-8 rounded-full bg-muted"></div>
+                    <span className="ml-2 text-foreground">moderator1</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-dark-700"></div>
-                    <span className="ml-2 text-dark-200">moderator2</span>
+                    <div className="h-8 w-8 rounded-full bg-muted"></div>
+                    <span className="ml-2 text-foreground">moderator2</span>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         </div>

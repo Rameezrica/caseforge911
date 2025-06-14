@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate, matchPath } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Briefcase, Search, Clock, Menu, X,
+  Search, Menu, X,
   Home, BookOpen, Trophy, Users, User, 
   Target, BarChart3, Calendar, 
-  Code, Layers, Zap, ChevronRight,
-  Brain, LogIn, UserPlus, Settings,
-  LogOut, Gauge
+  ChevronDown, LogIn, UserPlus, 
+  LogOut, Gauge, Settings
 } from 'lucide-react';
 import ThemeToggle from '../common/ThemeToggle';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
 import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
@@ -23,12 +19,12 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
 
   const navigationItems = [
-    { icon: Home, label: 'Home', path: '/', gradient: 'from-blue-500 to-cyan-500' },
-    { icon: BookOpen, label: 'Problems', path: '/problems', gradient: 'from-emerald-500 to-teal-500' },
-    { icon: Target, label: 'Study Plans', path: '/study-plans', gradient: 'from-purple-500 to-pink-500' },
-    { icon: Trophy, label: 'Contests', path: '/contests', gradient: 'from-yellow-500 to-orange-500' },
-    { icon: Users, label: 'Community', path: '/community', gradient: 'from-indigo-500 to-purple-500' },
-    { icon: BarChart3, label: 'Leaderboard', path: '/leaderboard', gradient: 'from-red-500 to-pink-500' },
+    { icon: Home, label: 'Home', path: '/' },
+    { icon: BookOpen, label: 'Problems', path: '/problems' },
+    { icon: Target, label: 'Study Plans', path: '/study-plans' },
+    { icon: Trophy, label: 'Contests', path: '/contests' },
+    { icon: Users, label: 'Community', path: '/community' },
+    { icon: BarChart3, label: 'Leaderboard', path: '/leaderboard' },
   ];
 
   const userMenuItems = [
@@ -63,388 +59,262 @@ const Navbar = () => {
     const match = location.pathname.match(/\/solve\/(.+)$/);
     const problemId = match ? match[1] : '';
     return (
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200 dark:bg-dark-900/80 dark:backdrop-blur-xl dark:border-white/10"
-      >
-        <div className="container-lg">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center group">
-              <motion.div 
-                className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-brand-500 dark:to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg dark:shadow-neon"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <Brain className="h-5 w-5 text-white" />
-              </motion.div>
-              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                CaseForge
-              </span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center text-dark-400">
-                <Clock className="h-5 w-5 mr-2" />
-                <span className="font-medium">Solving Mode</span>
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container">
+          <div className="flex h-14 items-center justify-between">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <BookOpen className="h-4 w-4" />
               </div>
-              <Button
-                variant="glass"
+              <span className="text-lg font-semibold">CaseForge</span>
+            </Link>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center text-muted-foreground">
+                <Calendar className="mr-2 h-4 w-4" />
+                <span className="text-sm font-medium">Solving Mode</span>
+              </div>
+              <button
                 onClick={() => navigate(`/problem/${problemId}`)}
+                className="btn btn-outline btn-sm"
               >
                 Back to Problem
-              </Button>
+              </button>
             </div>
           </div>
         </div>
-      </motion.nav>
+      </nav>
     );
   }
 
   const showSearch = location.pathname !== '/';
 
   return (
-    <motion.nav 
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200 dark:bg-dark-900/80 dark:backdrop-blur-xl dark:border-white/10"
-    >
-      <div className="container-lg">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo and Brand */}
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container">
+        <div className="flex h-14 items-center justify-between">
+          {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center group">
-              <motion.div 
-                className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-brand-500 dark:to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg dark:shadow-neon"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <Brain className="h-5 w-5 text-white" />
-              </motion.div>
-              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                CaseForge
-              </span>
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <BookOpen className="h-4 w-4" />
+              </div>
+              <span className="text-lg font-semibold">CaseForge</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2 ml-8">
+          <div className="hidden md:flex items-center space-x-1 ml-8">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
               
               return (
-                <motion.div
+                <Link
                   key={item.path}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  to={item.path}
+                  className={`
+                    flex items-center space-x-1 px-3 py-2 text-sm font-medium rounded-md transition-colors
+                    ${active 
+                      ? 'bg-accent text-accent-foreground' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                    }
+                  `}
                 >
-                  <Link
-                    to={item.path}
-                    className={`
-                      relative flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
-                      ${active 
-                        ? 'text-gray-900 dark:text-white' 
-                        : 'text-gray-600 hover:text-gray-900 dark:text-dark-300 dark:hover:text-white'
-                      }
-                    `}
-                  >
-                    {active && (
-                      <motion.div
-                        layoutId="navbar-active"
-                        className="absolute inset-0 bg-blue-100 border border-blue-200 dark:bg-white/10 dark:backdrop-blur-md dark:border-white/20 rounded-xl"
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                    <div className={`relative z-10 p-1 rounded-lg ${active ? `bg-gradient-to-br ${item.gradient} shadow-lg` : ''}`}>
-                      <Icon className="h-4 w-4 text-white" />
-                    </div>
-                    <span className="relative z-10">{item.label}</span>
-                  </Link>
-                </motion.div>
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
               );
             })}
           </div>
 
-            {/* Right side - Search, Theme, Auth/Profile */}
-            <div className="flex items-center space-x-4">
-              {showSearch && (
-                <motion.form 
-                  onSubmit={handleSearch} 
-                  className="relative hidden sm:block"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
+          {/* Right side - Search, Theme, Auth */}
+          <div className="flex items-center space-x-3">
+            {showSearch && (
+              <form onSubmit={handleSearch} className="relative hidden sm:block">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search problems..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="input pl-8 w-64"
+                />
+              </form>
+            )}
+            
+            <ThemeToggle />
+
+            {/* Authentication Section */}
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center space-x-2 text-sm font-medium rounded-md px-3 py-2 transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
+                  <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">
+                    {user?.username?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <span className="hidden lg:block">{user?.username}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* User Dropdown Menu */}
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-fade-in">
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground">{user?.full_name || user?.username}</p>
+                      <p className="truncate">{user?.email}</p>
+                    </div>
+                    <div className="h-px bg-border my-1" />
+                    {userMenuItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center space-x-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    ))}
+                    <div className="h-px bg-border my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center space-x-2 rounded-sm px-2 py-1.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link
+                  to="/login"
+                  className="btn btn-ghost btn-sm"
+                >
+                  <LogIn className="mr-1 h-4 w-4" />
+                  <span className="hidden lg:block">Login</span>
+                </Link>
+                <Link
+                  to="/register"
+                  className="btn btn-primary btn-sm"
+                >
+                  <UserPlus className="mr-1 h-4 w-4" />
+                  <span className="hidden lg:block">Sign Up</span>
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t bg-background">
+            <div className="space-y-1 px-2 pb-3 pt-2">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.path);
+                
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`
+                      flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors
+                      ${active 
+                        ? 'bg-accent text-accent-foreground' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                      }
+                    `}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+              
+              {/* Auth items for mobile */}
+              <div className="border-t pt-2 mt-2">
+                {isAuthenticated ? (
+                  <>
+                    {userMenuItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.label}</span>
+                      </Link>
+                    ))}
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex w-full items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Logout</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                    >
+                      <LogIn className="h-5 w-5" />
+                      <span>Login</span>
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium bg-primary text-primary-foreground transition-colors"
+                    >
+                      <UserPlus className="h-5 w-5" />
+                      <span>Sign Up</span>
+                    </Link>
+                  </>
+                )}
+              </div>
+              
+              {showSearch && (
+                <form onSubmit={handleSearch} className="pt-2 sm:hidden">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-dark-400 h-4 w-4" />
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <input
                       type="text"
                       placeholder="Search problems..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-64 pl-10 pr-4 py-2 bg-white border border-gray-300 dark:bg-white/10 dark:backdrop-blur-md dark:border-white/20 rounded-lg text-gray-900 placeholder-gray-500 dark:text-white dark:placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-brand-500 focus:border-transparent transition-all duration-300"
+                      className="input pl-8 w-full"
                     />
                   </div>
-                </motion.form>
+                </form>
               )}
-              
-              <ThemeToggle />
-
-              {/* Authentication Section */}
-              {isAuthenticated ? (
-                <div className="relative">
-                  <motion.button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-lg">
-                      {user?.username?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                    <span className="hidden lg:block">{user?.username}</span>
-                    <ChevronRight className={`h-4 w-4 transition-transform ${userMenuOpen ? 'rotate-90' : ''}`} />
-                  </motion.button>
-
-                  {/* User Dropdown Menu */}
-                  <AnimatePresence>
-                    {userMenuOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute right-0 mt-2 w-48 bg-dark-800/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-xl overflow-hidden z-50"
-                      >
-                        <div className="p-3 border-b border-white/10">
-                          <p className="text-white font-medium">{user?.full_name || user?.username}</p>
-                          <p className="text-dark-400 text-sm">{user?.email}</p>
-                        </div>
-                        
-                        <div className="py-2">
-                          {userMenuItems.map((item) => (
-                            <Link
-                              key={item.path}
-                              to={item.path}
-                              onClick={() => setUserMenuOpen(false)}
-                              className="flex items-center space-x-3 px-3 py-2 text-dark-300 hover:text-white hover:bg-white/10 transition-colors"
-                            >
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.label}</span>
-                            </Link>
-                          ))}
-                          
-                          <hr className="my-2 border-white/10" />
-                          
-                          <button
-                            onClick={handleLogout}
-                            className="flex items-center space-x-3 px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors w-full text-left"
-                          >
-                            <LogOut className="h-4 w-4" />
-                            <span>Logout</span>
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      to="/login"
-                      className="flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium text-dark-200 hover:text-white hover:bg-white/5 transition-all duration-300"
-                    >
-                      <LogIn className="h-4 w-4" />
-                      <span className="hidden lg:block">Login</span>
-                    </Link>
-                  </motion.div>
-                  
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      to="/register"
-                      className="flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:from-brand-600 hover:to-brand-700 transition-all duration-300 shadow-lg"
-                    >
-                      <UserPlus className="h-4 w-4" />
-                      <span className="hidden lg:block">Sign Up</span>
-                    </Link>
-                  </motion.div>
-                </div>
-              )}
-
-            {/* Mobile menu button */}
-            <motion.button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-dark-400 hover:text-white hover:bg-white/10 transition-colors"
-              whileTap={{ scale: 0.95 }}
-            >
-              <AnimatePresence mode="wait">
-                {mobileMenuOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <X className="h-5 w-5" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Menu className="h-5 w-5" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
+            </div>
           </div>
-        </div>
-
-        {/* Mobile Navigation Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-white/10 bg-dark-900/95 backdrop-blur-xl"
-            >
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {navigationItems.map((item, index) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.path);
-                  
-                  return (
-                    <motion.div
-                      key={item.path}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Link
-                        to={item.path}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`
-                          flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium transition-all duration-200
-                          ${active 
-                            ? 'bg-white/10 backdrop-blur-md border border-white/20 text-white' 
-                            : 'text-dark-300 hover:text-white hover:bg-white/5'
-                          }
-                        `}
-                      >
-                        <div className={`p-1 rounded-lg ${active ? `bg-gradient-to-br ${item.gradient} shadow-lg` : ''}`}>
-                          <Icon className="h-5 w-5 text-white" />
-                        </div>
-                        <span>{item.label}</span>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-                
-                {/* Auth items for mobile */}
-                <div className="pt-2 border-t border-white/10">
-                  {isAuthenticated ? (
-                    <>
-                      {userMenuItems.map((item, index) => (
-                        <motion.div
-                          key={item.path}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: (navigationItems.length + index) * 0.1 }}
-                        >
-                          <Link
-                            to={item.path}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-dark-300 hover:text-white hover:bg-white/5 transition-all duration-200"
-                          >
-                            <item.icon className="h-5 w-5" />
-                            <span>{item.label}</span>
-                          </Link>
-                        </motion.div>
-                      ))}
-                      
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: (navigationItems.length + userMenuItems.length) * 0.1 }}
-                      >
-                        <button
-                          onClick={() => {
-                            handleLogout();
-                            setMobileMenuOpen(false);
-                          }}
-                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 w-full text-left"
-                        >
-                          <LogOut className="h-5 w-5" />
-                          <span>Logout</span>
-                        </button>
-                      </motion.div>
-                    </>
-                  ) : (
-                    <>
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: navigationItems.length * 0.1 }}
-                      >
-                        <Link
-                          to="/login"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium text-dark-300 hover:text-white hover:bg-white/5 transition-all duration-200"
-                        >
-                          <LogIn className="h-5 w-5" />
-                          <span>Login</span>
-                        </Link>
-                      </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: (navigationItems.length + 1) * 0.1 }}
-                      >
-                        <Link
-                          to="/register"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 px-3 py-3 rounded-xl text-base font-medium bg-gradient-to-r from-brand-500 to-brand-600 text-white transition-all duration-200 mt-2"
-                        >
-                          <UserPlus className="h-5 w-5" />
-                          <span>Sign Up</span>
-                        </Link>
-                      </motion.div>
-                    </>
-                  )}
-                </div>
-                
-                {showSearch && (
-                  <motion.form 
-                    onSubmit={handleSearch} 
-                    className="pt-2 sm:hidden"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: navigationItems.length * 0.1 }}
-                  >
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 h-4 w-4" />
-                      <input
-                        type="text"
-                        placeholder="Search problems..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                      />
-                    </div>
-                  </motion.form>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        )}
       </div>
-    </motion.nav>
+    </nav>
   );
 };
 
