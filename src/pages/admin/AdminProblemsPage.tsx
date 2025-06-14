@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
-import { apiService } from '../../services/api';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 
 interface Problem {
   id: string;
@@ -32,6 +32,7 @@ const AdminProblemsPage: React.FC = () => {
   const [editingProblem, setEditingProblem] = useState<Problem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
+  const { session } = useAdminAuth();
 
   const [formData, setFormData] = useState<ProblemCreate>({
     title: '',
@@ -50,10 +51,27 @@ const AdminProblemsPage: React.FC = () => {
   const loadProblems = async () => {
     try {
       setLoading(true);
-      const data = await apiService.getAdminProblems();
-      setProblems(data);
       setError(null);
+      
+      if (!session?.access_token) {
+        throw new Error('No admin token available');
+      }
+
+      const response = await fetch('/api/admin/problems', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch problems: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setProblems(data);
     } catch (err: any) {
+      console.error('Error loading problems:', err);
       setError(err.message || 'Failed to load problems');
     } finally {
       setLoading(false);
@@ -63,13 +81,37 @@ const AdminProblemsPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (editingProblem) {
-        const updatedProblem = await apiService.updateAdminProblem(editingProblem.id, formData);
-        setProblems(prev => prev.map(p => p.id === editingProblem.id ? updatedProblem : p));
-      } else {
-        const newProblem = await apiService.createAdminProblem(formData);
-        setProblems(prev => [newProblem, ...prev]);
+      if (!session?.access_token) {
+        throw new Error('No admin token available');
       }
+
+      const url = editingProblem 
+        ? `/api/admin/problems/${editingProblem.id}`
+        : '/api/admin/problems';
+      
+      const method = editingProblem ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${editingProblem ? 'update' : 'create'} problem`);
+      }
+
+      const result = await response.json();
+
+      if (editingProblem) {
+        setProblems(prev => prev.map(p => p.id === editingProblem.id ? result : p));
+      } else {
+        setProblems(prev => [result, ...prev]);
+      }
+
       resetForm();
     } catch (err: any) {
       setError(err.message || 'Failed to save problem');
@@ -94,7 +136,22 @@ const AdminProblemsPage: React.FC = () => {
     if (!confirm('Are you sure you want to delete this problem?')) return;
     
     try {
-      await apiService.deleteAdminProblem(problemId);
+      if (!session?.access_token) {
+        throw new Error('No admin token available');
+      }
+
+      const response = await fetch(`/api/admin/problems/${problemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete problem');
+      }
+
       setProblems(prev => prev.filter(p => p.id !== problemId));
     } catch (err: any) {
       setError(err.message || 'Failed to delete problem');
@@ -146,6 +203,12 @@ const AdminProblemsPage: React.FC = () => {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
           {error}
+          <button 
+            onClick={() => setError(null)}
+            className="ml-2 text-red-500 hover:text-red-700"
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -237,6 +300,12 @@ const AdminProblemsPage: React.FC = () => {
             ))}
           </tbody>
         </table>
+
+        {filteredProblems.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No problems found.</p>
+          </div>
+        )}
       </div>
 
       {/* Modal */}
