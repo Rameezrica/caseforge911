@@ -303,24 +303,24 @@ const HomePage = () => {
 
       {/* Practice by Domain */}
       <section className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Practice by Domain</h2>
+        <h2 className="text-2xl font-bold mb-6 text-foreground">Practice by Domain</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {domains.map((domain) => (
             <Link key={domain.name} to={`/problems?domain=${domain.name.toLowerCase()}`}>
-              <Card variant="interactive" className="p-4 text-center">
-                <div className={`inline-flex items-center justify-center w-10 h-10 mb-3 rounded-lg bg-accent ${domain.color}`}>
+              <div className="win11-card card-hover text-center">
+                <div className={`inline-flex items-center justify-center w-12 h-12 mb-4 rounded-xl bg-win11-gray-100 ${domain.color} elevation-1`}>
                   {domain.icon}
                 </div>
-                <h3 className="font-semibold mb-2">{domain.name}</h3>
-                <div className="text-2xl font-bold mb-3">
+                <h3 className="font-semibold mb-2 text-foreground">{domain.name}</h3>
+                <div className="text-2xl font-bold mb-3 text-foreground">
                   {domain.total}
                 </div>
-                <div className="flex items-center justify-center space-x-2 text-xs">
-                  <span className="text-emerald-600 dark:text-emerald-400">{domain.easy} Easy</span>
-                  <span className="text-amber-600 dark:text-amber-400">{domain.medium} Med</span>
-                  <span className="text-red-600 dark:text-red-400">{domain.hard} Hard</span>
+                <div className="flex items-center justify-center space-x-3 text-xs">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">{domain.easy} Easy</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">{domain.medium} Med</span>
+                  <span className="text-red-600 dark:text-red-400 font-medium">{domain.hard} Hard</span>
                 </div>
-              </Card>
+              </div>
             </Link>
           ))}
         </div>
@@ -328,28 +328,28 @@ const HomePage = () => {
 
       {/* Study Plans */}
       <section>
-        <h2 className="text-2xl font-bold mb-6">Study Plans</h2>
+        <h2 className="text-2xl font-bold mb-6 text-foreground">Study Plans</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {studyPlans.map((plan) => (
-            <Card key={plan.title} className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded-lg bg-accent ${plan.color}`}>
+            <div key={plan.title} className="win11-card card-hover">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-xl bg-win11-gray-100 ${plan.color} elevation-1`}>
                   {plan.icon}
                 </div>
-                <span className="text-sm text-muted-foreground">{plan.duration}</span>
+                <span className="text-sm text-win11-gray-500 font-medium">{plan.duration}</span>
               </div>
-              <h3 className="font-semibold mb-2">{plan.title}</h3>
-              <div className="flex items-center justify-between text-sm mb-3">
-                <span className="text-muted-foreground">{plan.problems} problems</span>
+              <h3 className="font-semibold mb-2 text-foreground">{plan.title}</h3>
+              <div className="flex items-center justify-between text-sm mb-4">
+                <span className="text-win11-gray-600">{plan.problems} problems</span>
                 <CheckCircle className="h-4 w-4 text-emerald-500" />
               </div>
-              <div className="w-full bg-muted rounded-full h-1.5">
+              <div className="w-full bg-win11-gray-200 rounded-full h-2">
                 <div 
-                  className="h-1.5 rounded-full bg-primary transition-all duration-500"
+                  className="h-2 rounded-full bg-primary transition-all duration-500"
                   style={{ width: `${plan.progress}%` }}
                 />
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       </section>
