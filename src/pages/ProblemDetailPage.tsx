@@ -12,6 +12,8 @@ const ProblemDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'problem' | 'solutions' | 'discussions'>('problem');
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showMessage, setShowMessage] = useState(false);
   
   const { problem, loading, error } = useProblem(id || '');
   
@@ -20,6 +22,17 @@ const ProblemDetailPage: React.FC = () => {
       document.title = `${problem.title} - CaseForge`;
     }
   }, [problem]);
+
+  useEffect(() => {
+    // Check if there's a success message from navigation state
+    if (location.state?.message) {
+      setShowMessage(true);
+      // Clear the message from navigation state
+      window.history.replaceState({}, document.title);
+      // Auto-hide after 5 seconds
+      setTimeout(() => setShowMessage(false), 5000);
+    }
+  }, [location.state]);
   
   if (loading) {
     return (
