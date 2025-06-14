@@ -14,7 +14,6 @@ const AdminLoginPageSimple: React.FC = () => {
   // Only redirect if authenticated and not loading
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      console.log('Admin authenticated, redirecting to admin dashboard...');
       navigate('/admin', { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
