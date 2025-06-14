@@ -86,7 +86,7 @@ const Navbar = () => {
     );
   }
 
-  const showSearch = location.pathname !== '/';
+  const showSearch = location.pathname !== '/' || isAuthenticated;
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-win11-gray-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 elevation-1">
