@@ -706,12 +706,17 @@ async def get_daily_challenge():
 @app.post("/api/solutions")
 async def submit_solution(solution: Solution, current_user=Depends(get_current_user)):
     """Submit a solution for a problem"""
-    # In a real implementation, this would save to database
     solution_data = solution.dict()
+    solution_data["id"] = f"solution_{len(MOCK_SOLUTIONS) + 1}"
     solution_data["submitted_at"] = datetime.now()
     solution_data["user_id"] = current_user.id
+    solution_data["user_email"] = current_user.email
+    solution_data["user_name"] = current_user.user_metadata.get("username", current_user.email)
     
-    return {"message": "Solution submitted successfully", "solution_id": "mock_solution_id"}
+    # Add to mock solutions storage
+    MOCK_SOLUTIONS.append(solution_data)
+    
+    return {"message": "Solution submitted successfully", "solution_id": solution_data["id"]}
 
 # Admin problem management routes
 @app.get("/api/admin/problems")
