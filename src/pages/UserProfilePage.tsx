@@ -25,6 +25,7 @@ const UserProfilePage: React.FC = () => {
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [editForm, setEditForm] = useState({
     full_name: user?.full_name || '',
     email: user?.email || '',
