@@ -69,15 +69,11 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   const initializeAdminAuth = async () => {
     try {
       setIsLoading(true);
-      console.log('Initializing admin auth... FALLBACK_MODE:', FALLBACK_MODE);
       
       if (FALLBACK_MODE) {
         // In fallback mode, check for stored admin session
         const storedToken = localStorage.getItem('caseforge_admin_access_token');
         const storedUser = localStorage.getItem('caseforge_admin_user');
-        
-        console.log('Stored token exists:', !!storedToken);
-        console.log('Stored user exists:', !!storedUser);
         
         if (storedToken && storedUser) {
           try {
@@ -89,9 +85,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
             };
             
             // Verify token with backend
-            console.log('Validating stored token...');
             const isValid = await validateAdminTokenWithBackend(storedToken);
-            console.log('Token validation result:', isValid);
             if (isValid) {
               setSession(localSession);
               setAdminUser({
@@ -101,18 +95,14 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
                 is_admin: true,
               });
               setIsAuthenticated(true);
-              console.log('Admin authenticated from stored token');
             } else {
               // Token invalid, clear storage
-              console.log('Token invalid, clearing storage');
               clearAdminLocalStorage();
             }
           } catch (error) {
             console.error('Error parsing stored admin user data:', error);
             clearAdminLocalStorage();
           }
-        } else {
-          console.log('No stored admin session found');
         }
       } else {
         // Use Supabase authentication
@@ -176,7 +166,6 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       setError(error.message || 'Admin authentication initialization failed');
     } finally {
       setIsLoading(false);
-      console.log('Admin auth initialization complete');
     }
   };
 
