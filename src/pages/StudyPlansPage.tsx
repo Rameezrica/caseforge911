@@ -36,7 +36,7 @@ const StudyPlansPage: React.FC = () => {
       difficulty: 'Intermediate',
       progress: 0,
       locked: false,
-      icon: <TrendingUp className="h-6 w-6 text-green-500" />,
+      icon: <TrendingUp className="h-6 w-6 text-success" />,
       topics: ['Financial Modeling', 'Valuation', 'M&A', 'LBO Analysis'],
       skills: ['Excel Modeling', 'Financial Analysis', 'Due Diligence']
     },
