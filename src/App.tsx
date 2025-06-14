@@ -39,7 +39,8 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   // Exclude admin routes and auth pages from the main LayoutWrapper
   const isAuthPage = location.pathname === '/login' || 
                      location.pathname === '/register' || 
-                     location.pathname.startsWith('/admin');
+                     location.pathname.startsWith('/admin') ||
+                     location.pathname === '/';
 
   if (isAuthPage) {
     return <>{children}</>;
@@ -55,6 +56,17 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </main>
     </div>
   );
+};
+
+// Component to handle authenticated vs non-authenticated home page
+const HomePageRouter: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  
+  if (isAuthenticated) {
+    return <HomePage />;
+  }
+  
+  return <PromotionPage />;
 };
 
 const App: React.FC = () => {
