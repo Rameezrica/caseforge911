@@ -70,6 +70,22 @@ const ProblemDetailPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Success Message */}
+      {showMessage && location.state?.message && (
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <CheckCircle className="h-5 w-5 text-emerald-500 mr-3" />
+            <span className="text-emerald-300 font-medium">{location.state.message}</span>
+          </div>
+          <button
+            onClick={() => setShowMessage(false)}
+            className="text-emerald-400 hover:text-emerald-300"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
+
       <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
         <Link 
           to="/problems" 
