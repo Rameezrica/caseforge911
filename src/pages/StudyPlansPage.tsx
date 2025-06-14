@@ -49,7 +49,7 @@ const StudyPlansPage: React.FC = () => {
       difficulty: 'Advanced',
       progress: 0,
       locked: true,
-      icon: <Briefcase className="h-6 w-6 text-blue-500" />,
+      icon: <Briefcase className="h-6 w-6 text-primary" />,
       topics: ['Strategy', 'Operations', 'Market Entry', 'Digital Transformation'],
       skills: ['Problem Structuring', 'Data Analysis', 'Client Communication']
     },
