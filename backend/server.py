@@ -166,6 +166,9 @@ MOCK_PROBLEMS = [
     }
 ]
 
+# Mock solutions storage
+MOCK_SOLUTIONS = []
+
 # Fallback authentication functions
 def create_jwt_token(user_data: dict) -> str:
     """Create JWT token for fallback authentication"""
