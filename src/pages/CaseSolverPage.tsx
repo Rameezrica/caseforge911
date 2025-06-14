@@ -127,15 +127,23 @@ const CaseSolverPage: React.FC = () => {
               <h2 className="text-lg font-semibold text-dark-50 mb-6">Your Solution</h2>
               
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-2">
-                    Write your solution to this business case:
-                  </label>
-                  <textarea
-                    value={solution}
-                    onChange={(e) => setSolution(e.target.value)}
-                    className="w-full h-96 px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
-                    placeholder="Start writing your solution here...
+                {submitted ? (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-dark-50 mb-2">Solution Submitted!</h3>
+                    <p className="text-dark-400">Thank you for your solution. Redirecting you back to the problem...</p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-dark-300 mb-2">
+                        Write your solution to this business case:
+                      </label>
+                      <textarea
+                        value={solution}
+                        onChange={(e) => setSolution(e.target.value)}
+                        className="w-full h-96 px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                        placeholder="Start writing your solution here...
 
 Consider the following structure:
 1. Problem Analysis
@@ -143,31 +151,33 @@ Consider the following structure:
 3. Strategic Recommendations
 4. Implementation Plan
 5. Expected Outcomes"
-                  />
-                </div>
-                
-                <div className="flex justify-between">
-                  <button
-                    onClick={() => navigate(`/problem/${problem.id}`)}
-                    className="px-6 py-2 bg-dark-700 text-dark-200 rounded-lg hover:bg-dark-600 transition-colors duration-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmitSolution}
-                    disabled={isSubmitting || !solution.trim()}
-                    className="px-6 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      'Submit Solution'
-                    )}
-                  </button>
-                </div>
+                      />
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <button
+                        onClick={() => navigate(`/problem/${problem.id}`)}
+                        className="px-6 py-2 bg-dark-700 text-dark-200 rounded-lg hover:bg-dark-600 transition-colors duration-200"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSubmitSolution}
+                        disabled={isSubmitting || !solution.trim()}
+                        className="px-6 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          'Submit Solution'
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
