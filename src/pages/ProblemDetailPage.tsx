@@ -40,10 +40,7 @@ const ProblemDetailPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center">
-          <Loader2 className="h-8 w-8 text-emerald-500 animate-spin mb-4" />
-          <p className="text-dark-400">Loading problem details...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading problem details..." />
       </div>
     );
   }
@@ -51,22 +48,21 @@ const ProblemDetailPage: React.FC = () => {
   if (!problem && error) {
     return (
       <div className="flex items-center justify-center p-4">
-        <div className="bg-dark-800 p-8 rounded-lg shadow-md max-w-md w-full text-center border border-dark-700">
-          <div className="text-red-500 mb-4">
+        <Card className="p-8 max-w-md w-full text-center">
+          <div className="text-destructive mb-4">
             <FileText className="h-12 w-12 mx-auto" />
           </div>
-          <h2 className="text-2xl font-bold text-dark-50 mb-2">Problem Not Found</h2>
-          <p className="text-dark-400 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Problem Not Found</h2>
+          <p className="text-muted-foreground mb-6">
             We couldn't find the business case you're looking for.
           </p>
-          <Link 
-            to="/problems" 
-            className="inline-flex items-center px-4 py-2 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Problems
-          </Link>
-        </div>
+          <Button asChild>
+            <Link to="/problems">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Problems
+            </Link>
+          </Button>
+        </Card>
       </div>
     );
   }
