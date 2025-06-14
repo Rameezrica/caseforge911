@@ -145,30 +145,52 @@ const HomePage = () => {
 
   return (
     <div className="container py-8">
-      {/* Hero Section */}
-      <section className="py-12 lg:py-20">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 bg-primary text-primary-foreground rounded-xl elevation-2">
-            <Brain className="h-8 w-8" />
+      {/* Welcome Section */}
+      <section className="mb-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Column - Welcome Message */}
+          <div className="flex-1">
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-xl elevation-2">
+                  <Brain className="h-6 w-6" />
+                </div>
+                <div>
+                  <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
+                    Welcome back, {user?.user_metadata?.full_name || user?.user_metadata?.username || 'there'}! 👋
+                  </h1>
+                  <p className="text-lg text-muted-foreground">
+                    Ready to tackle some challenging business cases today?
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link to="/problems" className="win11-card card-hover p-6 text-center">
+                <Target className="h-8 w-8 text-primary mb-3 mx-auto" />
+                <h3 className="font-semibold mb-2 text-foreground">Browse Problems</h3>
+                <p className="text-sm text-muted-foreground">Find new challenges to solve</p>
+              </Link>
+              
+              <Link to="/daily-challenge" className="win11-card card-hover p-6 text-center">
+                <Star className="h-8 w-8 text-warning mb-3 mx-auto" />
+                <h3 className="font-semibold mb-2 text-foreground">Daily Challenge</h3>
+                <p className="text-sm text-muted-foreground">Today's featured problem</p>
+              </Link>
+              
+              <Link to="/leaderboard" className="win11-card card-hover p-6 text-center">
+                <TrendingUp className="h-8 w-8 text-success mb-3 mx-auto" />
+                <h3 className="font-semibold mb-2 text-foreground">Leaderboard</h3>
+                <p className="text-sm text-muted-foreground">See how you rank</p>
+              </Link>
+            </div>
           </div>
-          
-          <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-            <span className="text-gradient">Master Business Cases</span>
-            <br />
-            <span className="text-foreground">Like Never Before</span>
-          </h1>
-          
-          <p className="text-xl text-win11-gray-600 mb-8 max-w-3xl mx-auto">
-            Transform your business acumen with practical case studies across Finance, Operations, Strategy, Marketing & Analytics
-          </p>
-          
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>
-              Start Solving Cases
-            </Button>
-            <Button variant="outline" size="lg" leftIcon={<Trophy className="h-4 w-4" />}>
-              View Contests
-            </Button>
+
+          {/* Right Column - Profile Section */}
+          <div className="lg:w-80">
+            <ProfileSection />
           </div>
         </div>
       </section>
