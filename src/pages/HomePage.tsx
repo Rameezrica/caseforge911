@@ -7,7 +7,6 @@ import {
   Brain, Play
 } from 'lucide-react';
 import DailyChallengeWidget from '../components/home/DailyChallengeWidget';
-import ServerStatus from '../components/ui/ServerStatus';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
