@@ -253,37 +253,37 @@ const HomePage = () => {
 
       {/* Quick Start */}
       <section className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Quick Start</h2>
+        <h2 className="text-2xl font-bold mb-6 text-foreground">Quick Start</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {lastProblem && (
-            <Card variant="interactive" className="p-6">
+            <div className="win11-card card-hover cursor-pointer">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-primary text-primary-foreground rounded-lg">
+                <div className="p-3 bg-primary text-primary-foreground rounded-xl elevation-1">
                   <Play className="h-5 w-5" />
                 </div>
-                <span className="text-sm text-muted-foreground">{lastProblem.timeRemaining}</span>
+                <span className="text-sm text-win11-gray-500 font-medium">{lastProblem.timeRemaining}</span>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Resume Last Problem</h3>
-              <p className="text-muted-foreground mb-4">{lastProblem.title}</p>
-              <div className="space-y-2">
-                <div className="w-full bg-muted rounded-full h-2">
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Resume Last Problem</h3>
+              <p className="text-win11-gray-600 mb-4">{lastProblem.title}</p>
+              <div className="space-y-3">
+                <div className="w-full bg-win11-gray-200 rounded-full h-2">
                   <div 
                     className="bg-primary h-2 rounded-full transition-all duration-500"
                     style={{ width: `${lastProblem.progress}%` }}
                   />
                 </div>
-                <p className="text-sm text-muted-foreground">{lastProblem.progress}% complete</p>
+                <p className="text-sm text-win11-gray-500 font-medium">{lastProblem.progress}% complete</p>
               </div>
-            </Card>
+            </div>
           )}
 
           {recommendedProblem && (
-            <Card variant="interactive" className="p-6">
+            <div className="win11-card card-hover cursor-pointer">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-secondary text-secondary-foreground rounded-lg">
+                <div className="p-3 bg-win11-gray-100 text-win11-gray-700 rounded-xl elevation-1">
                   <Target className="h-5 w-5" />
                 </div>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                <span className={`px-3 py-1 text-xs font-medium rounded-full border ${
                   recommendedProblem.difficulty === 'Easy' ? 'difficulty-easy' :
                   recommendedProblem.difficulty === 'Medium' ? 'difficulty-medium' :
                   'difficulty-hard'
@@ -291,12 +291,12 @@ const HomePage = () => {
                   {recommendedProblem.difficulty}
                 </span>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Recommended Next</h3>
-              <p className="text-muted-foreground mb-4">{recommendedProblem.title}</p>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Recommended Next</h3>
+              <p className="text-win11-gray-600 mb-4">{recommendedProblem.title}</p>
+              <p className="text-sm text-win11-gray-500">
                 Matches your skill level in {recommendedProblem.category}
               </p>
-            </Card>
+            </div>
           )}
         </div>
       </section>
