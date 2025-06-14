@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import { 
-  ArrowRight, Trophy, BookOpen, Target, Award,
+  ArrowRight, Trophy, BookOpen, Target, 
   TrendingUp, Users, Star, Clock, Briefcase, 
-  BarChart2, Rocket, CheckCircle, Zap, 
-  Brain, Layers, Globe, Sparkles
+  BarChart2, Rocket, CheckCircle, 
+  Brain, Play
 } from 'lucide-react';
 import DailyChallengeWidget from '../components/home/DailyChallengeWidget';
 import ServerStatus from '../components/ui/ServerStatus';
