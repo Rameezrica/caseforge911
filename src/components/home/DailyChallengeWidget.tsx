@@ -4,6 +4,8 @@ import {
   Calendar, Clock, Users, Trophy, 
   Flame, ArrowRight, TrendingUp, MessageSquare 
 } from 'lucide-react';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 import { DailyChallenge } from '../../services/api';
 
 interface DailyChallengeWidgetProps {
@@ -38,28 +40,28 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
 
   if (!problem) {
     return (
-      <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+      <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <Calendar className="h-6 w-6 text-emerald-500 mr-2" />
-            <h2 className="text-xl font-bold text-dark-50">Daily Challenge</h2>
+            <Calendar className="h-5 w-5 text-primary mr-2" />
+            <h2 className="text-xl font-bold">Daily Challenge</h2>
           </div>
         </div>
-        <div className="text-center py-8 text-dark-400">
+        <div className="text-center py-8 text-muted-foreground">
           Loading daily challenge...
         </div>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+    <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <Calendar className="h-6 w-6 text-emerald-500 mr-2" />
-          <h2 className="text-xl font-bold text-dark-50">Daily Challenge</h2>
+          <Calendar className="h-5 w-5 text-primary mr-2" />
+          <h2 className="text-xl font-bold">Daily Challenge</h2>
         </div>
-        <div className="flex items-center text-dark-400">
+        <div className="flex items-center text-muted-foreground">
           <Clock className="h-4 w-4 mr-1" />
           <span>Ends in {timeRemaining()}</span>
         </div>
@@ -67,78 +69,74 @@ const DailyChallengeWidget: React.FC<DailyChallengeWidgetProps> = ({ challenge, 
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1">
-          <div className="text-dark-400 mb-2">{formatDate(challengeDate)}</div>
-          <h3 className="text-2xl font-bold text-dark-50 mb-4">{problem.title}</h3>
+          <div className="text-muted-foreground mb-2">{formatDate(challengeDate)}</div>
+          <h3 className="text-2xl font-bold mb-4">{problem.title}</h3>
           
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="flex items-center text-dark-400">
+          <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+            <div className="flex items-center text-muted-foreground">
               <Users className="h-4 w-4 mr-2" />
               {participants} participants
             </div>
-            <div className="flex items-center text-dark-400">
+            <div className="flex items-center text-muted-foreground">
               <Clock className="h-4 w-4 mr-2" />
               ~{problem.time_limit || 60} min avg
             </div>
-            <div className="flex items-center text-dark-400">
+            <div className="flex items-center text-muted-foreground">
               <TrendingUp className="h-4 w-4 mr-2" />
               {(completionRate * 100).toFixed(1)}% completion
             </div>
-            <div className="flex items-center text-dark-400">
+            <div className="flex items-center text-muted-foreground">
               <MessageSquare className="h-4 w-4 mr-2" />
               24 discussions
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-4">
-            <Link
-              to={`/solve/${problem.id}`}
-              className="px-6 py-3 bg-emerald-500 text-dark-900 rounded-lg hover:bg-emerald-600 transition-colors duration-200 flex items-center"
-            >
-              Start Challenge
-              <ArrowRight className="ml-2 h-4 w-4" />
+          <div className="flex flex-wrap gap-3">
+            <Link to={`/solve/${problem.id}`}>
+              <Button rightIcon={<ArrowRight className="h-4 w-4" />}>
+                Start Challenge
+              </Button>
             </Link>
-            <Link
-              to="/leaderboard"
-              className="px-6 py-3 bg-dark-700 text-dark-200 rounded-lg hover:bg-dark-600 transition-colors duration-200 flex items-center"
-            >
-              <Trophy className="mr-2 h-4 w-4" />
-              Leaderboard
+            <Link to="/leaderboard">
+              <Button variant="outline" leftIcon={<Trophy className="h-4 w-4" />}>
+                Leaderboard
+              </Button>
             </Link>
           </div>
         </div>
 
-        <div className="lg:w-64 flex flex-col justify-between p-6 bg-dark-700 rounded-lg">
+        <div className="lg:w-64 flex flex-col justify-between p-4 bg-muted rounded-lg">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <div className="text-dark-200 font-medium">Your Streak</div>
+              <div className="font-medium">Your Streak</div>
               <div className="flex items-center text-orange-500">
-                <Flame className="h-5 w-5 mr-1" />
+                <Flame className="h-4 w-4 mr-1" />
                 {userStreak} days
               </div>
             </div>
-            <div className="h-2 bg-dark-600 rounded-full overflow-hidden">
+            <div className="h-2 bg-muted-foreground/20 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-orange-500 rounded-full transition-all duration-300"
                 style={{ width: `${(userStreak % 7) / 7 * 100}%` }}
               />
             </div>
-            <div className="mt-2 text-sm text-dark-400">
+            <div className="mt-2 text-sm text-muted-foreground">
               {7 - (userStreak % 7)} days until next badge
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-dark-600">
+          <div className="mt-6 pt-4 border-t">
             <Link
               to="/community"
-              className="text-emerald-500 hover:text-emerald-400 text-sm flex items-center justify-center"
+              className="text-primary hover:text-primary/80 text-sm flex items-center justify-center transition-colors"
             >
               View Previous Solutions
-              <ArrowRight className="ml-1 h-4 w-4" />
+              <ArrowRight className="ml-1 h-3 w-3" />
             </Link>
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
