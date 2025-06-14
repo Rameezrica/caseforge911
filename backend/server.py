@@ -554,7 +554,7 @@ async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
         return {
             "total_problems": len(MOCK_PROBLEMS),
             "total_users": total_users,
-            "total_solutions": 0,  # TODO: Implement
+            "total_solutions": len(MOCK_SOLUTIONS),
             "active_competitions": 0,  # TODO: Implement
             "recent_activity": [
                 {"type": "user_registration", "count": 5, "date": datetime.now().isoformat()},
