@@ -27,8 +27,8 @@ const AdminLayout: React.FC = () => {
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Problems', href: '/admin/problems', icon: FileText },
+    { name: 'Solutions', href: '/admin/solutions', icon: Users },
     { name: 'Competitions', href: '/admin/competitions', icon: Trophy },
-    { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
