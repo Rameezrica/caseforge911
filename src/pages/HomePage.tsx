@@ -148,11 +148,6 @@ const HomePage = () => {
 
   return (
     <div className="container py-8">
-      <ServerStatus 
-        isOnline={!isAnyServiceOffline} 
-        onRetry={handleRetryAll}
-      />
-
       {/* Hero Section */}
       <section className="py-12 lg:py-20">
         <div className="max-w-4xl mx-auto text-center">
