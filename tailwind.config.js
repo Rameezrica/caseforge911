@@ -5,6 +5,7 @@ export default {
     './src/**/*.{js,ts,jsx,tsx}',
     './src/**/*.css'
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -33,6 +34,10 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -51,7 +56,7 @@ export default {
           900: '#0f172a',
           950: '#020617',
         },
-        // Premium Brand Colors
+        // Premium Brand Colors (Dark theme)
         brand: {
           50: '#eef2ff',
           100: '#e0e7ff',
@@ -64,6 +69,45 @@ export default {
           800: '#3730a3',
           900: '#312e81',
           950: '#1e1b4b',
+        },
+        // Light theme colors (Kaggle-inspired)
+        kaggle: {
+          blue: {
+            50: '#eff6ff',
+            100: '#dbeafe',
+            200: '#bfdbfe',
+            300: '#93c5fd',
+            400: '#60a5fa',
+            500: '#3b82f6',
+            600: '#2563eb',
+            700: '#1d4ed8',
+            800: '#1e40af',
+            900: '#1e3a8a',
+          },
+          orange: {
+            50: '#fff7ed',
+            100: '#ffedd5',
+            200: '#fed7aa',
+            300: '#fdba74',
+            400: '#fb923c',
+            500: '#f97316',
+            600: '#ea580c',
+            700: '#c2410c',
+            800: '#9a3412',
+            900: '#7c2d12',
+          },
+          gray: {
+            50: '#f9fafb',
+            100: '#f3f4f6',
+            200: '#e5e7eb',
+            300: '#d1d5db',
+            400: '#9ca3af',
+            500: '#6b7280',
+            600: '#4b5563',
+            700: '#374151',
+            800: '#1f2937',
+            900: '#111827',
+          }
         },
         // Success/Growth Colors
         success: {
@@ -107,7 +151,7 @@ export default {
           900: '#7f1d1d',
           950: '#450a0a',
         },
-        // Glass Colors for Glassmorphism
+        // Glass Colors for Glassmorphism (Dark theme)
         glass: {
           white: 'rgba(255, 255, 255, 0.1)',
           dark: 'rgba(0, 0, 0, 0.1)',
@@ -123,6 +167,7 @@ export default {
         'gradient-success': 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
         'gradient-premium': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
         'gradient-dark': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        'gradient-light': 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
         'gradient-glass': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
         'mesh-gradient': 'radial-gradient(at 40% 20%, hsla(28,100%,74%,1) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%), radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%), radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%), radial-gradient(at 0% 100%, hsla(22,100%,77%,1) 0px, transparent 50%), radial-gradient(at 80% 100%, hsla(242,100%,70%,1) 0px, transparent 50%), radial-gradient(at 0% 0%, hsla(343,100%,76%,1) 0px, transparent 50%)',
       },
@@ -134,6 +179,8 @@ export default {
         'glow': '0 0 20px rgba(255, 255, 255, 0.1)',
         'premium': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         'elegant': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'kaggle': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        'kaggle-lg': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       },
       // Enhanced Blur
       backdropBlur: {
