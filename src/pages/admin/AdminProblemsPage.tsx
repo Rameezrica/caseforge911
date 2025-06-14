@@ -64,10 +64,10 @@ const AdminProblemsPage: React.FC = () => {
     e.preventDefault();
     try {
       if (editingProblem) {
-        const updatedProblem = await updateProblem(editingProblem.id, formData as ProblemUpdate);
+        const updatedProblem = await apiService.updateAdminProblem(editingProblem.id, formData);
         setProblems(prev => prev.map(p => p.id === editingProblem.id ? updatedProblem : p));
       } else {
-        const newProblem = await createProblem(formData);
+        const newProblem = await apiService.createAdminProblem(formData);
         setProblems(prev => [newProblem, ...prev]);
       }
       resetForm();
