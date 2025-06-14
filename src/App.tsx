@@ -27,6 +27,7 @@ import { AuthProvider } from './context/AuthContext';
 import AdminLoginPageSimple from './pages/admin/AdminLoginPageSimple';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminProblemsPage from './pages/admin/AdminProblemsPage';
+import AdminSolutionsPage from './pages/admin/AdminSolutionsPage';
 import AdminCompetitionsPage from './pages/admin/AdminCompetitionsPage';
 import AdminLayout from './components/admin/layout/AdminLayout';
 import ProtectedRouteAdmin from './components/admin/ProtectedRouteAdmin';
