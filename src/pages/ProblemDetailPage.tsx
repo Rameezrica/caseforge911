@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { useProblem } from '../hooks/useProblems';
 import DifficultyBadge from '../components/common/DifficultyBadge';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const ProblemDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
