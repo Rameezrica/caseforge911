@@ -20,6 +20,30 @@ const CaseSolverPage: React.FC = () => {
     }
   }, [problem]);
 
+  const handleSubmitSolution = async () => {
+    if (!solution.trim() || !user) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await apiService.submitSolution(problem.id, solution.trim(), user.id);
+      setSubmitted(true);
+      
+      // Show success message and redirect after a short delay
+      setTimeout(() => {
+        navigate(`/problem/${problem.id}`, { 
+          state: { message: 'Solution submitted successfully!' }
+        });
+      }, 1500);
+    } catch (error) {
+      console.error('Error submitting solution:', error);
+      alert('Failed to submit solution. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
