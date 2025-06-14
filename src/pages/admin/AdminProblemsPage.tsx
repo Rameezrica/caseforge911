@@ -109,8 +109,7 @@ const AdminProblemsPage: React.FC = () => {
       category: '',
       domain: '',
       company: '',
-      time_limit: 60,
-      sample_framework: '',
+      tags: [],
     });
     setEditingProblem(null);
     setShowModal(false);
