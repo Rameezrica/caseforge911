@@ -408,8 +408,8 @@ class CaseForgeBackendTester:
         return self.tests_passed == self.tests_run
 
 def main():
-    # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = "http://localhost:8001/api"
+    # Use the API URL from environment or default to /api
+    api_url = os.environ.get("REACT_APP_BACKEND_URL", "/api")
     
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
