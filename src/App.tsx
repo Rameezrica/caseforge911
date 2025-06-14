@@ -81,7 +81,8 @@ const App: React.FC = () => {
               <Route path="/register" element={<RegisterPage />} />
 
               {/* Public Routes */}
-              <Route path="/" element={<LayoutWrapper><HomePage /></LayoutWrapper>} />
+              <Route path="/" element={<HomePageRouter />} />
+              <Route path="/home" element={<LayoutWrapper><HomePage /></LayoutWrapper>} />
               <Route path="/problems" element={<LayoutWrapper><ProblemsPage /></LayoutWrapper>} />
               <Route path="/problem/:id" element={<LayoutWrapper><ProblemDetailPage /></LayoutWrapper>} />
               <Route path="/leaderboard" element={<LayoutWrapper><LeaderboardPage /></LayoutWrapper>} />
