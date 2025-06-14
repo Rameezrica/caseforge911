@@ -263,9 +263,9 @@ const UserProfilePage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="p-6 rounded-2xl border border-dark-700 bg-dark-800/50 backdrop-blur-sm"
+        className="p-6 rounded-2xl border border-gray-200 bg-white/50 backdrop-blur-sm dark:border-dark-700 dark:bg-dark-800/50"
       >
-        <h2 className="text-xl font-semibold text-white mb-6">Achievements</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Achievements</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {achievements.map((achievement, index) => (
@@ -274,7 +274,7 @@ const UserProfilePage: React.FC = () => {
               className={`p-4 rounded-xl border transition-all ${
                 achievement.earned
                   ? `${achievement.bgColor} border-current ${achievement.color}`
-                  : 'border-dark-600 bg-dark-700/30 grayscale'
+                  : 'border-gray-200 bg-gray-50 grayscale dark:border-dark-600 dark:bg-dark-700/30'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -282,10 +282,10 @@ const UserProfilePage: React.FC = () => {
                   <achievement.icon className={`h-5 w-5 ${achievement.color}`} />
                 </div>
                 <div>
-                  <h3 className={`font-medium ${achievement.earned ? 'text-white' : 'text-gray-500'}`}>
+                  <h3 className={`font-medium ${achievement.earned ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
                     {achievement.title}
                   </h3>
-                  <p className={`text-sm ${achievement.earned ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <p className={`text-sm ${achievement.earned ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'}`}>
                     {achievement.description}
                   </p>
                 </div>
