@@ -94,7 +94,7 @@ const AdminProblemsPage: React.FC = () => {
     if (!confirm('Are you sure you want to delete this problem?')) return;
     
     try {
-      await deleteProblem(problemId);
+      await apiService.deleteAdminProblem(problemId);
       setProblems(prev => prev.filter(p => p.id !== problemId));
     } catch (err: any) {
       setError(err.message || 'Failed to delete problem');
