@@ -308,6 +308,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     isAuthenticated,
     isLoading,
     error,
+    signIn,
     signOut,
     clearError,
   };
