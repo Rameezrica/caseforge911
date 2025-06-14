@@ -50,7 +50,7 @@ const AdminProblemsPage: React.FC = () => {
   const loadProblems = async () => {
     try {
       setLoading(true);
-      const data = await getProblems();
+      const data = await apiService.getAdminProblems();
       setProblems(data);
       setError(null);
     } catch (err: any) {
