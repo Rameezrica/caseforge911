@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
 import ProblemsPage from './pages/ProblemsPage';
@@ -33,59 +32,24 @@ import AdminLayout from './components/admin/layout/AdminLayout';
 import ProtectedRouteAdmin from './components/admin/ProtectedRouteAdmin';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 
-
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 }
-};
-
-const pageTransition = {
-  type: "tween",
-  ease: "anticipate",
-  duration: 0.5
-};
-
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  // Exclude admin routes and auth pages from the main LayoutWrapper as they have their own layout
+  // Exclude admin routes and auth pages from the main LayoutWrapper
   const isAuthPage = location.pathname === '/login' || 
                      location.pathname === '/register' || 
                      location.pathname.startsWith('/admin');
 
   if (isAuthPage) {
-    // For auth pages and admin routes, don't use the main app layout
     return <>{children}</>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-dark-950 dark:via-dark-900 dark:to-dark-800">
-      {/* Background Decorations */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-br from-blue-500/5 to-purple-500/5 dark:from-brand-500/10 dark:to-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -left-24 w-96 h-96 bg-gradient-to-br from-emerald-500/5 to-cyan-500/5 dark:from-emerald-500/10 dark:to-cyan-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 right-1/3 w-96 h-96 bg-gradient-to-br from-pink-500/5 to-rose-500/5 dark:from-pink-500/10 dark:to-rose-500/10 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-background">
       <Navbar />
-      
-      <main className="relative z-10 pt-20 pb-12">
-        <div className="container-lg">
-          <ErrorBoundary>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={pageVariants}
-                transition={pageTransition}
-              >
-                {children}
-              </motion.div>
-            </AnimatePresence>
-          </ErrorBoundary>
-        </div>
+      <main className="pt-14">
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </main>
     </div>
   );
