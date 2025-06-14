@@ -67,53 +67,48 @@ const HomePage = () => {
   const domains = [
     {
       name: 'Finance',
-      icon: <TrendingUp className="h-6 w-6" />,
+      icon: <TrendingUp className="h-5 w-5" />,
       total: stats?.difficulty_distribution ? Object.values(stats.difficulty_distribution).reduce((a, b) => a + b, 0) : 0,
       easy: stats?.difficulty_distribution?.['Easy'] || 0,
       medium: stats?.difficulty_distribution?.['Medium'] || 0,
       hard: stats?.difficulty_distribution?.['Hard'] || 0,
-      gradient: 'from-emerald-500 to-teal-600',
-      bgGradient: 'from-emerald-500/20 to-teal-600/10'
+      color: 'domain-finance'
     },
     {
       name: 'Operations',
-      icon: <Target className="h-6 w-6" />,
+      icon: <Target className="h-5 w-5" />,
       total: Math.floor((stats?.total_problems || 0) * 0.2),
       easy: Math.floor((stats?.total_problems || 0) * 0.08),
       medium: Math.floor((stats?.total_problems || 0) * 0.09),
       hard: Math.floor((stats?.total_problems || 0) * 0.03),
-      gradient: 'from-blue-500 to-cyan-600',
-      bgGradient: 'from-blue-500/20 to-cyan-600/10'
+      color: 'domain-operations'
     },
     {
       name: 'Strategy',
-      icon: <Briefcase className="h-6 w-6" />,
+      icon: <Briefcase className="h-5 w-5" />,
       total: Math.floor((stats?.total_problems || 0) * 0.18),
       easy: Math.floor((stats?.total_problems || 0) * 0.07),
       medium: Math.floor((stats?.total_problems || 0) * 0.08),
       hard: Math.floor((stats?.total_problems || 0) * 0.03),
-      gradient: 'from-purple-500 to-pink-600',
-      bgGradient: 'from-purple-500/20 to-pink-600/10'
+      color: 'domain-strategy'
     },
     {
       name: 'Marketing',
-      icon: <BarChart2 className="h-6 w-6" />,
+      icon: <BarChart2 className="h-5 w-5" />,
       total: Math.floor((stats?.total_problems || 0) * 0.15),
       easy: Math.floor((stats?.total_problems || 0) * 0.06),
       medium: Math.floor((stats?.total_problems || 0) * 0.07),
       hard: Math.floor((stats?.total_problems || 0) * 0.02),
-      gradient: 'from-orange-500 to-red-600',
-      bgGradient: 'from-orange-500/20 to-red-600/10'
+      color: 'domain-marketing'
     },
     {
       name: 'Analytics',
-      icon: <BarChart2 className="h-6 w-6" />,
+      icon: <BarChart2 className="h-5 w-5" />,
       total: Math.floor((stats?.total_problems || 0) * 0.16),
       easy: Math.floor((stats?.total_problems || 0) * 0.06),
       medium: Math.floor((stats?.total_problems || 0) * 0.07),
       hard: Math.floor((stats?.total_problems || 0) * 0.03),
-      gradient: 'from-cyan-500 to-blue-600',
-      bgGradient: 'from-cyan-500/20 to-blue-600/10'
+      color: 'domain-analytics'
     }
   ];
 
