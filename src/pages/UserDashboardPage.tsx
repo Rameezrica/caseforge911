@@ -78,37 +78,35 @@ const UserDashboardPage: React.FC = () => {
   const totalSolved = difficultyStats.easy + difficultyStats.medium + difficultyStats.hard;
 
   return (
-    <div className="space-y-8">
+    <div className="container py-8 space-y-8">
       {/* Welcome Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center"
-      >
-        <h1 className="text-4xl font-bold text-white mb-4">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-bold text-foreground">
           Welcome back, {user?.full_name || user?.username}! 👋
         </h1>
-        <p className="text-gray-400 text-lg">
+        <p className="text-muted-foreground text-lg">
           Ready to tackle some challenging business cases today?
         </p>
-      </motion.div>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className={`p-6 rounded-2xl border ${stat.bgColor} ${stat.borderColor} backdrop-blur-sm`}
-          >
+        {stats.map((stat) => (
+          <Card key={stat.title} className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm font-medium">{stat.title}</p>
+                <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
                 <p className={`text-3xl font-bold ${stat.color} mt-1`}>
                   {stat.value}
                 </p>
+              </div>
+              <div className={`p-3 rounded-lg bg-muted`}>
+                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
               </div>
               <div className={`p-3 rounded-xl ${stat.bgColor}`}>
                 <stat.icon className={`h-6 w-6 ${stat.color}`} />
