@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { 
   Trophy, 
   Target, 
@@ -14,6 +13,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getUserSolutions, Solution } from '../services/userApi';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const UserDashboardPage: React.FC = () => {
   const { user, userProgress, refreshUserData } = useAuth();
