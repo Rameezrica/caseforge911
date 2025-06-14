@@ -300,11 +300,11 @@ const UserProfilePage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="p-6 rounded-2xl border border-dark-700 bg-dark-800/50 backdrop-blur-sm"
+        className="p-6 rounded-2xl border border-gray-200 bg-white/50 backdrop-blur-sm dark:border-dark-700 dark:bg-dark-800/50"
       >
         <div className="flex items-center gap-3 mb-6">
-          <Clock className="h-6 w-6 text-brand-400" />
-          <h2 className="text-xl font-semibold text-white">Solution History</h2>
+          <Clock className="h-6 w-6 text-blue-600 dark:text-brand-400" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Solution History</h2>
         </div>
 
         {solutions.length > 0 ? (
@@ -312,20 +312,20 @@ const UserProfilePage: React.FC = () => {
             {solutions.map((solution) => (
               <div
                 key={solution.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-dark-700/50 border border-dark-600"
+                className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200 dark:bg-dark-700/50 dark:border-dark-600"
               >
                 <div>
-                  <p className="text-white text-sm font-medium">
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Solution #{solution.id.slice(0, 8)}...
                   </p>
-                  <p className="text-gray-400 text-xs">
+                  <p className="text-gray-600 dark:text-gray-400 text-xs">
                     {new Date(solution.submitted_at).toLocaleDateString()}
                   </p>
                 </div>
                 {solution.score && (
                   <div className="flex items-center gap-1 px-2 py-1 rounded bg-yellow-500/20">
-                    <Trophy className="h-3 w-3 text-yellow-400" />
-                    <span className="text-yellow-400 text-sm">{solution.score}</span>
+                    <Trophy className="h-3 w-3 text-yellow-600 dark:text-yellow-400" />
+                    <span className="text-yellow-600 dark:text-yellow-400 text-sm">{solution.score}</span>
                   </div>
                 )}
               </div>
@@ -333,8 +333,8 @@ const UserProfilePage: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <BookOpen className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-            <p className="text-gray-400">No solutions yet</p>
+            <BookOpen className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
+            <p className="text-gray-600 dark:text-gray-400">No solutions yet</p>
             <p className="text-gray-500 text-sm">Start solving problems to build your history</p>
           </div>
         )}
