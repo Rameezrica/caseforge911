@@ -151,7 +151,7 @@ const Navbar = () => {
                     {active && (
                       <motion.div
                         layoutId="navbar-active"
-                        className="absolute inset-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl"
+                        className="absolute inset-0 bg-blue-100 border border-blue-200 dark:bg-white/10 dark:backdrop-blur-md dark:border-white/20 rounded-xl"
                         transition={{ type: "spring", stiffness: 380, damping: 30 }}
                       />
                     )}
