@@ -7,49 +7,49 @@
 @layer base {
   :root {
     /* Light theme - clean and professional */
-    --background: 255 255 255;
-    --foreground: 15 23 42;
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
-    --primary: 0 138 188;
-    --primary-foreground: 255 255 255;
-    --secondary: 241 245 249;
-    --secondary-foreground: 15 23 42;
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
-    --accent: 241 245 249;
-    --accent-foreground: 15 23 42;
-    --destructive: 239 68 68;
-    --destructive-foreground: 255 255 255;
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 0 138 188;
+    --background: 0 0 100; /* White */
+    --foreground: 210 17% 25%; /* Dark Slate Blue/Grey */
+    --card: 0 0 100; /* White */
+    --card-foreground: 210 17% 25%; /* Dark Slate Blue/Grey */
+    --popover: 0 0 100; /* White */
+    --popover-foreground: 210 17% 25%; /* Dark Slate Blue/Grey */
+    --primary: 199 100 37; /* Kaggle Blue #008ABC */
+    --primary-foreground: 0 0 100; /* White */
+    --secondary: 210 30% 96%; /* Very Light Blue/Grey */
+    --secondary-foreground: 210 17% 25%; /* Dark Slate Blue/Grey */
+    --muted: 210 30% 96%; /* Very Light Blue/Grey */
+    --muted-foreground: 210 15% 65%; /* Medium Slate Grey */
+    --accent: 210 30% 96%; /* Very Light Blue/Grey */
+    --accent-foreground: 199 100 37; /* Kaggle Blue */
+    --destructive: 0 84 60; /* Red */
+    --destructive-foreground: 0 0 100; /* White */
+    --border: 210 20% 88%; /* Light Blue/Grey Border */
+    --input: 210 20% 88%; /* Light Blue/Grey Input Border */
+    --ring: 199 100 37; /* Kaggle Blue for focus rings */
     --radius: 0.5rem;
   }
  
   .dark {
     /* Dark theme - clean and professional */
-    --background: 2 6 23;
-    --foreground: 248 250 252;
-    --card: 15 23 42;
-    --card-foreground: 248 250 252;
-    --popover: 15 23 42;
-    --popover-foreground: 248 250 252;
-    --primary: 56 189 248;
-    --primary-foreground: 15 23 42;
-    --secondary: 30 41 59;
-    --secondary-foreground: 248 250 252;
-    --muted: 30 41 59;
-    --muted-foreground: 148 163 184;
-    --accent: 30 41 59;
-    --accent-foreground: 248 250 252;
-    --destructive: 248 113 113;
-    --destructive-foreground: 15 23 42;
-    --border: 30 41 59;
-    --input: 30 41 59;
-    --ring: 56 189 248;
+    --background: 222 47% 11%; /* Very Dark Blue */
+    --foreground: 210 40% 98%; /* Off-White */
+    --card: 222 47% 14%; /* Slightly Lighter Dark Blue */
+    --card-foreground: 210 40% 98%; /* Off-White */
+    --popover: 222 47% 11%; /* Very Dark Blue */
+    --popover-foreground: 210 40% 98%; /* Off-White */
+    --primary: 205 90% 58%; /* Brighter Blue for Dark Mode */
+    --primary-foreground: 222 47% 11%; /* Very Dark Blue for text on primary */
+    --secondary: 215 28% 17%; /* Dark Blue/Grey */
+    --secondary-foreground: 210 40% 98%; /* Off-White */
+    --muted: 215 28% 17%; /* Dark Blue/Grey */
+    --muted-foreground: 215 20% 65%; /* Medium Grey for Dark */
+    --accent: 215 28% 17%; /* Dark Blue/Grey */
+    --accent-foreground: 205 90% 58%; /* Brighter Blue for Dark Mode */
+    --destructive: 0 72% 51%; /* Red for Dark Mode */
+    --destructive-foreground: 0 0 100; /* White, changed from 0 0 100% to match convention */
+    --border: 215 28% 17%; /* Dark Blue/Grey Border */
+    --input: 215 28% 17%; /* Dark Blue/Grey Input Border */
+    --ring: 205 90% 58%; /* Brighter Blue for focus rings */
   }
 }
 
