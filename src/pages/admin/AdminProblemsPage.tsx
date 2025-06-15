@@ -32,7 +32,7 @@ const AdminProblemsPage: React.FC = () => {
   const [editingProblem, setEditingProblem] = useState<Problem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
-  const { session } = useAdminAuth();
+  const { firebaseUser } = useAdminAuth();
 
   const [formData, setFormData] = useState<ProblemCreate>({
     title: '',
