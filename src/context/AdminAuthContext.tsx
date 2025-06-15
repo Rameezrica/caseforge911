@@ -12,30 +12,15 @@ const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
 
 interface AdminUser {
   id: string;
+  firebase_uid: string;
   email: string;
-  username: string;
+  display_name: string;
   is_admin: boolean;
-}
-
-// Fallback admin user type
-interface FallbackAdminUser {
-  id: string;
-  email: string;
-  user_metadata: Record<string, any>;
-  created_at: string;
-}
-
-// Local admin session type for fallback mode
-interface LocalAdminSession {
-  access_token: string;
-  refresh_token: string;
-  user: FallbackAdminUser;
-  expires_at?: number;
 }
 
 interface AdminAuthContextType {
   adminUser: AdminUser | null;
-  session: any | LocalAdminSession | null;
+  firebaseUser: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
