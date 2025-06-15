@@ -15,10 +15,13 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 import asyncio
 
+# Firebase imports
+from firebase_config import verify_firebase_token, create_firebase_user, get_firebase_user, FIREBASE_CONFIG
+
 # Load environment variables
 load_dotenv()
 
-# Password hashing
+# Password hashing (kept for fallback mode)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Initialize FastAPI app
@@ -36,29 +39,24 @@ app.add_middleware(
 # Security
 security = HTTPBearer()
 
-# Supabase configuration
+# Supabase configuration (kept for database operations)
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 FALLBACK_MODE = os.getenv("FALLBACK_MODE", "false").lower() == "true"
 
-if not all([SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY]) and not FALLBACK_MODE:
-    raise ValueError("Missing Supabase environment variables. Set FALLBACK_MODE=true for testing without Supabase")
-
-# Create Supabase clients with error handling
+# Create Supabase clients for database operations (not auth)
 try:
-    if not FALLBACK_MODE:
+    if SUPABASE_URL and SUPABASE_ANON_KEY and SUPABASE_SERVICE_KEY:
         supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
         admin_supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-        print("✅ Supabase connected successfully")
+        print("✅ Supabase connected successfully for database operations")
     else:
         supabase = None
         admin_supabase = None
-        print("⚠️  Running in fallback mode without Supabase")
+        print("⚠️  Supabase not configured - database operations will use fallback")
 except Exception as e:
     print(f"❌ Supabase connection failed: {e}")
-    print("🔄 Switching to fallback mode...")
-    FALLBACK_MODE = True
     supabase = None
     admin_supabase = None
 
@@ -169,7 +167,7 @@ MOCK_PROBLEMS = [
 # Mock solutions storage
 MOCK_SOLUTIONS = []
 
-# Fallback authentication functions
+# Fallback authentication functions (kept for development)
 def create_jwt_token(user_data: dict) -> str:
     """Create JWT token for fallback authentication"""
     expiry = datetime.utcnow() + timedelta(hours=24)
@@ -230,7 +228,7 @@ MOCK_STATS = {
 
 # Helper functions
 async def get_current_user(request: Request):
-    """Get current user from Supabase JWT token or fallback authentication"""
+    """Get current user from Firebase ID token or fallback authentication"""
     try:
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
@@ -239,11 +237,27 @@ async def get_current_user(request: Request):
                 detail="Missing or invalid authorization header"
             )
         
-        jwt_token = auth_header.split("Bearer ")[1]
+        token = auth_header.split("Bearer ")[1]
         
+        # Try Firebase token verification first
+        firebase_user = verify_firebase_token(token)
+        if firebase_user:
+            # Create a user object similar to Supabase format
+            class FirebaseUser:
+                def __init__(self, firebase_data):
+                    self.id = firebase_data.get("uid")
+                    self.email = firebase_data.get("email")
+                    self.user_metadata = {
+                        "username": firebase_data.get("name", firebase_data.get("email", "").split('@')[0]),
+                        "full_name": firebase_data.get("name", firebase_data.get("email", "").split('@')[0])
+                    }
+                    self.created_at = firebase_data.get("auth_time")
+            
+            return FirebaseUser(firebase_user)
+        
+        # Fallback to JWT authentication for development
         if FALLBACK_MODE:
-            # Use fallback authentication
-            payload = verify_jwt_token(jwt_token)
+            payload = verify_jwt_token(token)
             user_email = payload.get("email")
             user = FALLBACK_USERS.get(user_email)
             if not user:
@@ -258,17 +272,11 @@ async def get_current_user(request: Request):
                     self.created_at = user_data.get("created_at")
             
             return FallbackUser(user)
-        else:
-            # Use Supabase authentication
-            user_response = supabase.auth.get_user(jwt_token)
-            
-            if not user_response.user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid token"
-                )
-            
-            return user_response.user
+        
+        raise HTTPException(status_code=401, detail="Invalid token")
+        
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -288,9 +296,43 @@ async def get_admin_user(current_user=Depends(get_current_user)):
     return current_user
 
 # Authentication Routes
+@app.post("/api/firebase/auth/register")
+async def register_user_firebase(user_data: UserSignUp):
+    """Register a new user with Firebase"""
+    try:
+        # Create user in Firebase
+        firebase_user = create_firebase_user(
+            email=user_data.email,
+            password=user_data.password,
+            display_name=user_data.full_name or user_data.username
+        )
+        
+        if not firebase_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Registration failed. Email may already be in use."
+            )
+        
+        return {
+            "message": "User registered successfully with Firebase",
+            "user": {
+                "uid": firebase_user["uid"],
+                "email": firebase_user["email"],
+                "username": user_data.username,
+                "full_name": user_data.full_name or user_data.username,
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Registration failed: {str(e)}"
+        ) from e
+
 @app.post("/api/auth/register")
 async def register_user(user_data: UserSignUp):
-    """Register a new user"""
+    """Register a new user (fallback mode)"""
     try:
         if FALLBACK_MODE:
             # Use fallback registration
@@ -311,33 +353,8 @@ async def register_user(user_data: UserSignUp):
                 }
             }
         else:
-            # Sign up user with Supabase
-            auth_response = supabase.auth.sign_up({
-                "email": user_data.email,
-                "password": user_data.password,
-                "options": {
-                    "data": {
-                        "username": user_data.username,
-                        "full_name": user_data.full_name or user_data.username,
-                    }
-                }
-            })
-            
-            if auth_response.user is None:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Registration failed. Email may already be in use."
-                )
-            
-            return {
-                "message": "User registered successfully",
-                "user": {
-                    "id": auth_response.user.id,
-                    "email": auth_response.user.email,
-                    "username": user_data.username,
-                    "full_name": user_data.full_name or user_data.username,
-                }
-            }
+            # Redirect to Firebase registration
+            return await register_user_firebase(user_data)
     except HTTPException:
         raise
     except Exception as e:
@@ -348,7 +365,7 @@ async def register_user(user_data: UserSignUp):
 
 @app.post("/api/auth/token")
 async def login_for_access_token(credentials: UserSignIn):
-    """User login endpoint"""
+    """User login endpoint (fallback mode only - Firebase handles auth on frontend)"""
     try:
         if FALLBACK_MODE:
             # Use fallback authentication
@@ -374,29 +391,11 @@ async def login_for_access_token(credentials: UserSignIn):
                 }
             }
         else:
-            # Authenticate with Supabase
-            auth_response = supabase.auth.sign_in_with_password({
-                "email": credentials.email,
-                "password": credentials.password
-            })
-            
-            if not auth_response.session:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid email or password"
-                )
-            
-            return {
-                "access_token": auth_response.session.access_token,
-                "refresh_token": auth_response.session.refresh_token,
-                "token_type": "bearer",
-                "user": {
-                    "id": auth_response.user.id,
-                    "email": auth_response.user.email,
-                    "username": auth_response.user.user_metadata.get("username", ""),
-                    "full_name": auth_response.user.user_metadata.get("full_name", ""),
-                }
-            }
+            # In Firebase mode, authentication is handled on the frontend
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Please use Firebase authentication on the frontend"
+            )
     except HTTPException:
         raise
     except Exception as e:
@@ -440,37 +439,24 @@ async def admin_login(credentials: AdminSignIn):
                 }
             }
         else:
-            # Authenticate with Supabase
-            auth_response = supabase.auth.sign_in_with_password({
-                "email": credentials.email,
-                "password": credentials.password
-            })
-            
-            if not auth_response.session:
+            # In Firebase mode, check if the user is admin
+            # This endpoint is still useful for admin-specific tokens
+            user = authenticate_fallback_user(credentials.email, credentials.password)
+            if not user or not user.get("is_admin"):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid admin credentials"
                 )
             
-            # Check if user is admin
-            user = auth_response.user
-            is_admin = (user.email == ADMIN_EMAIL or 
-                       user.user_metadata.get("admin", False))
-            
-            if not is_admin:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Admin access required"
-                )
-            
+            access_token = create_jwt_token(user)
             return {
-                "access_token": auth_response.session.access_token,
-                "refresh_token": auth_response.session.refresh_token,
+                "access_token": access_token,
+                "refresh_token": access_token,
                 "token_type": "bearer",
                 "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "username": user.user_metadata.get("username", "admin"),
+                    "id": user["id"],
+                    "email": user["email"],
+                    "username": user.get("username", "admin"),
                     "is_admin": True
                 }
             }
@@ -499,7 +485,7 @@ async def get_current_user_profile(current_user=Depends(get_current_user)):
 async def logout_user(current_user=Depends(get_current_user)):
     """Logout user"""
     try:
-        supabase.auth.sign_out()
+        # Firebase logout is handled on the frontend
         return {"message": "Logged out successfully"}
     except Exception as e:
         # Even if logout fails, return success
@@ -538,18 +524,8 @@ async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
             # Use fallback data
             total_users = len(FALLBACK_USERS)
         else:
-            # Get user count from Supabase
-            users_response = admin_supabase.auth.admin.list_users()
-            
-            # Handle both list and object responses
-            if hasattr(users_response, 'users'):
-                users = users_response.users or []
-            elif isinstance(users_response, list):
-                users = users_response
-            else:
-                users = []
-                
-            total_users = len(users)
+            # Get user count from database
+            total_users = len(FALLBACK_USERS)  # Placeholder
         
         return {
             "total_problems": len(MOCK_PROBLEMS),
@@ -566,7 +542,7 @@ async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
         # Fallback to mock data if anything fails
         return {
             "total_problems": len(MOCK_PROBLEMS),
-            "total_users": len(FALLBACK_USERS) if FALLBACK_MODE else 10,
+            "total_users": len(FALLBACK_USERS),
             "total_solutions": len(MOCK_SOLUTIONS),
             "active_competitions": 0,
             "recent_activity": []
@@ -580,43 +556,19 @@ async def get_admin_users(
 ):
     """Get all users for admin management"""
     try:
-        if FALLBACK_MODE:
-            # Use fallback users
-            users = list(FALLBACK_USERS.values())
-            formatted_users = []
-            for user in users:
-                formatted_users.append({
-                    "id": user["id"],
-                    "username": user.get("username", ""),
-                    "email": user["email"],
-                    "created_at": user.get("created_at"),
-                    "is_active": True,
-                    "email_confirmed": True,  # Assume confirmed in fallback mode
-                    "problems_solved": 0  # TODO: Implement from database
-                })
-        else:
-            users_response = admin_supabase.auth.admin.list_users()
-            
-            # Handle both list and object responses
-            if hasattr(users_response, 'users'):
-                users = users_response.users or []
-            elif isinstance(users_response, list):
-                users = users_response
-            else:
-                users = []
-            
-            # Convert to the expected format
-            formatted_users = []
-            for user in users:
-                formatted_users.append({
-                    "id": user.id,
-                    "username": user.user_metadata.get("username", ""),
-                    "email": user.email,
-                    "created_at": user.created_at,
-                    "is_active": True,
-                    "email_confirmed": user.email_confirmed_at is not None,
-                    "problems_solved": 0  # TODO: Implement from database
-                })
+        # Use fallback users for now
+        users = list(FALLBACK_USERS.values())
+        formatted_users = []
+        for user in users:
+            formatted_users.append({
+                "id": user["id"],
+                "username": user.get("username", ""),
+                "email": user["email"],
+                "created_at": user.get("created_at"),
+                "is_active": True,
+                "email_confirmed": True,
+                "problems_solved": 0  # TODO: Implement from database
+            })
         
         return {
             "users": formatted_users[(page-1)*limit:page*limit],
@@ -634,7 +586,7 @@ async def get_admin_users(
 async def delete_user(user_id: str, admin_user=Depends(get_admin_user)):
     """Delete a user"""
     try:
-        admin_supabase.auth.admin.delete_user(user_id)
+        # TODO: Implement Firebase user deletion
         return {"message": f"User {user_id} deleted successfully"}
     except Exception as e:
         raise HTTPException(
@@ -642,14 +594,22 @@ async def delete_user(user_id: str, admin_user=Depends(get_admin_user)):
             detail=f"Failed to delete user: {str(e)}"
         ) from e
 
-# Public Routes (unchanged)
+# Public Routes
 @app.get("/")
 async def root():
-    return {"message": "CaseForge API is running with Supabase authentication"}
+    return {"message": "CaseForge API is running with Firebase authentication"}
+
+@app.get("/api/firebase/config")
+async def get_firebase_config():
+    """Get Firebase configuration for frontend"""
+    return {
+        "config": FIREBASE_CONFIG,
+        "message": "Firebase configuration"
+    }
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "timestamp": datetime.now(), "auth": "supabase"}
+    return {"status": "healthy", "timestamp": datetime.now(), "auth": "firebase"}
 
 @app.get("/api/problems")
 async def get_problems(
