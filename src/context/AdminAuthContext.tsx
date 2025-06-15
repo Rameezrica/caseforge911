@@ -204,16 +204,11 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     try {
       setError(null);
       
-      // Always clear local storage for admin
+      // Clear local storage for admin
       clearAdminLocalStorage();
       setAdminUser(null);
       setSession(null);
       setIsAuthenticated(false);
-      
-      if (!FALLBACK_MODE) {
-        // Also sign out from Supabase if not in fallback mode
-        await supabase.auth.signOut();
-      }
     } catch (error: any) {
       console.error('Admin sign out error:', error);
       // Even if sign out fails, clear local state
