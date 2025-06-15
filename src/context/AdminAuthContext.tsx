@@ -55,7 +55,7 @@ interface AdminAuthProviderProps {
 
 export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }) => {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
-  const [session, setSession] = useState<Session | LocalAdminSession | null>(null);
+  const [session, setSession] = useState<any | LocalAdminSession | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
