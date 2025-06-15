@@ -1,40 +1,30 @@
+// This file maintains Supabase client for database operations only (not authentication)
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const FALLBACK_MODE = import.meta.env.VITE_FALLBACK_MODE === 'true'
 
-// In fallback mode, create a minimal client or handle gracefully
+// Note: Supabase is now used ONLY for database operations, not authentication
+// Authentication is handled by Firebase
+
 let supabase: any = null
 
-if (!FALLBACK_MODE && supabaseUrl && supabaseAnonKey) {
+if (supabaseUrl && supabaseAnonKey) {
   supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
+      // Disable Supabase auth since we're using Firebase
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false
     }
   })
-} else if (FALLBACK_MODE) {
-  // Create a mock supabase client for fallback mode
-  supabase = {
-    auth: {
-      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      setSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      signOut: () => Promise.resolve({ error: null }),
-      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
-    }
-  }
+  console.log('✅ Supabase client initialized for database operations only')
 } else {
-  console.warn('Supabase not configured - missing environment variables')
-  // Create a basic fallback client
+  console.warn('⚠️ Supabase not configured - database operations will use fallback')
+  // Create a basic fallback client for development
   supabase = {
-    auth: {
-      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      setSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      signOut: () => Promise.resolve({ error: null }),
-      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
-    }
+    // Mock database operations if needed
   }
 }
 
