@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { 
+  User, 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  updateProfile,
+  UserCredential
+} from 'firebase/auth';
+import { auth } from '../lib/firebase';
 
 // Check if we're in fallback mode based on environment
 const FALLBACK_MODE = import.meta.env.VITE_FALLBACK_MODE === 'true';
@@ -53,7 +61,7 @@ interface LocalSession {
 
 export interface AuthContextType {
   user: User | FallbackUser | null;
-  session: Session | LocalSession | null;
+  session: any | LocalSession | null;
   userProfile: UserProfile | null;
   userProgress: UserProgress | null;
   isAuthenticated: boolean;
@@ -83,7 +91,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | FallbackUser | null>(null);
-  const [session, setSession] = useState<Session | LocalSession | null>(null);
+  const [session, setSession] = useState<any | LocalSession | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -129,37 +137,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         }
       } else {
-        // Use Supabase authentication
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting session:', error);
-        } else if (session) {
-          setSession(session);
-          setUser(session.user);
-          setIsAuthenticated(true);
-          await loadUserData(session);
-        }
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            console.log('Auth state changed:', event, session?.user?.email);
+        // Use Firebase authentication
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+          console.log('Firebase auth state changed:', firebaseUser?.email);
+          
+          if (firebaseUser) {
+            // Get Firebase ID token
+            const idToken = await firebaseUser.getIdToken();
             
-            setSession(session);
-            setUser(session?.user ?? null);
-            setIsAuthenticated(!!session?.user);
+            // Store token for API calls
+            localStorage.setItem('firebase_id_token', idToken);
             
-            if (session?.user) {
-              await loadUserData(session);
-            } else {
-              setUserProfile(null);
-              setUserProgress(null);
-            }
+            setUser(firebaseUser);
+            setSession({ user: firebaseUser, idToken });
+            setIsAuthenticated(true);
+            
+            // Load user data from backend
+            await loadUserDataWithFirebaseToken(idToken);
+          } else {
+            // User signed out
+            localStorage.removeItem('firebase_id_token');
+            setUser(null);
+            setSession(null);
+            setIsAuthenticated(false);
+            setUserProfile(null);
+            setUserProgress(null);
           }
-        );
+        });
 
-        return () => subscription.unsubscribe();
+        return () => unsubscribe();
       }
     } catch (error: any) {
       console.error('Auth initialization error:', error);
@@ -188,9 +194,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('caseforge_access_token');
     localStorage.removeItem('caseforge_refresh_token');
     localStorage.removeItem('caseforge_user');
+    localStorage.removeItem('firebase_id_token');
   };
 
-  const loadUserData = async (session: Session | LocalSession) => {
+  const loadUserData = async (session: LocalSession) => {
     try {
       const token = session.access_token;
       
@@ -224,6 +231,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loadUserDataWithFirebaseToken = async (idToken: string) => {
+    try {
+      // Get user profile from backend using Firebase token
+      const profileResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json();
+        setUserProfile(profile);
+      }
+
+      // Get user progress from backend
+      const progressResponse = await fetch(`${API_BASE_URL}/user/progress`, {
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (progressResponse.ok) {
+        const progress = await progressResponse.json();
+        setUserProgress(progress);
+      }
+    } catch (error: any) {
+      console.error('Failed to load user data with Firebase token:', error);
+    }
+  };
+
   const signUp = async (
     email: string, 
     password: string, 
@@ -234,28 +273,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-      // Use backend registration endpoint
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          username,
-          full_name: fullName,
-        }),
-      });
+      if (FALLBACK_MODE) {
+        // Use backend registration endpoint
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            username,
+            full_name: fullName,
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Registration failed');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Registration failed');
+        }
+
+        // After successful registration, sign in the user
+        return await signIn(email, password);
+      } else {
+        // Use Firebase authentication
+        const userCredential: UserCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Update the user's display name
+        if (userCredential.user && (fullName || username)) {
+          await updateProfile(userCredential.user, {
+            displayName: fullName || username
+          });
+        }
+
+        // The onAuthStateChanged listener will handle the rest
+        return true;
       }
-
-      // After successful registration, sign in the user
-      return await signIn(email, password);
     } catch (error: any) {
+      console.error('Sign up error:', error);
       setError(error.message || 'Registration failed');
       return false;
     } finally {
@@ -268,27 +323,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-      // Use backend login endpoint
-      const response = await fetch(`${API_BASE_URL}/auth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Login failed');
-      }
-
-      const data = await response.json();
-      
       if (FALLBACK_MODE) {
-        // In fallback mode, store tokens locally and create local session
+        // Use backend login endpoint
+        const response = await fetch(`${API_BASE_URL}/auth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Login failed');
+        }
+
+        const data = await response.json();
+        
+        // Store tokens locally and create local session
         const userData: FallbackUser = {
           id: data.user.id,
           email: data.user.email,
@@ -315,20 +370,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(userData);
         setIsAuthenticated(true);
         await loadUserData(localSession);
+
+        return true;
       } else {
-        // Use Supabase session
-        const { error } = await supabase.auth.setSession({
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-        });
-
-        if (error) {
-          throw error;
-        }
+        // Use Firebase authentication
+        await signInWithEmailAndPassword(auth, email, password);
+        // The onAuthStateChanged listener will handle the rest
+        return true;
       }
-
-      return true;
     } catch (error: any) {
+      console.error('Sign in error:', error);
       setError(error.message || 'Login failed');
       return false;
     } finally {
@@ -349,22 +400,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserProgress(null);
         setIsAuthenticated(false);
       } else {
-        // Use Supabase sign out
-        await supabase.auth.signOut();
-        
-        // Clear local state
-        setUser(null);
-        setSession(null);
-        setUserProfile(null);
-        setUserProgress(null);
-        setIsAuthenticated(false);
+        // Use Firebase sign out
+        await firebaseSignOut(auth);
+        // The onAuthStateChanged listener will handle clearing state
       }
     } catch (error: any) {
       console.error('Sign out error:', error);
       // Even if sign out fails, clear local state
-      if (FALLBACK_MODE) {
-        clearLocalStorage();
-      }
+      clearLocalStorage();
       setUser(null);
       setSession(null);
       setUserProfile(null);
@@ -375,7 +418,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshUserData = async (): Promise<void> => {
     if (!session) return;
-    await loadUserData(session);
+    
+    if (FALLBACK_MODE) {
+      await loadUserData(session as LocalSession);
+    } else {
+      const idToken = localStorage.getItem('firebase_id_token');
+      if (idToken) {
+        await loadUserDataWithFirebaseToken(idToken);
+      }
+    }
   };
 
   const clearError = () => {
