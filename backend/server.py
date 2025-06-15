@@ -1,118 +1,83 @@
 from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any
 import uvicorn
 import os
-from datetime import datetime, timedelta
-import motor.motor_asyncio
-from bson import ObjectId
-import json
-import jwt
-from passlib.context import CryptContext
+from datetime import datetime
 from dotenv import load_dotenv
 from supabase import create_client, Client
-import asyncio
-
-# Firebase imports
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from firebase_config import verify_firebase_token, create_firebase_user, get_firebase_user, FIREBASE_CONFIG
+import firebase_admin
+from firebase_admin import credentials, auth
+import json
+import uuid
 
 # Load environment variables
 load_dotenv()
 
-# Password hashing (kept for fallback mode)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 # Initialize FastAPI app
-app = FastAPI(title="CaseForge API", version="1.0.0")
+app = FastAPI(title="CaseForge API", version="2.0.0")
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://caseforge911.vercel.app"],
+    allow_origins=os.getenv("FRONTEND_URLS", "http://localhost:3000,http://localhost:5173").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Security
-security = HTTPBearer()
-
-# Supabase configuration (kept for database operations)
+# Supabase configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-FALLBACK_MODE = os.getenv("FALLBACK_MODE", "false").lower() == "true"
 
-# Create Supabase clients for database operations (not auth)
-try:
-    if SUPABASE_URL and SUPABASE_ANON_KEY and SUPABASE_SERVICE_KEY:
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-        admin_supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-        print("✅ Supabase connected successfully for database operations")
-    else:
-        supabase = None
-        admin_supabase = None
-        print("⚠️  Supabase not configured - database operations will use fallback")
-except Exception as e:
-    print(f"❌ Supabase connection failed: {e}")
-    supabase = None
-    admin_supabase = None
+# Create Supabase clients
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+admin_supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-# MongoDB connection (keeping for problems data)
-MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/")
-DATABASE_NAME = os.getenv("DATABASE_NAME", "caseforge")
-
-try:
-    client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
-    db = client[DATABASE_NAME]
-except Exception as e:
-    print(f"MongoDB connection failed: {e}")
-    db = None
-
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
-
-# JWT secret for fallback mode
-JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret-key-for-testing-only")
-JWT_ALGORITHM = "HS256"
-
-# Fallback user storage (in production, this would be in a database)
-FALLBACK_USERS = {
-    ADMIN_EMAIL: {
-        "id": "admin_user_id",
-        "email": ADMIN_EMAIL,
-        "password_hash": "$2b$12$q7/jZcq9ECnch4YLz/H19eDh5UPC6olC0ImxsrgN4UvshvAVphU6e",  # Qwerty9061#
-        "username": "admin",
-        "full_name": "Administrator", 
-        "is_admin": True,
-        "created_at": datetime.now().isoformat(),
-        "user_metadata": {
-            "username": "admin",
-            "full_name": "Administrator",
-            "admin": True
-        }
-    }
+# Firebase configuration
+FIREBASE_CONFIG = {
+    "apiKey": os.getenv("FIREBASE_API_KEY"),
+    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
+    "projectId": os.getenv("FIREBASE_PROJECT_ID"),
+    "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
+    "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID"),
+    "appId": os.getenv("FIREBASE_APP_ID")
 }
 
+# Initialize Firebase Admin SDK
+def initialize_firebase():
+    """Initialize Firebase Admin SDK"""
+    try:
+        if not firebase_admin._apps:
+            # Try to use service account key first
+            service_account_key = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY")
+            
+            if service_account_key:
+                # Parse the service account key from environment
+                service_account_info = json.loads(service_account_key)
+                cred = credentials.Certificate(service_account_info)
+                firebase_admin.initialize_app(cred)
+                print("✅ Firebase Admin initialized with service account")
+            else:
+                # Fallback to minimal config for development
+                firebase_admin.initialize_app(options={
+                    'projectId': FIREBASE_CONFIG["projectId"]
+                })
+                print("✅ Firebase Admin initialized with project ID only")
+        return True
+    except Exception as e:
+        print(f"❌ Firebase Admin initialization failed: {e}")
+        return False
+
+# Initialize Firebase
+firebase_initialized = initialize_firebase()
+
+# Admin email
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
+
 # Pydantic models
-class UserSignUp(BaseModel):
-    email: EmailStr
-    password: str
-    username: str
-    full_name: Optional[str] = None
-
-class UserSignIn(BaseModel):
-    email: EmailStr
-    password: str
-
-class AdminSignIn(BaseModel):
-    email: EmailStr
-    password: str
-
 class Problem(BaseModel):
     id: Optional[str] = None
     title: str
@@ -123,115 +88,37 @@ class Problem(BaseModel):
     company: Optional[str] = None
     tags: List[str] = []
     created_at: Optional[datetime] = None
+    created_by: Optional[str] = None
 
 class Solution(BaseModel):
+    id: Optional[str] = None
     problem_id: str
     user_id: str
     content: str
     submitted_at: Optional[datetime] = None
 
-# Mock data for development
-MOCK_PROBLEMS = [
-    {
-        "id": "1",
-        "title": "Market Entry Strategy for Electric Vehicles",
-        "description": "Tesla is considering entering the Indian market. Analyze the market opportunity, competitive landscape, and recommend an entry strategy.",
-        "category": "Strategy",
-        "domain": "Automotive",
-        "difficulty": "Hard",
-        "company": "Tesla",
-        "tags": ["market-entry", "automotive", "strategy"],
-        "created_at": datetime.now()
-    },
-    {
-        "id": "2", 
-        "title": "Customer Acquisition Cost Optimization",
-        "description": "A SaaS startup is spending $200 to acquire each customer but only generating $150 in lifetime value. How would you fix this?",
-        "category": "Marketing",
-        "domain": "Technology",
-        "difficulty": "Medium",
-        "company": "Generic SaaS",
-        "tags": ["marketing", "saas", "metrics"],
-        "created_at": datetime.now()
-    },
-    {
-        "id": "3",
-        "title": "Supply Chain Disruption Response",
-        "description": "A major supplier to your manufacturing company has gone bankrupt. You need to maintain production while finding alternatives.",
-        "category": "Operations",
-        "domain": "Manufacturing",
-        "difficulty": "Hard",
-        "company": "Manufacturing Corp",
-        "tags": ["supply-chain", "operations", "crisis-management"],
-        "created_at": datetime.now()
-    }
-]
-
-# Mock solutions storage
-MOCK_SOLUTIONS = []
-
-# Fallback authentication functions (kept for development)
-def create_jwt_token(user_data: dict) -> str:
-    """Create JWT token for fallback authentication"""
-    expiry = datetime.utcnow() + timedelta(hours=24)
-    payload = {
-        "sub": user_data["id"],
-        "email": user_data["email"],
-        "exp": expiry,
-        "iat": datetime.utcnow(),
-        "user_metadata": user_data.get("user_metadata", {})
-    }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-
-def verify_jwt_token(token: str) -> dict:
-    """Verify JWT token for fallback authentication"""
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-def authenticate_fallback_user(email: str, password: str) -> Optional[dict]:
-    """Authenticate user in fallback mode"""
-    user = FALLBACK_USERS.get(email)
-    if user and pwd_context.verify(password, user["password_hash"]):
-        return user
-    return None
-
-def register_fallback_user(email: str, password: str, username: str, full_name: str = None) -> dict:
-    """Register user in fallback mode"""
-    if email in FALLBACK_USERS:
-        raise HTTPException(status_code=400, detail="User already exists")
-    
-    user_id = f"user_{len(FALLBACK_USERS) + 1}"
-    user_data = {
-        "id": user_id,
-        "email": email,
-        "password_hash": pwd_context.hash(password),
-        "username": username,
-        "full_name": full_name or username,
-        "is_admin": False,
-        "created_at": datetime.now().isoformat(),
-        "user_metadata": {
-            "username": username,
-            "full_name": full_name or username,
-        }
-    }
-    FALLBACK_USERS[email] = user_data
-    return user_data
-
-MOCK_STATS = {
-    "total_problems": len(MOCK_PROBLEMS),
-    "total_users": 1250,
-    "problems_solved_today": 45,
-    "active_users": 320
-}
+class UserProfile(BaseModel):
+    id: str
+    email: str
+    display_name: Optional[str] = None
+    is_admin: bool = False
+    created_at: Optional[datetime] = None
 
 # Helper functions
+async def verify_firebase_token(id_token: str) -> Optional[Dict[str, Any]]:
+    """Verify Firebase ID token"""
+    try:
+        if not firebase_initialized:
+            raise HTTPException(status_code=500, detail="Firebase not initialized")
+        
+        decoded_token = auth.verify_id_token(id_token)
+        return decoded_token
+    except Exception as e:
+        print(f"❌ Firebase token verification error: {e}")
+        return None
+
 async def get_current_user(request: Request):
-    """Get current user from Firebase ID token or fallback authentication"""
+    """Get current user from Firebase ID token"""
     try:
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
@@ -242,41 +129,17 @@ async def get_current_user(request: Request):
         
         token = auth_header.split("Bearer ")[1]
         
-        # Try Firebase token verification first
-        firebase_user = verify_firebase_token(token)
-        if firebase_user:
-            # Create a user object similar to Supabase format
-            class FirebaseUser:
-                def __init__(self, firebase_data):
-                    self.id = firebase_data.get("uid")
-                    self.email = firebase_data.get("email")
-                    self.user_metadata = {
-                        "username": firebase_data.get("name", firebase_data.get("email", "").split('@')[0]),
-                        "full_name": firebase_data.get("name", firebase_data.get("email", "").split('@')[0])
-                    }
-                    self.created_at = firebase_data.get("auth_time")
-            
-            return FirebaseUser(firebase_user)
+        # Verify Firebase token
+        firebase_user = await verify_firebase_token(token)
+        if not firebase_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid Firebase token"
+            )
         
-        # Fallback to JWT authentication for development
-        if FALLBACK_MODE:
-            payload = verify_jwt_token(token)
-            user_email = payload.get("email")
-            user = FALLBACK_USERS.get(user_email)
-            if not user:
-                raise HTTPException(status_code=401, detail="User not found")
-            
-            # Create a user object similar to Supabase format
-            class FallbackUser:
-                def __init__(self, user_data):
-                    self.id = user_data["id"]
-                    self.email = user_data["email"]
-                    self.user_metadata = user_data.get("user_metadata", {})
-                    self.created_at = user_data.get("created_at")
-            
-            return FallbackUser(user)
-        
-        raise HTTPException(status_code=401, detail="Invalid token")
+        # Get or create user profile in Supabase
+        user_profile = await get_or_create_user_profile(firebase_user)
+        return user_profile
         
     except HTTPException:
         raise
@@ -286,255 +149,274 @@ async def get_current_user(request: Request):
             detail="Invalid authentication credentials"
         ) from e
 
+async def get_or_create_user_profile(firebase_user: Dict[str, Any]) -> Dict[str, Any]:
+    """Get or create user profile in Supabase"""
+    try:
+        # Check if user exists in Supabase
+        result = admin_supabase.table("users").select("*").eq("firebase_uid", firebase_user["uid"]).execute()
+        
+        if result.data:
+            return result.data[0]
+        
+        # Create new user profile
+        user_data = {
+            "id": str(uuid.uuid4()),
+            "firebase_uid": firebase_user["uid"],
+            "email": firebase_user.get("email"),
+            "display_name": firebase_user.get("name", firebase_user.get("email", "").split("@")[0]),
+            "is_admin": firebase_user.get("email") == ADMIN_EMAIL,
+            "created_at": datetime.now().isoformat()
+        }
+        
+        result = admin_supabase.table("users").insert(user_data).execute()
+        return result.data[0] if result.data else user_data
+        
+    except Exception as e:
+        print(f"❌ Error getting/creating user profile: {e}")
+        # Return basic user data if database operation fails
+        return {
+            "id": str(uuid.uuid4()),
+            "firebase_uid": firebase_user["uid"],
+            "email": firebase_user.get("email"),
+            "display_name": firebase_user.get("name", firebase_user.get("email", "").split("@")[0]),
+            "is_admin": firebase_user.get("email") == ADMIN_EMAIL,
+            "created_at": datetime.now().isoformat()
+        }
+
 async def get_admin_user(current_user=Depends(get_current_user)):
     """Verify that current user is admin"""
-    # Check if user is the designated admin
-    if current_user.email != ADMIN_EMAIL:
-        # Also check user metadata for admin flag
-        if not current_user.user_metadata.get("admin", False):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin access required"
-            )
+    if not current_user.get("is_admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
     return current_user
 
-# Authentication Routes
-@app.post("/api/firebase/auth/register")
-async def register_user_firebase(user_data: UserSignUp):
-    """Register a new user with Firebase"""
-    try:
-        # Create user in Firebase
-        firebase_user = create_firebase_user(
-            email=user_data.email,
-            password=user_data.password,
-            display_name=user_data.full_name or user_data.username
-        )
-        
-        if not firebase_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Registration failed. Email may already be in use."
-            )
-        
-        return {
-            "message": "User registered successfully with Firebase",
-            "user": {
-                "uid": firebase_user["uid"],
-                "email": firebase_user["email"],
-                "username": user_data.username,
-                "full_name": user_data.full_name or user_data.username,
-            }
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Registration failed: {str(e)}"
-        ) from e
+# API Routes
+@app.get("/")
+async def root():
+    return {"message": "CaseForge API v2.0 - Firebase Auth + Supabase Database"}
 
-@app.post("/api/auth/register")
-async def register_user(user_data: UserSignUp):
-    """Register a new user (fallback mode)"""
-    try:
-        if FALLBACK_MODE:
-            # Use fallback registration
-            user = register_fallback_user(
-                user_data.email, 
-                user_data.password,
-                user_data.username,
-                user_data.full_name
-            )
-            
-            return {
-                "message": "User registered successfully",
-                "user": {
-                    "id": user["id"],
-                    "email": user["email"],
-                    "username": user["username"],
-                    "full_name": user["full_name"],
-                }
-            }
-        else:
-            # Redirect to Firebase registration
-            return await register_user_firebase(user_data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Registration failed: {str(e)}"
-        ) from e
+@app.get("/api/firebase/config")
+async def get_firebase_config():
+    """Get Firebase configuration for frontend"""
+    return {
+        "config": FIREBASE_CONFIG,
+        "message": "Firebase configuration"
+    }
 
-@app.post("/api/auth/token")
-async def login_for_access_token(credentials: UserSignIn):
-    """User login endpoint (fallback mode only - Firebase handles auth on frontend)"""
-    try:
-        if FALLBACK_MODE:
-            # Use fallback authentication
-            user = authenticate_fallback_user(credentials.email, credentials.password)
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid email or password"
-                )
-            
-            # Create JWT tokens
-            access_token = create_jwt_token(user)
-            
-            return {
-                "access_token": access_token,
-                "refresh_token": access_token,  # For simplicity, using same token
-                "token_type": "bearer",
-                "user": {
-                    "id": user["id"],
-                    "email": user["email"],
-                    "username": user.get("username", ""),
-                    "full_name": user.get("full_name", ""),
-                }
-            }
-        else:
-            # In Firebase mode, authentication is handled on the frontend
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Please use Firebase authentication on the frontend"
-            )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
-        ) from e
+@app.get("/api/health")
+async def health_check():
+    return {
+        "status": "healthy", 
+        "timestamp": datetime.now(), 
+        "auth": "firebase",
+        "database": "supabase",
+        "version": "2.0.0"
+    }
 
-@app.post("/api/auth/admin/login")
-async def admin_login(credentials: AdminSignIn):
-    """Admin login endpoint"""
-    try:
-        if FALLBACK_MODE:
-            # Use fallback authentication
-            user = authenticate_fallback_user(credentials.email, credentials.password)
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid admin credentials"
-                )
-            
-            # Check if user is admin
-            if not user.get("is_admin"):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Admin access required"
-                )
-            
-            # Create JWT tokens
-            access_token = create_jwt_token(user)
-            
-            return {
-                "access_token": access_token,
-                "refresh_token": access_token,  # For simplicity, using same token
-                "token_type": "bearer",
-                "user": {
-                    "id": user["id"],
-                    "email": user["email"],
-                    "username": user.get("username", "admin"),
-                    "is_admin": True
-                }
-            }
-        else:
-            # In Firebase mode, check if the user is admin
-            # This endpoint is still useful for admin-specific tokens
-            user = authenticate_fallback_user(credentials.email, credentials.password)
-            if not user or not user.get("is_admin"):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid admin credentials"
-                )
-            
-            access_token = create_jwt_token(user)
-            return {
-                "access_token": access_token,
-                "refresh_token": access_token,
-                "token_type": "bearer",
-                "user": {
-                    "id": user["id"],
-                    "email": user["email"],
-                    "username": user.get("username", "admin"),
-                    "is_admin": True
-                }
-            }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid admin credentials"
-        ) from e
-
+# User Routes
 @app.get("/api/auth/me")
 async def get_current_user_profile(current_user=Depends(get_current_user)):
     """Get current user profile"""
-    return {
-        "id": current_user.id,
-        "email": current_user.email,
-        "username": current_user.user_metadata.get("username", ""),
-        "full_name": current_user.user_metadata.get("full_name", ""),
-        "created_at": current_user.created_at,
-        "solved_problems": [],  # TODO: Implement from database
-        "total_score": 0,  # TODO: Implement from database
-    }
+    return current_user
 
-@app.post("/api/auth/logout")
-async def logout_user(current_user=Depends(get_current_user)):
-    """Logout user"""
-    try:
-        # Firebase logout is handled on the frontend
-        return {"message": "Logged out successfully"}
-    except Exception as e:
-        # Even if logout fails, return success
-        return {"message": "Logged out successfully"}
-
-# User Routes
 @app.get("/api/user/progress")
 async def get_user_progress(current_user=Depends(get_current_user)):
     """Get user progress and statistics"""
-    # TODO: Implement real progress tracking
-    return {
-        "total_problems_solved": 0,
-        "total_score": 0,
-        "current_streak": 0,
-        "longest_streak": 0,
-        "problems_by_difficulty": {
-            "easy": 0,
-            "medium": 0,
-            "hard": 0
-        },
-        "recent_activity": []
-    }
+    try:
+        # Get user's solutions from Supabase
+        solutions_result = admin_supabase.table("solutions").select("*").eq("user_id", current_user["id"]).execute()
+        solutions = solutions_result.data or []
+        
+        # Calculate progress stats
+        total_problems_solved = len(solutions)
+        total_score = sum(solution.get("score", 0) for solution in solutions)
+        
+        # Get problems solved by difficulty
+        problem_ids = [solution["problem_id"] for solution in solutions]
+        problems_by_difficulty = {"easy": 0, "medium": 0, "hard": 0}
+        
+        if problem_ids:
+            problems_result = admin_supabase.table("problems").select("difficulty").in_("id", problem_ids).execute()
+            for problem in problems_result.data or []:
+                difficulty = problem.get("difficulty", "").lower()
+                if difficulty in problems_by_difficulty:
+                    problems_by_difficulty[difficulty] += 1
+        
+        return {
+            "total_problems_solved": total_problems_solved,
+            "total_score": total_score,
+            "current_streak": 0,  # TODO: Implement streak calculation
+            "longest_streak": 0,  # TODO: Implement streak calculation
+            "problems_by_difficulty": problems_by_difficulty,
+            "recent_activity": solutions[-5:] if solutions else []
+        }
+    except Exception as e:
+        print(f"❌ Error getting user progress: {e}")
+        return {
+            "total_problems_solved": 0,
+            "total_score": 0,
+            "current_streak": 0,
+            "longest_streak": 0,
+            "problems_by_difficulty": {"easy": 0, "medium": 0, "hard": 0},
+            "recent_activity": []
+        }
 
 @app.get("/api/user/solutions")
 async def get_user_solutions(current_user=Depends(get_current_user)):
     """Get user's solutions"""
-    # TODO: Implement real solutions retrieval
-    return []
+    try:
+        result = admin_supabase.table("solutions").select("*").eq("user_id", current_user["id"]).execute()
+        return result.data or []
+    except Exception as e:
+        print(f"❌ Error getting user solutions: {e}")
+        return []
+
+# Problems Routes
+@app.get("/api/problems")
+async def get_problems(
+    category: Optional[str] = None,
+    domain: Optional[str] = None,
+    difficulty: Optional[str] = None,
+    limit: int = 50
+):
+    """Get all problems with optional filtering"""
+    try:
+        query = admin_supabase.table("problems").select("*")
+        
+        if category:
+            query = query.eq("category", category)
+        if domain:
+            query = query.eq("domain", domain)
+        if difficulty:
+            query = query.eq("difficulty", difficulty)
+        
+        result = query.limit(limit).execute()
+        return result.data or []
+    except Exception as e:
+        print(f"❌ Error getting problems: {e}")
+        return []
+
+@app.get("/api/problems/{problem_id}")
+async def get_problem(problem_id: str):
+    """Get a specific problem by ID"""
+    try:
+        result = admin_supabase.table("problems").select("*").eq("id", problem_id).execute()
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Problem not found")
+        return result.data[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error getting problem: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/api/categories")
+async def get_categories():
+    """Get available categories and domains"""
+    try:
+        # Get unique categories
+        categories_result = admin_supabase.table("problems").select("category").execute()
+        categories = list(set(item["category"] for item in categories_result.data or []))
+        
+        # Get unique domains
+        domains_result = admin_supabase.table("problems").select("domain").execute()
+        domains = list(set(item["domain"] for item in domains_result.data or []))
+        
+        # Get unique difficulties
+        difficulties_result = admin_supabase.table("problems").select("difficulty").execute()
+        difficulties = list(set(item["difficulty"] for item in difficulties_result.data or []))
+        
+        return {
+            "categories": categories,
+            "domains": domains,
+            "difficulties": difficulties
+        }
+    except Exception as e:
+        print(f"❌ Error getting categories: {e}")
+        return {"categories": [], "domains": [], "difficulties": []}
+
+@app.get("/api/stats")
+async def get_stats():
+    """Get platform statistics"""
+    try:
+        # Get total problems
+        problems_result = admin_supabase.table("problems").select("id", count="exact").execute()
+        total_problems = problems_result.count or 0
+        
+        # Get total users
+        users_result = admin_supabase.table("users").select("id", count="exact").execute()
+        total_users = users_result.count or 0
+        
+        # Get total solutions
+        solutions_result = admin_supabase.table("solutions").select("id", count="exact").execute()
+        total_solutions = solutions_result.count or 0
+        
+        return {
+            "total_problems": total_problems,
+            "total_users": total_users,
+            "problems_solved_today": 0,  # TODO: Implement daily count
+            "active_users": total_users
+        }
+    except Exception as e:
+        print(f"❌ Error getting stats: {e}")
+        return {
+            "total_problems": 0,
+            "total_users": 0,
+            "problems_solved_today": 0,
+            "active_users": 0
+        }
+
+@app.get("/api/daily-challenge")
+async def get_daily_challenge():
+    """Get today's daily challenge"""
+    try:
+        result = admin_supabase.table("problems").select("*").limit(1).execute()
+        if not result.data:
+            raise HTTPException(status_code=404, detail="No daily challenge available")
+        return result.data[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error getting daily challenge: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.post("/api/solutions")
+async def submit_solution(solution: Solution, current_user=Depends(get_current_user)):
+    """Submit a solution for a problem"""
+    try:
+        solution_data = {
+            "id": str(uuid.uuid4()),
+            "problem_id": solution.problem_id,
+            "user_id": current_user["id"],
+            "content": solution.content,
+            "submitted_at": datetime.now().isoformat(),
+            "user_email": current_user["email"],
+            "user_name": current_user["display_name"]
+        }
+        
+        result = admin_supabase.table("solutions").insert(solution_data).execute()
+        return {"message": "Solution submitted successfully", "solution_id": solution_data["id"]}
+    except Exception as e:
+        print(f"❌ Error submitting solution: {e}")
+        raise HTTPException(status_code=500, detail="Failed to submit solution")
 
 # Admin Routes
 @app.get("/api/admin/dashboard")
 async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
     """Get admin dashboard data"""
     try:
-        if FALLBACK_MODE:
-            # Use fallback data
-            total_users = len(FALLBACK_USERS)
-        else:
-            # Get user count from database
-            total_users = len(FALLBACK_USERS)  # Placeholder
+        # Get counts
+        problems_result = admin_supabase.table("problems").select("id", count="exact").execute()
+        users_result = admin_supabase.table("users").select("id", count="exact").execute()
+        solutions_result = admin_supabase.table("solutions").select("id", count="exact").execute()
         
         return {
-            "total_problems": len(MOCK_PROBLEMS),
-            "total_users": total_users,
-            "total_solutions": len(MOCK_SOLUTIONS),
-            "active_competitions": 0,  # TODO: Implement
+            "total_problems": problems_result.count or 0,
+            "total_users": users_result.count or 0,
+            "total_solutions": solutions_result.count or 0,
+            "active_competitions": 0,
             "recent_activity": [
                 {"type": "user_registration", "count": 5, "date": datetime.now().isoformat()},
                 {"type": "problem_solved", "count": 12, "date": datetime.now().isoformat()},
@@ -542,11 +424,11 @@ async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
             ]
         }
     except Exception as e:
-        # Fallback to mock data if anything fails
+        print(f"❌ Error getting admin dashboard: {e}")
         return {
-            "total_problems": len(MOCK_PROBLEMS),
-            "total_users": len(FALLBACK_USERS),
-            "total_solutions": len(MOCK_SOLUTIONS),
+            "total_problems": 0,
+            "total_users": 0,
+            "total_solutions": 0,
             "active_competitions": 0,
             "recent_activity": []
         }
@@ -559,143 +441,59 @@ async def get_admin_users(
 ):
     """Get all users for admin management"""
     try:
-        # Use fallback users for now
-        users = list(FALLBACK_USERS.values())
-        formatted_users = []
-        for user in users:
-            formatted_users.append({
-                "id": user["id"],
-                "username": user.get("username", ""),
-                "email": user["email"],
-                "created_at": user.get("created_at"),
-                "is_active": True,
-                "email_confirmed": True,
-                "problems_solved": 0  # TODO: Implement from database
-            })
+        offset = (page - 1) * limit
+        result = admin_supabase.table("users").select("*").range(offset, offset + limit - 1).execute()
+        
+        # Get total count
+        count_result = admin_supabase.table("users").select("id", count="exact").execute()
         
         return {
-            "users": formatted_users[(page-1)*limit:page*limit],
-            "total": len(formatted_users),
+            "users": result.data or [],
+            "total": count_result.count or 0,
             "page": page,
             "limit": limit
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch users: {str(e)}"
-        ) from e
+        print(f"❌ Error getting admin users: {e}")
+        return {
+            "users": [],
+            "total": 0,
+            "page": page,
+            "limit": limit
+        }
 
-@app.delete("/api/admin/users/{user_id}")
-async def delete_user(user_id: str, admin_user=Depends(get_admin_user)):
-    """Delete a user"""
-    try:
-        # TODO: Implement Firebase user deletion
-        return {"message": f"User {user_id} deleted successfully"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete user: {str(e)}"
-        ) from e
-
-# Public Routes
-@app.get("/")
-async def root():
-    return {"message": "CaseForge API is running with Firebase authentication"}
-
-@app.get("/api/firebase/config")
-async def get_firebase_config():
-    """Get Firebase configuration for frontend"""
-    return {
-        "config": FIREBASE_CONFIG,
-        "message": "Firebase configuration"
-    }
-
-@app.get("/api/health")
-async def health_check():
-    return {"status": "healthy", "timestamp": datetime.now(), "auth": "firebase"}
-
-@app.get("/api/problems")
-async def get_problems(
-    category: Optional[str] = None,
-    domain: Optional[str] = None,
-    difficulty: Optional[str] = None,
-    limit: int = 50
-):
-    """Get all problems with optional filtering"""
-    problems = MOCK_PROBLEMS.copy()
-    
-    if category:
-        problems = [p for p in problems if p["category"].lower() == category.lower()]
-    if domain:
-        problems = [p for p in problems if p["domain"].lower() == domain.lower()]
-    if difficulty:
-        problems = [p for p in problems if p["difficulty"].lower() == difficulty.lower()]
-    
-    return problems[:limit]
-
-@app.get("/api/problems/{problem_id}")
-async def get_problem(problem_id: str):
-    """Get a specific problem by ID"""
-    problem = next((p for p in MOCK_PROBLEMS if p["id"] == problem_id), None)
-    if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
-    return problem
-
-@app.get("/api/categories")
-async def get_categories():
-    """Get available categories and domains"""
-    categories = list(set(p["category"] for p in MOCK_PROBLEMS))
-    domains = list(set(p["domain"] for p in MOCK_PROBLEMS))
-    difficulties = list(set(p["difficulty"] for p in MOCK_PROBLEMS))
-    
-    return {
-        "categories": categories,
-        "domains": domains,
-        "difficulties": difficulties
-    }
-
-@app.get("/api/stats")
-async def get_stats():
-    """Get platform statistics"""
-    return MOCK_STATS
-
-@app.get("/api/daily-challenge")
-async def get_daily_challenge():
-    """Get today's daily challenge"""
-    if MOCK_PROBLEMS:
-        return MOCK_PROBLEMS[0]
-    raise HTTPException(status_code=404, detail="No daily challenge available")
-
-@app.post("/api/solutions")
-async def submit_solution(solution: Solution, current_user=Depends(get_current_user)):
-    """Submit a solution for a problem"""
-    solution_data = solution.dict()
-    solution_data["id"] = f"solution_{len(MOCK_SOLUTIONS) + 1}"
-    solution_data["submitted_at"] = datetime.now()
-    solution_data["user_id"] = current_user.id
-    solution_data["user_email"] = current_user.email
-    solution_data["user_name"] = current_user.user_metadata.get("username", current_user.email)
-    
-    # Add to mock solutions storage
-    MOCK_SOLUTIONS.append(solution_data)
-    
-    return {"message": "Solution submitted successfully", "solution_id": solution_data["id"]}
-
-# Admin problem management routes
 @app.get("/api/admin/problems")
 async def get_admin_problems(admin_user=Depends(get_admin_user)):
     """Get all problems for admin management"""
-    return MOCK_PROBLEMS
+    try:
+        result = admin_supabase.table("problems").select("*").execute()
+        return result.data or []
+    except Exception as e:
+        print(f"❌ Error getting admin problems: {e}")
+        return []
 
 @app.post("/api/admin/problems")
 async def create_problem(problem: Problem, admin_user=Depends(get_admin_user)):
     """Create a new problem"""
-    problem_data = problem.dict()
-    problem_data["id"] = f"problem_{len(MOCK_PROBLEMS) + 1}"
-    problem_data["created_at"] = datetime.now()
-    
-    MOCK_PROBLEMS.append(problem_data)
-    return problem_data
+    try:
+        problem_data = {
+            "id": str(uuid.uuid4()),
+            "title": problem.title,
+            "description": problem.description,
+            "category": problem.category,
+            "domain": problem.domain,
+            "difficulty": problem.difficulty,
+            "company": problem.company,
+            "tags": problem.tags,
+            "created_at": datetime.now().isoformat(),
+            "created_by": admin_user["id"]
+        }
+        
+        result = admin_supabase.table("problems").insert(problem_data).execute()
+        return result.data[0] if result.data else problem_data
+    except Exception as e:
+        print(f"❌ Error creating problem: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create problem")
 
 @app.put("/api/admin/problems/{problem_id}")
 async def update_problem(
@@ -704,101 +502,86 @@ async def update_problem(
     admin_user=Depends(get_admin_user)
 ):
     """Update an existing problem"""
-    # Find and update the problem in MOCK_PROBLEMS
-    for i, p in enumerate(MOCK_PROBLEMS):
-        if p["id"] == problem_id:
-            problem_data = problem.dict()
-            problem_data["id"] = problem_id
-            problem_data["created_at"] = p.get("created_at", datetime.now())
-            problem_data["updated_at"] = datetime.now()
-            MOCK_PROBLEMS[i] = problem_data
-            return problem_data
-    
-    raise HTTPException(status_code=404, detail="Problem not found")
+    try:
+        problem_data = {
+            "title": problem.title,
+            "description": problem.description,
+            "category": problem.category,
+            "domain": problem.domain,
+            "difficulty": problem.difficulty,
+            "company": problem.company,
+            "tags": problem.tags,
+            "updated_at": datetime.now().isoformat()
+        }
+        
+        result = admin_supabase.table("problems").update(problem_data).eq("id", problem_id).execute()
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Problem not found")
+        return result.data[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error updating problem: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update problem")
 
 @app.delete("/api/admin/problems/{problem_id}")
 async def delete_problem(problem_id: str, admin_user=Depends(get_admin_user)):
     """Delete a problem"""
-    global MOCK_PROBLEMS
-    MOCK_PROBLEMS = [p for p in MOCK_PROBLEMS if p["id"] != problem_id]
-    return {"message": f"Problem {problem_id} deleted successfully"}
-
-@app.get("/api/admin/competitions")
-async def get_admin_competitions(admin_user=Depends(get_admin_user)):
-    """Get all competitions for admin management"""
-    return [
-        {
-            "id": "comp_1",
-            "title": "Winter Strategy Challenge",
-            "description": "A week-long competition focusing on strategic thinking",
-            "start_date": "2024-01-20T00:00:00Z",
-            "end_date": "2024-01-27T23:59:59Z",
-            "participants": 45,
-            "status": "upcoming"
-        }
-    ]
-
-@app.get("/api/admin/analytics")
-async def get_admin_analytics(admin_user=Depends(get_admin_user)):
-    """Get platform analytics"""
-    return {
-        "user_growth": [
-            {"date": "2024-01-01", "users": 1000},
-            {"date": "2024-01-08", "users": 1100},
-            {"date": "2024-01-15", "users": 1250}
-        ],
-        "problem_difficulty_distribution": {
-            "Easy": 45,
-            "Medium": 78,
-            "Hard": 27
-        },
-        "category_popularity": {
-            "Strategy": 35,
-            "Marketing": 28,
-            "Operations": 22,
-            "Finance": 15
-        },
-        "daily_active_users": [
-            {"date": "2024-01-10", "users": 120},
-            {"date": "2024-01-11", "users": 135},
-            {"date": "2024-01-12", "users": 142},
-            {"date": "2024-01-13", "users": 128},
-            {"date": "2024-01-14", "users": 156},
-            {"date": "2024-01-15", "users": 163}
-        ]
-    }
+    try:
+        result = admin_supabase.table("problems").delete().eq("id", problem_id).execute()
+        return {"message": f"Problem {problem_id} deleted successfully"}
+    except Exception as e:
+        print(f"❌ Error deleting problem: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete problem")
 
 @app.get("/api/admin/solutions")
 async def get_admin_solutions(admin_user=Depends(get_admin_user)):
     """Get all submitted solutions for admin review"""
-    # Add problem titles to solutions for easier viewing
-    solutions_with_problems = []
-    for solution in MOCK_SOLUTIONS:
-        problem = next((p for p in MOCK_PROBLEMS if p["id"] == solution["problem_id"]), None)
-        solution_with_problem = solution.copy()
-        solution_with_problem["problem_title"] = problem["title"] if problem else "Unknown Problem"
-        solution_with_problem["problem_difficulty"] = problem["difficulty"] if problem else "Unknown"
-        solutions_with_problems.append(solution_with_problem)
-    
-    return {
-        "solutions": solutions_with_problems,
-        "total": len(solutions_with_problems)
-    }
+    try:
+        # Get solutions with problem details
+        solutions_result = admin_supabase.table("solutions").select("*, problems(title, difficulty)").execute()
+        
+        solutions_with_problems = []
+        for solution in solutions_result.data or []:
+            solution_with_problem = solution.copy()
+            if solution.get("problems"):
+                solution_with_problem["problem_title"] = solution["problems"]["title"]
+                solution_with_problem["problem_difficulty"] = solution["problems"]["difficulty"]
+            else:
+                solution_with_problem["problem_title"] = "Unknown Problem"
+                solution_with_problem["problem_difficulty"] = "Unknown"
+            solutions_with_problems.append(solution_with_problem)
+        
+        return {
+            "solutions": solutions_with_problems,
+            "total": len(solutions_with_problems)
+        }
+    except Exception as e:
+        print(f"❌ Error getting admin solutions: {e}")
+        return {"solutions": [], "total": 0}
 
 @app.get("/api/admin/solutions/{problem_id}")
 async def get_problem_solutions(problem_id: str, admin_user=Depends(get_admin_user)):
     """Get all solutions for a specific problem"""
-    problem_solutions = [s for s in MOCK_SOLUTIONS if s["problem_id"] == problem_id]
-    problem = next((p for p in MOCK_PROBLEMS if p["id"] == problem_id), None)
-    
-    if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
-    
-    return {
-        "problem": problem,
-        "solutions": problem_solutions,
-        "total": len(problem_solutions)
-    }
+    try:
+        # Get problem details
+        problem_result = admin_supabase.table("problems").select("*").eq("id", problem_id).execute()
+        if not problem_result.data:
+            raise HTTPException(status_code=404, detail="Problem not found")
+        
+        # Get solutions for this problem
+        solutions_result = admin_supabase.table("solutions").select("*").eq("problem_id", problem_id).execute()
+        
+        return {
+            "problem": problem_result.data[0],
+            "solutions": solutions_result.data or [],
+            "total": len(solutions_result.data or [])
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error getting problem solutions: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)

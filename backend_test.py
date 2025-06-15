@@ -13,28 +13,23 @@ class CaseForgeBackendTester:
         self.tests_run = 0
         self.tests_passed = 0
         self.results = []
-        self.admin_token = None
-        self.user_token = None
+        self.firebase_token = None
         self.test_user = None
         self.test_password = None
         self.test_email = None
         self.test_problem_id = None
         
-        # For Firebase testing
-        self.firebase_token = None
+        # Admin credentials
+        self.admin_email = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
+        self.admin_password = os.getenv("ADMIN_PASSWORD", "Qwerty9061#")
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, admin=False, firebase_token=False):
+    def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, admin=False):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
         
-        if auth:
-            if firebase_token and self.firebase_token:
-                headers['Authorization'] = f'Bearer {self.firebase_token}'
-            else:
-                token = self.admin_token if admin else self.user_token
-                if token:
-                    headers['Authorization'] = f'Bearer {token}'
+        if auth and self.firebase_token:
+            headers['Authorization'] = f'Bearer {self.firebase_token}'
         
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
@@ -84,20 +79,20 @@ class CaseForgeBackendTester:
             return False, {}
 
     # ===== FIREBASE SPECIFIC TESTS =====
-    def test_health_check_firebase(self):
-        """Test the health check endpoint for Firebase auth"""
+    def test_health_check(self):
+        """Test the health check endpoint"""
         success, response = self.run_test(
-            "Health Check Firebase Auth",
+            "Health Check",
             "GET",
             "health",
             200
         )
         
-        if success and response.get("auth") == "firebase":
-            print("✅ Firebase auth confirmed in health check")
+        if success:
+            print(f"✅ Health check successful: {response}")
             return True, response
         else:
-            print("❌ Firebase auth not confirmed in health check")
+            print("❌ Health check failed")
             return False, response
             
     def test_firebase_config(self):
@@ -109,30 +104,6 @@ class CaseForgeBackendTester:
             200
         )
         
-    def test_firebase_register(self):
-        """Test user registration with Firebase"""
-        # Generate a unique username and email
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        random_suffix = str(random.randint(1000, 9999))
-        self.test_user = f"testuser_{timestamp}_{random_suffix}"
-        self.test_email = f"testuser_{timestamp}_{random_suffix}@gmail.com"
-        self.test_password = "TestPassword123!"
-        
-        user_data = {
-            "username": self.test_user,
-            "email": self.test_email,
-            "password": self.test_password,
-            "full_name": "Test User"
-        }
-        
-        return self.run_test(
-            "Firebase User Registration",
-            "POST",
-            "firebase/auth/register",
-            200,
-            data=user_data
-        )
-        
     def test_protected_route_without_auth(self):
         """Test accessing protected route without auth"""
         return self.run_test(
@@ -142,307 +113,34 @@ class CaseForgeBackendTester:
             401
         )
         
-    def test_fallback_auth(self):
-        """Test fallback authentication"""
-        if not self.test_email:
-            print("❌ Cannot test fallback auth: No test user created")
-            return False, {}
-            
-        login_data = {
-            "email": self.test_email,
-            "password": self.test_password
-        }
-        
-        success, response = self.run_test(
-            "Fallback Authentication",
-            "POST",
-            "auth/token",
-            200,
-            data=login_data
-        )
-        
-        if success and 'access_token' in response:
-            self.user_token = response['access_token']
-            print(f"✅ Successfully obtained fallback token")
-            return True, response
-        else:
-            print(f"❌ Failed to obtain fallback token")
-            return False, response
-
-    # ===== AUTHENTICATION SYSTEM =====
-    def test_user_registration(self):
-        """Test user registration"""
-        # Generate a unique username and email
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        random_suffix = str(random.randint(1000, 9999))
-        self.test_user = f"testuser_{timestamp}_{random_suffix}"
-        self.test_email = f"testuser_{timestamp}_{random_suffix}@gmail.com"
-        self.test_password = "TestPassword123!"
-        
-        user_data = {
-            "username": self.test_user,
-            "email": self.test_email,
-            "password": self.test_password,
-            "full_name": "Test User"
-        }
-        
-        return self.run_test(
-            "User Registration",
-            "POST",
-            "auth/register",
-            200,
-            data=user_data
-        )
-
-    def test_user_login(self):
-        """Test user login and get token"""
-        if not self.test_email:
-            print("❌ Cannot test login: No test user created")
-            return False, {}
-            
-        login_data = {
-            "email": self.test_email,
-            "password": self.test_password
-        }
-        
-        success, response = self.run_test(
-            "User Login",
-            "POST",
-            "auth/token",
-            200,
-            data=login_data
-        )
-        
-        if success and 'access_token' in response:
-            self.user_token = response['access_token']
-            print(f"✅ Successfully obtained user token")
-            return True, response
-        else:
-            print(f"❌ Failed to obtain user token")
-            return False, response
-
-    def test_invalid_login(self):
-        """Test login with invalid credentials"""
-        login_data = {
-            "email": "nonexistent@example.com",
-            "password": "WrongPassword123!"
-        }
-        
-        return self.run_test(
-            "Invalid Login",
-            "POST",
-            "auth/token",
-            401,
-            data=login_data
-        )
-
-    def test_get_current_user(self):
-        """Test getting current user profile"""
-        return self.run_test(
-            "Get Current User Profile",
-            "GET",
-            "auth/me",
-            200,
-            auth=True,
-            admin=False
-        )
-
-    def test_unauthorized_access(self):
-        """Test accessing protected route without auth"""
-        return self.run_test(
-            "Unauthorized Access",
-            "GET",
-            "auth/me",
-            401
-        )
-
-    def test_admin_login(self):
-        """Test admin login and get token"""
-        login_data = {
-            "email": "admin@caseforge.com",
-            "password": "Qwerty9061#"
-        }
-        
-        success, response = self.run_test(
-            "Admin Login",
-            "POST",
-            "auth/admin/login",
-            200,
-            data=login_data
-        )
-        
-        if success and 'access_token' in response:
-            self.admin_token = response['access_token']
-            print(f"✅ Successfully obtained admin token")
-            return True, response
-        else:
-            print(f"❌ Failed to obtain admin token")
-            return False, response
-
-    def test_logout(self):
-        """Test user logout"""
-        return self.run_test(
-            "User Logout",
-            "POST",
-            "auth/logout",
-            200,
-            auth=True,
-            admin=False
-        )
-
-    # ===== USER MANAGEMENT =====
-    def test_user_progress(self):
-        """Test getting user progress"""
-        return self.run_test(
-            "User Progress",
-            "GET",
-            "user/progress",
-            200,
-            auth=True,
-            admin=False
-        )
-
-    def test_user_solutions(self):
-        """Test getting user solutions"""
-        return self.run_test(
-            "User Solutions",
-            "GET",
-            "user/solutions",
-            200,
-            auth=True,
-            admin=False
-        )
-
-    # ===== ADMIN FUNCTIONALITY =====
-    def test_admin_dashboard(self):
-        """Test accessing admin dashboard"""
-        return self.run_test(
-            "Admin Dashboard Access",
-            "GET",
-            "admin/dashboard",
-            200,
-            auth=True,
-            admin=True
-        )
-
-    def test_admin_users(self):
-        """Test accessing admin users list"""
-        return self.run_test(
-            "Admin Users List",
-            "GET",
-            "admin/users",
-            200,
-            auth=True,
-            admin=True
-        )
-
-    def test_admin_problems(self):
-        """Test accessing admin problems list"""
-        return self.run_test(
-            "Admin Problems List",
-            "GET",
-            "admin/problems",
-            200,
-            auth=True,
-            admin=True
-        )
-
-    def test_admin_create_problem(self):
-        """Test creating a new problem as admin"""
-        problem_data = {
-            "title": f"Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
-            "description": "This is a test problem created by the automated test suite",
-            "category": "Testing",
-            "domain": "Software",
-            "difficulty": "Medium",
-            "company": "Test Company",
-            "tags": ["test", "automation"]
-        }
-        
-        success, response = self.run_test(
-            "Admin Create Problem",
-            "POST",
-            "admin/problems",
-            200,
-            data=problem_data,
-            auth=True,
-            admin=True
-        )
-        
-        if success and 'id' in response:
-            self.test_problem_id = response['id']
-            print(f"✅ Successfully created test problem with ID: {self.test_problem_id}")
-        
-        return success, response
-
-    def test_admin_update_problem(self):
-        """Test updating a problem as admin"""
-        if not self.test_problem_id:
-            print("❌ Cannot test problem update: No test problem created")
-            return False, {}
-            
-        problem_data = {
-            "title": f"Updated Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
-            "description": "This problem was updated by the automated test suite",
-            "category": "Testing",
-            "domain": "Software",
-            "difficulty": "Hard",
-            "company": "Updated Test Company",
-            "tags": ["test", "automation", "updated"]
-        }
-        
-        return self.run_test(
-            "Admin Update Problem",
-            "PUT",
-            f"admin/problems/{self.test_problem_id}",
-            200,
-            data=problem_data,
-            auth=True,
-            admin=True
-        )
-
-    def test_admin_delete_problem(self):
-        """Test deleting a problem as admin"""
-        if not self.test_problem_id:
-            print("❌ Cannot test problem deletion: No test problem created")
-            return False, {}
-            
-        return self.run_test(
-            "Admin Delete Problem",
-            "DELETE",
-            f"admin/problems/{self.test_problem_id}",
-            200,
-            auth=True,
-            admin=True
-        )
-
-    def test_user_accessing_admin(self):
-        """Test regular user trying to access admin route"""
-        return self.run_test(
-            "User Accessing Admin Route",
-            "GET",
-            "admin/dashboard",
-            403,
-            auth=True,
-            admin=False
-        )
-
     # ===== PROBLEMS AND PUBLIC ENDPOINTS =====
     def test_get_all_problems(self):
         """Test getting all problems"""
-        return self.run_test(
+        success, response = self.run_test(
             "Get All Problems",
             "GET",
             "problems",
             200
         )
+        
+        if success and isinstance(response, list):
+            # Store a problem ID for later tests if available
+            if len(response) > 0:
+                self.test_problem_id = response[0].get('id')
+                print(f"✅ Found problem ID for testing: {self.test_problem_id}")
+        
+        return success, response
 
-    def test_get_specific_problem(self):
-        """Test getting a specific problem"""
+    def test_get_problem_by_id(self):
+        """Test getting a specific problem by ID"""
+        if not self.test_problem_id:
+            print("⚠️ No problem ID available for testing")
+            return False, {}
+            
         return self.run_test(
-            "Get Specific Problem",
+            "Get Problem by ID",
             "GET",
-            "problems/1",
+            f"problems/{self.test_problem_id}",
             200
         )
 
@@ -454,25 +152,79 @@ class CaseForgeBackendTester:
             "categories",
             200
         )
-
-    def test_submit_solution(self):
-        """Test submitting a solution"""
-        solution_data = {
-            "problem_id": "1",
-            "user_id": "user_id_placeholder",  # Will be replaced with actual user ID
-            "content": "This is a test solution submitted by the automated test suite"
+        
+    def test_get_stats(self):
+        """Test getting platform statistics"""
+        return self.run_test(
+            "Get Platform Stats",
+            "GET",
+            "stats",
+            200
+        )
+        
+    def test_get_daily_challenge(self):
+        """Test getting daily challenge"""
+        return self.run_test(
+            "Get Daily Challenge",
+            "GET",
+            "daily-challenge",
+            200
+        )
+        
+    # ===== ADMIN ENDPOINTS =====
+    def test_admin_dashboard(self):
+        """Test getting admin dashboard data"""
+        if not self.firebase_token:
+            print("⚠️ No Firebase token available for admin testing")
+            return False, {}
+            
+        return self.run_test(
+            "Admin Dashboard",
+            "GET",
+            "admin/dashboard",
+            200,
+            auth=True
+        )
+        
+    def test_admin_problems(self):
+        """Test getting admin problems"""
+        if not self.firebase_token:
+            print("⚠️ No Firebase token available for admin testing")
+            return False, {}
+            
+        return self.run_test(
+            "Admin Problems",
+            "GET",
+            "admin/problems",
+            200,
+            auth=True
+        )
+        
+    def test_create_problem(self):
+        """Test creating a new problem"""
+        if not self.firebase_token:
+            print("⚠️ No Firebase token available for admin testing")
+            return False, {}
+            
+        problem_data = {
+            "title": f"Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "description": "This is a test problem created by the automated test script",
+            "category": "Marketing",
+            "domain": "Technology",
+            "difficulty": "Medium",
+            "company": "TestCorp",
+            "tags": ["test", "automation"]
         }
         
         return self.run_test(
-            "Submit Solution",
+            "Create Problem",
             "POST",
-            "solutions",
+            "admin/problems",
             200,
-            data=solution_data,
-            auth=True,
-            admin=False
+            data=problem_data,
+            auth=True
         )
-
+        
     def print_summary(self):
         """Print a summary of the test results"""
         print("\n" + "="*50)
@@ -491,18 +243,18 @@ class CaseForgeBackendTester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = os.getenv("REACT_APP_BACKEND_URL", "http://localhost:8001") + "/api"
+    api_url = "http://localhost:3001/api"
     
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
     
-    # ===== FIREBASE AUTHENTICATION TESTS =====
+    # ===== BASIC API TESTS =====
     print("\n" + "="*50)
-    print("🔥 Testing Firebase Authentication Integration")
+    print("🔍 Testing Basic API Functionality")
     print("="*50)
     
-    # Test health check for Firebase auth
-    tester.test_health_check_firebase()
+    # Test health check
+    tester.test_health_check()
     
     # Test Firebase config endpoint
     tester.test_firebase_config()
@@ -510,113 +262,36 @@ def main():
     # Test protected route without auth
     tester.test_protected_route_without_auth()
     
-    # Test Firebase user registration
-    success, _ = tester.test_firebase_register()
-    if success:
-        print("✅ Firebase user registration successful")
-    else:
-        print("❌ Firebase user registration failed")
-    
-    # Test fallback authentication
-    fallback_success, _ = tester.test_fallback_auth()
-    if fallback_success:
-        print("✅ Fallback authentication successful")
-        
-        # Test protected user endpoints with fallback auth
-        tester.test_get_current_user()
-    else:
-        print("❌ Fallback authentication failed")
-    
-    # ===== REGULAR AUTHENTICATION SYSTEM TESTS =====
+    # ===== PUBLIC ENDPOINTS TESTS =====
     print("\n" + "="*50)
-    print("👤 Testing Regular Authentication System")
+    print("📚 Testing Public Endpoints")
     print("="*50)
     
-    # Test invalid login
-    tester.test_invalid_login()
+    # Test getting all problems
+    tester.test_get_all_problems()
     
-    # Test unauthorized access
-    tester.test_unauthorized_access()
+    # Test getting a specific problem by ID
+    if tester.test_problem_id:
+        tester.test_get_problem_by_id()
     
-    # Register a new user
-    success, _ = tester.test_user_registration()
-    if success:
-        print("✅ User registration successful")
-        
-        # Login with the new user
-        login_success, _ = tester.test_user_login()
-        if login_success:
-            print("✅ User login successful")
-            
-            # Test protected user endpoints
-            tester.test_get_current_user()
-            
-            # Test user trying to access admin route
-            tester.test_user_accessing_admin()
-            
-            # ===== USER MANAGEMENT TESTS =====
-            print("\n" + "="*50)
-            print("👤 Testing User Management")
-            print("="*50)
-            
-            # Test user progress
-            tester.test_user_progress()
-            
-            # Test user solutions
-            tester.test_user_solutions()
-            
-            # ===== PROBLEMS AND PUBLIC ENDPOINTS TESTS =====
-            print("\n" + "="*50)
-            print("📚 Testing Problems and Public Endpoints")
-            print("="*50)
-            
-            # Test getting all problems
-            tester.test_get_all_problems()
-            
-            # Test getting a specific problem
-            tester.test_get_specific_problem()
-            
-            # Test getting categories
-            tester.test_get_categories()
-            
-            # Test submitting a solution
-            tester.test_submit_solution()
-            
-            # Test logout
-            tester.test_logout()
-        else:
-            print("❌ User login failed")
-    else:
-        print("❌ User registration failed")
+    # Test getting categories
+    tester.test_get_categories()
     
-    # ===== ADMIN FUNCTIONALITY TESTS =====
-    print("\n" + "="*50)
-    print("🔐 Testing Admin Functionality")
-    print("="*50)
+    # Test getting platform stats
+    tester.test_get_stats()
     
-    # Login as admin
-    admin_success, _ = tester.test_admin_login()
-    if admin_success:
-        print("✅ Admin login successful")
-        
-        # Test admin dashboard access
-        tester.test_admin_dashboard()
-        
-        # Test admin users list
-        tester.test_admin_users()
-        
-        # Test admin problems list
-        tester.test_admin_problems()
-        
-        # Test admin problem management
-        tester.test_admin_create_problem()
-        tester.test_admin_update_problem()
-        tester.test_admin_delete_problem()
-    else:
-        print("❌ Admin login failed")
+    # Test getting daily challenge
+    tester.test_get_daily_challenge()
     
     # Print summary
     success = tester.print_summary()
+    
+    print("\n" + "="*50)
+    print("🔐 Note on Firebase Authentication Testing")
+    print("="*50)
+    print("Firebase authentication requires client-side integration and cannot be fully tested with this script.")
+    print("Please use the Playwright UI tests to verify the complete authentication flow.")
+    
     return 0 if success else 1
 
 if __name__ == "__main__":

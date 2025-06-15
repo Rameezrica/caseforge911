@@ -24,7 +24,7 @@ const AdminDashboardPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { session } = useAdminAuth();
+  const { firebaseUser } = useAdminAuth();
 
   useEffect(() => {
     loadDashboardData();
@@ -35,13 +35,15 @@ const AdminDashboardPage: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      if (!session?.access_token) {
+      // Get Firebase ID token
+      const idToken = localStorage.getItem('admin_firebase_id_token');
+      if (!idToken) {
         throw new Error('No admin token available');
       }
 
       const response = await fetch('/api/admin/dashboard', {
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${idToken}`,
           'Content-Type': 'application/json',
         },
       });
