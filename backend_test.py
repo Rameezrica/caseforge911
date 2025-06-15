@@ -13,15 +13,15 @@ class CaseForgeBackendTester:
         self.tests_run = 0
         self.tests_passed = 0
         self.results = []
-        self.admin_token = None
-        self.user_token = None
+        self.firebase_token = None
         self.test_user = None
         self.test_password = None
         self.test_email = None
         self.test_problem_id = None
         
-        # For Firebase testing
-        self.firebase_token = None
+        # Admin credentials
+        self.admin_email = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
+        self.admin_password = None  # Will need to be provided
 
     def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, admin=False, firebase_token=False):
         """Run a single API test"""
