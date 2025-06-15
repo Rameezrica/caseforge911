@@ -45,79 +45,74 @@ interface AdminAuthProviderProps {
 
 export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }) => {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
-  const [session, setSession] = useState<any | LocalAdminSession | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    initializeAdminAuth();
-  }, []);
-
-  const initializeAdminAuth = async () => {
-    try {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log('Admin Firebase auth state changed:', user?.email);
       setIsLoading(true);
       
-      // Check for stored admin session
-      const storedToken = localStorage.getItem('caseforge_admin_access_token');
-      const storedUser = localStorage.getItem('caseforge_admin_user');
-      
-      if (storedToken && storedUser) {
+      if (user && user.email === ADMIN_EMAIL) {
         try {
-          const userData = JSON.parse(storedUser);
-          const localSession: LocalAdminSession = {
-            access_token: storedToken,
-            refresh_token: localStorage.getItem('caseforge_admin_refresh_token') || storedToken,
-            user: userData
-          };
+          // Get Firebase ID token
+          const idToken = await user.getIdToken();
           
-          // Verify token with backend
-          const isValid = await validateAdminTokenWithBackend(storedToken);
-          if (isValid) {
-            setSession(localSession);
-            setAdminUser({
-              id: userData.id,
-              email: userData.email,
-              username: userData.user_metadata?.username || 'admin',
-              is_admin: true,
-            });
-            setIsAuthenticated(true);
-          } else {
-            // Token invalid, clear storage
-            clearAdminLocalStorage();
-          }
+          // Store token for admin API calls
+          localStorage.setItem('admin_firebase_id_token', idToken);
+          
+          // Load admin profile from backend
+          await loadAdminProfile(idToken);
+          
+          setFirebaseUser(user);
+          setIsAuthenticated(true);
         } catch (error) {
-          console.error('Error parsing stored admin user data:', error);
-          clearAdminLocalStorage();
+          console.error('Error processing admin user:', error);
+          setError('Failed to load admin profile');
         }
+      } else if (user && user.email !== ADMIN_EMAIL) {
+        // User is authenticated but not admin
+        setError('Admin access required');
+        await firebaseSignOut(auth);
+      } else {
+        // User signed out
+        localStorage.removeItem('admin_firebase_id_token');
+        setFirebaseUser(null);
+        setAdminUser(null);
+        setIsAuthenticated(false);
       }
-    } catch (error: any) {
-      console.error('Admin auth initialization error:', error);
-      setError(error.message || 'Admin authentication initialization failed');
-    } finally {
+      
       setIsLoading(false);
-    }
-  };
+    });
 
-  const validateAdminTokenWithBackend = async (token: string): Promise<boolean> => {
+    return () => unsubscribe();
+  }, []);
+
+  const loadAdminProfile = async (idToken: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${idToken}`,
           'Content-Type': 'application/json',
         },
       });
-      return response.ok;
-    } catch (error) {
-      console.error('Admin token validation error:', error);
-      return false;
-    }
-  };
 
-  const clearAdminLocalStorage = () => {
-    localStorage.removeItem('caseforge_admin_access_token');
-    localStorage.removeItem('caseforge_admin_refresh_token');
-    localStorage.removeItem('caseforge_admin_user');
+      if (response.ok) {
+        const profile = await response.json();
+        if (profile.is_admin) {
+          setAdminUser(profile);
+        } else {
+          throw new Error('User is not an admin');
+        }
+      } else {
+        throw new Error('Failed to load admin profile');
+      }
+    } catch (error: any) {
+      console.error('Failed to load admin profile:', error);
+      setError(error.message || 'Failed to load admin profile');
+    }
   };
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
@@ -125,64 +120,18 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       setIsLoading(true);
       setError(null);
 
-      // Use backend admin login endpoint
-      const response = await fetch(`${API_BASE_URL}/auth/admin/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Admin login failed');
+      // Check if email is admin email
+      if (email !== ADMIN_EMAIL) {
+        throw new Error('Admin access required');
       }
 
-      const data = await response.json();
+      // Sign in with Firebase
+      await signInWithEmailAndPassword(auth, email, password);
       
-      if (FALLBACK_MODE || true) { // Always use fallback mode for admin
-        // Store tokens locally and create local session
-        const userData: FallbackAdminUser = {
-          id: data.user.id,
-          email: data.user.email,
-          user_metadata: {
-            username: data.user.username || 'admin',
-            admin: true
-          },
-          created_at: new Date().toISOString()
-        };
-
-        const localSession: LocalAdminSession = {
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-          user: userData
-        };
-
-        // Store in localStorage with proper keys
-        localStorage.setItem('caseforge_admin_access_token', data.access_token);
-        localStorage.setItem('caseforge_admin_refresh_token', data.refresh_token);
-        localStorage.setItem('caseforge_admin_user', JSON.stringify(userData));
-
-        // Update state
-        setSession(localSession);
-        setAdminUser({
-          id: userData.id,
-          email: userData.email,
-          username: userData.user_metadata?.username || 'admin',
-          is_admin: true,
-        });
-        setIsAuthenticated(true);
-      } else {
-        // This branch is no longer used as we always use fallback for admin
-        throw new Error("Admin auth configuration error");
-      }
-
+      // The onAuthStateChanged listener will handle the rest
       return true;
     } catch (error: any) {
+      console.error('Admin sign in error:', error);
       setError(error.message || 'Admin login failed');
       return false;
     } finally {
@@ -194,17 +143,19 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     try {
       setError(null);
       
-      // Clear local storage for admin
-      clearAdminLocalStorage();
-      setAdminUser(null);
-      setSession(null);
-      setIsAuthenticated(false);
+      // Sign out from Firebase
+      await firebaseSignOut(auth);
+      
+      // Clear local storage
+      localStorage.removeItem('admin_firebase_id_token');
+      
+      // The onAuthStateChanged listener will handle clearing state
     } catch (error: any) {
       console.error('Admin sign out error:', error);
       // Even if sign out fails, clear local state
-      clearAdminLocalStorage();
+      localStorage.removeItem('admin_firebase_id_token');
+      setFirebaseUser(null);
       setAdminUser(null);
-      setSession(null);
       setIsAuthenticated(false);
     }
   };
@@ -215,7 +166,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
   const contextValue: AdminAuthContextType = {
     adminUser,
-    session,
+    firebaseUser,
     isAuthenticated,
     isLoading,
     error,
