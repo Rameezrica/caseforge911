@@ -16,7 +16,7 @@ from supabase import create_client, Client
 import asyncio
 
 # Firebase imports
-from firebase_config import verify_firebase_token, create_firebase_user, get_firebase_user, FIREBASE_CONFIG
+from .firebase_config import verify_firebase_token, create_firebase_user, get_firebase_user, FIREBASE_CONFIG
 
 # Load environment variables
 load_dotenv()
