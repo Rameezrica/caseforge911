@@ -51,11 +51,21 @@ def initialize_firebase():
     """Initialize Firebase Admin SDK"""
     try:
         if not firebase_admin._apps:
-            # For development, initialize with project ID only
-            firebase_admin.initialize_app(options={
-                'projectId': FIREBASE_CONFIG["projectId"]
-            })
-            print("✅ Firebase Admin initialized successfully")
+            # Try to use service account key first
+            service_account_key = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY")
+            
+            if service_account_key:
+                # Parse the service account key from environment
+                service_account_info = json.loads(service_account_key)
+                cred = credentials.Certificate(service_account_info)
+                firebase_admin.initialize_app(cred)
+                print("✅ Firebase Admin initialized with service account")
+            else:
+                # Fallback to minimal config for development
+                firebase_admin.initialize_app(options={
+                    'projectId': FIREBASE_CONFIG["projectId"]
+                })
+                print("✅ Firebase Admin initialized with project ID only")
         return True
     except Exception as e:
         print(f"❌ Firebase Admin initialization failed: {e}")
