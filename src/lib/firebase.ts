@@ -1,14 +1,14 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 
-// Firebase configuration
+// Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyA221PgciN3w-oG_zh3-mUStnqTAT9-RTA",
-  authDomain: "caseforge911-ace0e.firebaseapp.com",
-  projectId: "caseforge911-ace0e",
-  storageBucket: "caseforge911-ace0e.firebasestorage.app",
-  messagingSenderId: "802491517741",
-  appId: "1:802491517741:web:78313cebbffeed805721a4"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
