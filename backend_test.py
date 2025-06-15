@@ -496,12 +496,40 @@ def main():
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
     
-    # Test basic health check
-    tester.test_health_check()
-    
-    # ===== AUTHENTICATION SYSTEM TESTS =====
+    # ===== FIREBASE AUTHENTICATION TESTS =====
     print("\n" + "="*50)
-    print("👤 Testing Authentication System")
+    print("🔥 Testing Firebase Authentication Integration")
+    print("="*50)
+    
+    # Test health check for Firebase auth
+    tester.test_health_check_firebase()
+    
+    # Test Firebase config endpoint
+    tester.test_firebase_config()
+    
+    # Test protected route without auth
+    tester.test_protected_route_without_auth()
+    
+    # Test Firebase user registration
+    success, _ = tester.test_firebase_register()
+    if success:
+        print("✅ Firebase user registration successful")
+    else:
+        print("❌ Firebase user registration failed")
+    
+    # Test fallback authentication
+    fallback_success, _ = tester.test_fallback_auth()
+    if fallback_success:
+        print("✅ Fallback authentication successful")
+        
+        # Test protected user endpoints with fallback auth
+        tester.test_get_current_user()
+    else:
+        print("❌ Fallback authentication failed")
+    
+    # ===== REGULAR AUTHENTICATION SYSTEM TESTS =====
+    print("\n" + "="*50)
+    print("👤 Testing Regular Authentication System")
     print("="*50)
     
     # Test invalid login
