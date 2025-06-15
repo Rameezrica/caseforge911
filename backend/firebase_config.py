@@ -4,14 +4,14 @@ import os
 import json
 from typing import Optional, Dict, Any
 
-# Firebase configuration
+# Firebase configuration from environment variables
 FIREBASE_CONFIG = {
-    "apiKey": "AIzaSyA221PgciN3w-oG_zh3-mUStnqTAT9-RTA",
-    "authDomain": "caseforge911-ace0e.firebaseapp.com",
-    "projectId": "caseforge911-ace0e",
-    "storageBucket": "caseforge911-ace0e.firebasestorage.app",
-    "messagingSenderId": "802491517741",
-    "appId": "1:802491517741:web:78313cebbffeed805721a4"
+    "apiKey": os.getenv("FIREBASE_API_KEY", "AIzaSyDjJTOdsvjaa90z53RYkFB-wVyzPz-9sG4"),
+    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN", "scenariocat-fb81d.firebaseapp.com"),
+    "projectId": os.getenv("FIREBASE_PROJECT_ID", "scenariocat-fb81d"),
+    "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET", "scenariocat-fb81d.firebasestorage.app"),
+    "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID", "142415481422"),
+    "appId": os.getenv("FIREBASE_APP_ID", "1:142415481422:web:4d1673fbe3e38014fe911f")
 }
 
 # Check if Firebase Admin is already initialized
