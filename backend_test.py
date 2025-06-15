@@ -242,7 +242,7 @@ class CaseForgeBackendTester:
         return self.tests_passed == self.tests_run
 
 def main():
-    # Use the API URL from environment or default to http://localhost:8001/api
+    # Use the API URL from environment or default to http://localhost:3001/api
     api_url = "http://localhost:3001/api"
     
     print(f"Testing CaseForge Backend API at: {api_url}")
