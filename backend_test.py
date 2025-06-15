@@ -83,15 +83,91 @@ class CaseForgeBackendTester:
             })
             return False, {}
 
-    # ===== HEALTH CHECK =====
-    def test_health_check(self):
-        """Test the health check endpoint"""
-        return self.run_test(
-            "Health Check",
+    # ===== FIREBASE SPECIFIC TESTS =====
+    def test_health_check_firebase(self):
+        """Test the health check endpoint for Firebase auth"""
+        success, response = self.run_test(
+            "Health Check Firebase Auth",
             "GET",
             "health",
             200
         )
+        
+        if success and response.get("auth") == "firebase":
+            print("✅ Firebase auth confirmed in health check")
+            return True, response
+        else:
+            print("❌ Firebase auth not confirmed in health check")
+            return False, response
+            
+    def test_firebase_config(self):
+        """Test getting Firebase configuration"""
+        return self.run_test(
+            "Firebase Config",
+            "GET",
+            "firebase/config",
+            200
+        )
+        
+    def test_firebase_register(self):
+        """Test user registration with Firebase"""
+        # Generate a unique username and email
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        random_suffix = str(random.randint(1000, 9999))
+        self.test_user = f"testuser_{timestamp}_{random_suffix}"
+        self.test_email = f"testuser_{timestamp}_{random_suffix}@gmail.com"
+        self.test_password = "TestPassword123!"
+        
+        user_data = {
+            "username": self.test_user,
+            "email": self.test_email,
+            "password": self.test_password,
+            "full_name": "Test User"
+        }
+        
+        return self.run_test(
+            "Firebase User Registration",
+            "POST",
+            "firebase/auth/register",
+            200,
+            data=user_data
+        )
+        
+    def test_protected_route_without_auth(self):
+        """Test accessing protected route without auth"""
+        return self.run_test(
+            "Protected Route Without Auth",
+            "GET",
+            "auth/me",
+            401
+        )
+        
+    def test_fallback_auth(self):
+        """Test fallback authentication"""
+        if not self.test_email:
+            print("❌ Cannot test fallback auth: No test user created")
+            return False, {}
+            
+        login_data = {
+            "email": self.test_email,
+            "password": self.test_password
+        }
+        
+        success, response = self.run_test(
+            "Fallback Authentication",
+            "POST",
+            "auth/token",
+            200,
+            data=login_data
+        )
+        
+        if success and 'access_token' in response:
+            self.user_token = response['access_token']
+            print(f"✅ Successfully obtained fallback token")
+            return True, response
+        else:
+            print(f"❌ Failed to obtain fallback token")
+            return False, response
 
     # ===== AUTHENTICATION SYSTEM =====
     def test_user_registration(self):
