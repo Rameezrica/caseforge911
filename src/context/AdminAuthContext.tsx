@@ -30,7 +30,7 @@ interface LocalAdminSession {
 
 interface AdminAuthContextType {
   adminUser: AdminUser | null;
-  session: Session | LocalAdminSession | null;
+  session: any | LocalAdminSession | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
