@@ -42,13 +42,18 @@ api.interceptors.request.use(
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     
     // Add authentication headers
+    const firebaseToken = localStorage.getItem('firebase_id_token');
     const userToken = localStorage.getItem('caseforge_access_token');
     const adminToken = localStorage.getItem('caseforge_admin_access_token');
     
     // Prioritize admin token for admin routes
     if (config.url?.includes('/admin') && adminToken) {
       config.headers.Authorization = `Bearer ${adminToken}`;
+    } else if (firebaseToken) {
+      // Use Firebase ID token for authentication
+      config.headers.Authorization = `Bearer ${firebaseToken}`;
     } else if (userToken) {
+      // Fallback to old token system
       config.headers.Authorization = `Bearer ${userToken}`;
     }
     
