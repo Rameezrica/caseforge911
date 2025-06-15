@@ -243,7 +243,7 @@ class CaseForgeBackendTester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = "/api"
+    api_url = "http://localhost:8001/api"
     
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
