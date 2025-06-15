@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
 
 // Check if we're in fallback mode based on environment
 const FALLBACK_MODE = import.meta.env.VITE_FALLBACK_MODE === 'true';
