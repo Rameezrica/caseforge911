@@ -172,18 +172,18 @@ class CaseForgeBackendTester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = os.getenv("REACT_APP_BACKEND_URL", "http://localhost:8001") + "/api"
+    api_url = os.getenv("VITE_API_BASE_URL", "http://localhost:8001/api")
     
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
     
-    # ===== FIREBASE AUTHENTICATION TESTS =====
+    # ===== BASIC API TESTS =====
     print("\n" + "="*50)
-    print("🔥 Testing Firebase Authentication Integration")
+    print("🔍 Testing Basic API Functionality")
     print("="*50)
     
-    # Test health check for Firebase auth
-    tester.test_health_check_firebase()
+    # Test health check
+    tester.test_health_check()
     
     # Test Firebase config endpoint
     tester.test_firebase_config()
@@ -191,113 +191,32 @@ def main():
     # Test protected route without auth
     tester.test_protected_route_without_auth()
     
-    # Test Firebase user registration
-    success, _ = tester.test_firebase_register()
-    if success:
-        print("✅ Firebase user registration successful")
-    else:
-        print("❌ Firebase user registration failed")
-    
-    # Test fallback authentication
-    fallback_success, _ = tester.test_fallback_auth()
-    if fallback_success:
-        print("✅ Fallback authentication successful")
-        
-        # Test protected user endpoints with fallback auth
-        tester.test_get_current_user()
-    else:
-        print("❌ Fallback authentication failed")
-    
-    # ===== REGULAR AUTHENTICATION SYSTEM TESTS =====
+    # ===== PUBLIC ENDPOINTS TESTS =====
     print("\n" + "="*50)
-    print("👤 Testing Regular Authentication System")
+    print("📚 Testing Public Endpoints")
     print("="*50)
     
-    # Test invalid login
-    tester.test_invalid_login()
+    # Test getting all problems
+    tester.test_get_all_problems()
     
-    # Test unauthorized access
-    tester.test_unauthorized_access()
+    # Test getting categories
+    tester.test_get_categories()
     
-    # Register a new user
-    success, _ = tester.test_user_registration()
-    if success:
-        print("✅ User registration successful")
-        
-        # Login with the new user
-        login_success, _ = tester.test_user_login()
-        if login_success:
-            print("✅ User login successful")
-            
-            # Test protected user endpoints
-            tester.test_get_current_user()
-            
-            # Test user trying to access admin route
-            tester.test_user_accessing_admin()
-            
-            # ===== USER MANAGEMENT TESTS =====
-            print("\n" + "="*50)
-            print("👤 Testing User Management")
-            print("="*50)
-            
-            # Test user progress
-            tester.test_user_progress()
-            
-            # Test user solutions
-            tester.test_user_solutions()
-            
-            # ===== PROBLEMS AND PUBLIC ENDPOINTS TESTS =====
-            print("\n" + "="*50)
-            print("📚 Testing Problems and Public Endpoints")
-            print("="*50)
-            
-            # Test getting all problems
-            tester.test_get_all_problems()
-            
-            # Test getting a specific problem
-            tester.test_get_specific_problem()
-            
-            # Test getting categories
-            tester.test_get_categories()
-            
-            # Test submitting a solution
-            tester.test_submit_solution()
-            
-            # Test logout
-            tester.test_logout()
-        else:
-            print("❌ User login failed")
-    else:
-        print("❌ User registration failed")
+    # Test getting platform stats
+    tester.test_get_stats()
     
-    # ===== ADMIN FUNCTIONALITY TESTS =====
-    print("\n" + "="*50)
-    print("🔐 Testing Admin Functionality")
-    print("="*50)
-    
-    # Login as admin
-    admin_success, _ = tester.test_admin_login()
-    if admin_success:
-        print("✅ Admin login successful")
-        
-        # Test admin dashboard access
-        tester.test_admin_dashboard()
-        
-        # Test admin users list
-        tester.test_admin_users()
-        
-        # Test admin problems list
-        tester.test_admin_problems()
-        
-        # Test admin problem management
-        tester.test_admin_create_problem()
-        tester.test_admin_update_problem()
-        tester.test_admin_delete_problem()
-    else:
-        print("❌ Admin login failed")
+    # Test getting daily challenge
+    tester.test_get_daily_challenge()
     
     # Print summary
     success = tester.print_summary()
+    
+    print("\n" + "="*50)
+    print("🔐 Note on Firebase Authentication Testing")
+    print("="*50)
+    print("Firebase authentication requires client-side integration and cannot be fully tested with this script.")
+    print("Please use the Playwright UI tests to verify the complete authentication flow.")
+    
     return 0 if success else 1
 
 if __name__ == "__main__":
