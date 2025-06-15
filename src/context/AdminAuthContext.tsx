@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { 
+  User, 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  signOut as firebaseSignOut
+} from 'firebase/auth';
+import { auth } from '../lib/firebase';
 
-// Check if we're in fallback mode based on environment
-const FALLBACK_MODE = import.meta.env.VITE_FALLBACK_MODE === 'true';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
 
