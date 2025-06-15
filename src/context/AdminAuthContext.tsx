@@ -187,15 +187,8 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
         });
         setIsAuthenticated(true);
       } else {
-        // Use Supabase session
-        const { error } = await supabase.auth.setSession({
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-        });
-
-        if (error) {
-          throw error;
-        }
+        // This branch is no longer used as we always use fallback for admin
+        throw new Error("Admin auth configuration error");
       }
 
       return true;
