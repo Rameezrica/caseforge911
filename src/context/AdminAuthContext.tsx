@@ -68,96 +68,38 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     try {
       setIsLoading(true);
       
-      if (FALLBACK_MODE) {
-        // In fallback mode, check for stored admin session
-        const storedToken = localStorage.getItem('caseforge_admin_access_token');
-        const storedUser = localStorage.getItem('caseforge_admin_user');
-        
-        if (storedToken && storedUser) {
-          try {
-            const userData = JSON.parse(storedUser);
-            const localSession: LocalAdminSession = {
-              access_token: storedToken,
-              refresh_token: localStorage.getItem('caseforge_admin_refresh_token') || storedToken,
-              user: userData
-            };
-            
-            // Verify token with backend
-            const isValid = await validateAdminTokenWithBackend(storedToken);
-            if (isValid) {
-              setSession(localSession);
-              setAdminUser({
-                id: userData.id,
-                email: userData.email,
-                username: userData.user_metadata?.username || 'admin',
-                is_admin: true,
-              });
-              setIsAuthenticated(true);
-            } else {
-              // Token invalid, clear storage
-              clearAdminLocalStorage();
-            }
-          } catch (error) {
-            console.error('Error parsing stored admin user data:', error);
-            clearAdminLocalStorage();
-          }
-        }
-      } else {
-        // Use Supabase authentication
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting admin session:', error);
-        } else if (session) {
-          // Check if user is admin
-          const isAdmin = session.user.email === ADMIN_EMAIL || 
-                         session.user.user_metadata?.admin === true;
+      // Check for stored admin session
+      const storedToken = localStorage.getItem('caseforge_admin_access_token');
+      const storedUser = localStorage.getItem('caseforge_admin_user');
+      
+      if (storedToken && storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          const localSession: LocalAdminSession = {
+            access_token: storedToken,
+            refresh_token: localStorage.getItem('caseforge_admin_refresh_token') || storedToken,
+            user: userData
+          };
           
-          if (isAdmin) {
-            setSession(session);
+          // Verify token with backend
+          const isValid = await validateAdminTokenWithBackend(storedToken);
+          if (isValid) {
+            setSession(localSession);
             setAdminUser({
-              id: session.user.id,
-              email: session.user.email!,
-              username: session.user.user_metadata?.username || 'admin',
+              id: userData.id,
+              email: userData.email,
+              username: userData.user_metadata?.username || 'admin',
               is_admin: true,
             });
             setIsAuthenticated(true);
+          } else {
+            // Token invalid, clear storage
+            clearAdminLocalStorage();
           }
+        } catch (error) {
+          console.error('Error parsing stored admin user data:', error);
+          clearAdminLocalStorage();
         }
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            console.log('Admin auth state changed:', event, session?.user?.email);
-            
-            if (session?.user) {
-              const isAdmin = session.user.email === ADMIN_EMAIL || 
-                             session.user.user_metadata?.admin === true;
-              
-              if (isAdmin) {
-                setSession(session);
-                setAdminUser({
-                  id: session.user.id,
-                  email: session.user.email!,
-                  username: session.user.user_metadata?.username || 'admin',
-                  is_admin: true,
-                });
-                setIsAuthenticated(true);
-              } else {
-                // Not an admin user
-                setSession(null);
-                setAdminUser(null);
-                setIsAuthenticated(false);
-              }
-            } else {
-              setSession(null);
-              setAdminUser(null);
-              setIsAuthenticated(false);
-            }
-          }
-        );
-
-        return () => subscription.unsubscribe();
       }
     } catch (error: any) {
       console.error('Admin auth initialization error:', error);
