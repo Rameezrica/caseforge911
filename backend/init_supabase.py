@@ -210,9 +210,8 @@ if __name__ == "__main__":
     
     create_tables()
     
-    # Ask if user wants to insert sample data
-    response = input("\n❓ Do you want to insert sample problems? (y/n): ").lower().strip()
-    if response in ['y', 'yes']:
-        insert_sample_data()
+    # Automatically insert sample data
+    print("\n📝 Inserting sample problems...")
+    insert_sample_data()
     
     print("\n✨ Setup complete! Your CaseForge database is ready.")
