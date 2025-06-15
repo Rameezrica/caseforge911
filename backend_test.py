@@ -21,7 +21,7 @@ class CaseForgeBackendTester:
         
         # Admin credentials
         self.admin_email = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
-        self.admin_password = None  # Will need to be provided
+        self.admin_password = os.getenv("ADMIN_PASSWORD", "Qwerty9061#")
 
     def run_test(self, name, method, endpoint, expected_status, data=None, auth=False, admin=False):
         """Run a single API test"""
@@ -171,10 +171,60 @@ class CaseForgeBackendTester:
             200
         )
         
-    # Note: The following tests would require actual Firebase authentication
-    # which we can't do in this test script without Firebase SDK
-    # These would be better tested through UI testing with Playwright
-    
+    # ===== ADMIN ENDPOINTS =====
+    def test_admin_dashboard(self):
+        """Test getting admin dashboard data"""
+        if not self.firebase_token:
+            print("⚠️ No Firebase token available for admin testing")
+            return False, {}
+            
+        return self.run_test(
+            "Admin Dashboard",
+            "GET",
+            "admin/dashboard",
+            200,
+            auth=True
+        )
+        
+    def test_admin_problems(self):
+        """Test getting admin problems"""
+        if not self.firebase_token:
+            print("⚠️ No Firebase token available for admin testing")
+            return False, {}
+            
+        return self.run_test(
+            "Admin Problems",
+            "GET",
+            "admin/problems",
+            200,
+            auth=True
+        )
+        
+    def test_create_problem(self):
+        """Test creating a new problem"""
+        if not self.firebase_token:
+            print("⚠️ No Firebase token available for admin testing")
+            return False, {}
+            
+        problem_data = {
+            "title": f"Test Problem {datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "description": "This is a test problem created by the automated test script",
+            "category": "Marketing",
+            "domain": "Technology",
+            "difficulty": "Medium",
+            "company": "TestCorp",
+            "tags": ["test", "automation"]
+        }
+        
+        return self.run_test(
+            "Create Problem",
+            "POST",
+            "admin/problems",
+            200,
+            data=problem_data,
+            auth=True
+        )
+        
     def print_summary(self):
         """Print a summary of the test results"""
         print("\n" + "="*50)
@@ -193,7 +243,7 @@ class CaseForgeBackendTester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = "http://localhost:8001/api"
+    api_url = "/api"
     
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
