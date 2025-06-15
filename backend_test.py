@@ -116,10 +116,31 @@ class CaseForgeBackendTester:
     # ===== PROBLEMS AND PUBLIC ENDPOINTS =====
     def test_get_all_problems(self):
         """Test getting all problems"""
-        return self.run_test(
+        success, response = self.run_test(
             "Get All Problems",
             "GET",
             "problems",
+            200
+        )
+        
+        if success and isinstance(response, list):
+            # Store a problem ID for later tests if available
+            if len(response) > 0:
+                self.test_problem_id = response[0].get('id')
+                print(f"✅ Found problem ID for testing: {self.test_problem_id}")
+        
+        return success, response
+
+    def test_get_problem_by_id(self):
+        """Test getting a specific problem by ID"""
+        if not self.test_problem_id:
+            print("⚠️ No problem ID available for testing")
+            return False, {}
+            
+        return self.run_test(
+            "Get Problem by ID",
+            "GET",
+            f"problems/{self.test_problem_id}",
             200
         )
 
@@ -172,7 +193,7 @@ class CaseForgeBackendTester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = os.getenv("VITE_API_BASE_URL", "http://localhost:8001/api")
+    api_url = os.getenv("VITE_API_BASE_URL", "/api")
     
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
@@ -198,6 +219,10 @@ def main():
     
     # Test getting all problems
     tester.test_get_all_problems()
+    
+    # Test getting a specific problem by ID
+    if tester.test_problem_id:
+        tester.test_get_problem_by_id()
     
     # Test getting categories
     tester.test_get_categories()
