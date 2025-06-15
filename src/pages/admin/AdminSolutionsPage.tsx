@@ -30,9 +30,16 @@ const AdminSolutionsPage: React.FC = () => {
   const loadSolutions = async () => {
     try {
       setLoading(true);
+      
+      // Get Firebase ID token
+      const idToken = localStorage.getItem('admin_firebase_id_token');
+      if (!idToken) {
+        throw new Error('No admin token available');
+      }
+
       const response = await fetch('/api/admin/solutions', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('caseforge_admin_access_token')}`,
+          'Authorization': `Bearer ${idToken}`,
           'Content-Type': 'application/json',
         },
       });
