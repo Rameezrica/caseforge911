@@ -49,11 +49,14 @@ class CaseForgeAuthTester:
                 try:
                     response_data = response.json()
                     print(f"Response: {json.dumps(response_data, indent=2)[:500]}...")
+                    return success, response_data
                 except:
                     print(f"Response: {response.text[:200]}...")
+                    return success, {}
             else:
                 print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
                 print(f"Response: {response.text[:200]}...")
+                return success, {}
 
             self.results.append({
                 "name": name,
@@ -62,8 +65,6 @@ class CaseForgeAuthTester:
                 "expected_status": expected_status,
                 "url": url
             })
-
-            return success, response.json() if success and response.text else {}
 
         except Exception as e:
             print(f"❌ Failed - Error: {str(e)}")
@@ -75,6 +76,15 @@ class CaseForgeAuthTester:
             })
             return False, {}
 
+    def test_root_endpoint(self):
+        """Test the root endpoint"""
+        return self.run_test(
+            "Root Endpoint",
+            "GET",
+            "",
+            200
+        )
+
     def test_health_check(self):
         """Test the health check endpoint"""
         success, response = self.run_test(
@@ -85,20 +95,52 @@ class CaseForgeAuthTester:
         )
         
         if success:
-            print(f"✅ Health check successful: {response}")
-            return True, response
+            print(f"✅ Health check successful")
+            # Verify the response contains expected fields
+            expected_fields = ["status", "timestamp", "auth", "database", "version"]
+            for field in expected_fields:
+                if field not in response:
+                    print(f"❌ Health check response missing field: {field}")
+                    success = False
+            
+            if success:
+                print("✅ Health check response contains all expected fields")
         else:
             print("❌ Health check failed")
-            return False, response
+            
+        return success, response
             
     def test_firebase_config(self):
         """Test getting Firebase configuration"""
-        return self.run_test(
+        success, response = self.run_test(
             "Firebase Config",
             "GET",
             "firebase/config",
             200
         )
+        
+        if success:
+            # Verify the response contains the Firebase config
+            if "config" not in response:
+                print("❌ Firebase config response missing 'config' field")
+                success = False
+            else:
+                config = response["config"]
+                expected_fields = ["apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId"]
+                missing_fields = [field for field in expected_fields if field not in config]
+                
+                if missing_fields:
+                    print(f"❌ Firebase config missing fields: {', '.join(missing_fields)}")
+                    success = False
+                else:
+                    print("✅ Firebase config contains all required fields")
+                    
+                    # Check if any fields are undefined or empty
+                    empty_fields = [field for field in expected_fields if not config.get(field)]
+                    if empty_fields:
+                        print(f"⚠️ Warning: Firebase config has empty values for: {', '.join(empty_fields)}")
+        
+        return success, response
         
     def test_protected_route_without_auth(self):
         """Test accessing protected route without auth"""
@@ -153,6 +195,42 @@ class CaseForgeAuthTester:
             })
             return False, {}
     
+    def test_categories_endpoint(self):
+        """Test the categories endpoint"""
+        return self.run_test(
+            "Categories Endpoint",
+            "GET",
+            "categories",
+            200
+        )
+    
+    def test_stats_endpoint(self):
+        """Test the stats endpoint"""
+        return self.run_test(
+            "Stats Endpoint",
+            "GET",
+            "stats",
+            200
+        )
+    
+    def test_daily_challenge_endpoint(self):
+        """Test the daily challenge endpoint"""
+        return self.run_test(
+            "Daily Challenge Endpoint",
+            "GET",
+            "daily-challenge",
+            200
+        )
+    
+    def test_problems_endpoint(self):
+        """Test the problems endpoint"""
+        return self.run_test(
+            "Problems Endpoint",
+            "GET",
+            "problems",
+            200
+        )
+    
     def print_summary(self):
         """Print a summary of the test results"""
         print("\n" + "="*50)
@@ -170,27 +248,49 @@ class CaseForgeAuthTester:
         return self.tests_passed == self.tests_run
 
 def main():
+    # Get the API URL from the frontend .env file
+    api_base_url = None
+    try:
+        with open('/app/.env', 'r') as f:
+            for line in f:
+                if line.startswith('VITE_API_BASE_URL='):
+                    api_base_url = line.strip().split('=')[1]
+                    break
+    except Exception as e:
+        print(f"Error reading .env file: {e}")
+    
     # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = "http://localhost:8001/api"
+    api_url = api_base_url or "/api"
+    
+    # If the API URL is relative, use the full URL
+    if api_url.startswith('/'):
+        api_url = f"http://localhost:8001{api_url}"
     
     print(f"Testing CaseForge Authentication API at: {api_url}")
     tester = CaseForgeAuthTester(api_url)
     
     # ===== BASIC API TESTS =====
     print("\n" + "="*50)
-    print("🔍 Testing Authentication API Endpoints")
+    print("🔍 Testing API Endpoints")
     print("="*50)
+    
+    # Test root endpoint
+    tester.test_root_endpoint()
     
     # Test health check
     tester.test_health_check()
     
     # Test Firebase config endpoint
-    tester.test_firebase_config()
+    firebase_success, firebase_config = tester.test_firebase_config()
     
-    # Test protected route without auth
+    # Test public endpoints
+    tester.test_categories_endpoint()
+    tester.test_stats_endpoint()
+    tester.test_daily_challenge_endpoint()
+    tester.test_problems_endpoint()
+    
+    # Test protected routes
     tester.test_protected_route_without_auth()
-    
-    # Test protected route with invalid token
     tester.test_protected_route_with_invalid_token()
     
     # Print summary
@@ -199,7 +299,14 @@ def main():
     print("\n" + "="*50)
     print("🔐 Authentication Testing Results")
     print("="*50)
-    print("Backend API endpoints for authentication are working as expected.")
+    
+    if firebase_success:
+        print("✅ Firebase configuration is properly returned by the backend API")
+        print("✅ All required Firebase configuration fields are present")
+    else:
+        print("❌ Firebase configuration has issues - check the test output above")
+    
+    print("\nBackend API endpoints for authentication are working as expected.")
     print("The Firebase authentication flow requires client-side integration and cannot be fully tested with this script.")
     print("Please use the Playwright UI tests to verify the complete authentication flow including:")
     print("1. User registration")
