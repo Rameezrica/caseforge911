@@ -243,7 +243,7 @@ class CaseForgeBackendTester:
 
 def main():
     # Use the API URL from environment or default to http://localhost:3001/api
-    api_url = "http://localhost:3001/api"
+    api_url = os.getenv("VITE_API_BASE_URL", "/api")
     
     print(f"Testing CaseForge Backend API at: {api_url}")
     tester = CaseForgeBackendTester(api_url)
