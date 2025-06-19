@@ -58,25 +58,30 @@ const missingFields = requiredFields.filter(field => !firebaseConfig[field as ke
 // Initialize Firebase
 let firebaseApp: FirebaseApp;
 let auth: Auth;
+let initializationPromise: Promise<void>;
 
-async function initializeFirebase() {
+// If environment variables are missing, try to fetch from backend
+if (missingFields.length > 0) {
+  console.log('❌ Missing Firebase configuration fields from env:', missingFields);
+  console.log('🔄 Attempting to fetch config from backend API...');
+  
+  initializationPromise = fetchFirebaseConfigFromBackend().then((backendConfig) => {
+    if (backendConfig) {
+      firebaseConfig = backendConfig;
+      console.log('✅ Using Firebase config from backend');
+      return initializeFirebaseApp();
+    } else {
+      throw new Error(`Missing Firebase configuration: ${missingFields.join(', ')}`);
+    }
+  });
+} else {
+  initializationPromise = Promise.resolve().then(() => initializeFirebaseApp());
+}
+
+function initializeFirebaseApp() {
   try {
     console.log('Initializing Firebase...');
     
-    // If environment variables are missing, try to fetch from backend
-    if (missingFields.length > 0) {
-      console.log('❌ Missing Firebase configuration fields from env:', missingFields);
-      console.log('🔄 Attempting to fetch config from backend API...');
-      
-      const backendConfig = await fetchFirebaseConfigFromBackend();
-      if (backendConfig) {
-        firebaseConfig = backendConfig;
-        console.log('✅ Using Firebase config from backend');
-      } else {
-        throw new Error(`Missing Firebase configuration: ${missingFields.join(', ')}`);
-      }
-    }
-
     // Final validation
     const finalMissingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
     if (finalMissingFields.length > 0) {
@@ -94,26 +99,30 @@ async function initializeFirebase() {
     auth = getAuth(firebaseApp);
     console.log('✅ Firebase Auth initialized successfully');
     
+    // Global check for Firebase availability
+    if (typeof window !== 'undefined') {
+      (window as any).firebaseApp = firebaseApp;
+      (window as any).firebaseAuth = auth;
+      
+      if (firebaseApp) {
+        console.log('✅ Firebase is available globally');
+      } else {
+        console.error('❌ Firebase is NOT defined');
+      }
+    }
   } catch (error) {
     console.error('❌ Firebase initialization failed:', error);
     throw error;
   }
 }
 
-// Initialize Firebase immediately
-await initializeFirebase();
-
-// Global check for Firebase availability
-if (typeof window !== 'undefined') {
-  (window as any).firebaseApp = firebaseApp;
-  (window as any).firebaseAuth = auth;
-  
-  if (firebaseApp) {
-    console.log('✅ Firebase is available globally');
-  } else {
-    console.error('❌ Firebase is NOT defined');
-  }
+// If we have environment variables, initialize immediately
+if (missingFields.length === 0) {
+  initializeFirebaseApp();
 }
+
+// Export a promise that resolves when Firebase is ready
+export const firebaseReady = initializationPromise;
 
 export { firebaseApp, auth };
 export default firebaseApp;
