@@ -59,8 +59,9 @@ CaseForge provides access to practical, case-based learning across domains like:
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+
-- MongoDB
 - Yarn
+- Firebase project (for authentication)
+- Supabase project (for database)
 
 ### Installation
 
@@ -82,25 +83,16 @@ CaseForge provides access to practical, case-based learning across domains like:
    yarn install
    ```
 
-4. **Set up environment variables**
+4. **Configuration**
    
-   Backend (`.env` in `/backend`):
-   ```env
-   MONGO_URL=mongodb://localhost:27017/
-   DATABASE_NAME=caseforge
-   FRONTEND_URLS=http://localhost:3000,http://localhost:5173
-   JWT_SECRET_KEY=your-secret-key-here
-   ```
-   
-   Frontend (`.env` in root):
-   ```env
-   VITE_API_BASE_URL=http://localhost:8001/api
-   ```
+   The application uses hardcoded API keys for Firebase and Supabase as specified in the requirements. The configuration is already set up in:
+   - Backend: `/backend/server.py` (lines 17-32)
+   - Frontend: `/src/lib/firebase.ts` (lines 5-12)
 
 5. **Start the services**
    ```bash
-   # Start all services with supervisor
-   sudo supervisorctl start all
+   # Start all services with supervisor (recommended)
+   sudo supervisorctl restart all
    
    # Or manually:
    # Backend
@@ -111,9 +103,14 @@ CaseForge provides access to practical, case-based learning across domains like:
    ```
 
 6. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8001/api
+   - Frontend: http://localhost:3000 (or the port shown in terminal)
+   - Backend API: http://localhost:8001
    - API Documentation: http://localhost:8001/docs
+   - Admin Panel: http://localhost:3000/admin/login
+
+### Admin Access
+- **Email**: `rameezuddinmohammed61@gmail.com`
+- **Password**: `Qwerty9061#`
 
 ## 📁 Project Structure
 
