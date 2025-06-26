@@ -249,7 +249,7 @@ class CaseForgeAuthTester:
 
 def main():
     # Use the API URL from the backend server
-    api_url = "http://localhost:8001/api"
+    api_url = "/api"
     
     print(f"Testing CaseForge Authentication API at: {api_url}")
     tester = CaseForgeAuthTester(api_url)
