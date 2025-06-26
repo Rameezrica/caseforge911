@@ -147,18 +147,36 @@ caseforge/
 
 ## 🧪 API Endpoints
 
-### Problems
+### Public Endpoints
+- `GET /api/health` - Health check and service status
+- `GET /api/firebase/config` - Firebase configuration for frontend
 - `GET /api/problems` - Get all problems with optional filtering
 - `GET /api/problems/{id}` - Get specific problem by ID
-- `GET /api/categories` - Get available categories and domains
-
-### Platform
-- `GET /api/health` - Health check
+- `GET /api/categories` - Get available categories, domains, and difficulties
 - `GET /api/stats` - Platform statistics
 - `GET /api/daily-challenge` - Today's daily challenge
 
-### Solutions
+### Protected User Endpoints
+- `GET /api/auth/me` - Get current user profile
+- `GET /api/user/progress` - Get user progress and statistics
+- `GET /api/user/solutions` - Get user's submitted solutions
 - `POST /api/solutions` - Submit a solution for a problem
+
+### Admin Endpoints (Requires Admin Access)
+- `GET /api/admin/dashboard` - Admin dashboard statistics
+- `GET /api/admin/users` - Get all users with pagination
+- `GET /api/admin/problems` - Get all problems for management
+- `POST /api/admin/problems` - Create a new problem
+- `PUT /api/admin/problems/{id}` - Update an existing problem
+- `DELETE /api/admin/problems/{id}` - Delete a problem
+- `GET /api/admin/solutions` - Get all submitted solutions
+- `GET /api/admin/solutions/{problem_id}` - Get solutions for specific problem
+
+### Authentication
+All protected endpoints require a valid Firebase ID token in the Authorization header:
+```
+Authorization: Bearer <firebase_id_token>
+```
 
 ## 🎨 Styling
 
