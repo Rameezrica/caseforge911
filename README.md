@@ -178,13 +178,46 @@ All protected endpoints require a valid Firebase ID token in the Authorization h
 Authorization: Bearer <firebase_id_token>
 ```
 
+## 🔐 Authentication System
+
+### User Authentication
+- **Registration**: New users can register with email and password
+- **Login**: Existing users can log in using Firebase authentication
+- **Protected Routes**: User dashboard and problem-solving features require authentication
+- **Profile Management**: Users can view and manage their profiles
+
+### Admin Authentication
+- **Admin Login**: Dedicated admin login at `/admin/login`
+- **Admin Email**: `rameezuddinmohammed61@gmail.com`
+- **Admin Panel**: Full content management system for problems, users, and solutions
+- **Role-based Access**: Admin routes are protected and only accessible to verified admin users
+
+### Security Features
+- Firebase ID token verification on backend
+- Automatic token refresh handling
+- Protected API endpoints with role-based access control
+- Secure session management with local storage fallback
+
+## 📊 Current Data
+
+The platform currently includes:
+- **3 Problems**: Sample business case studies across different domains
+- **11 Users**: Registered user accounts in the system
+- **Categories**: Strategy, Marketing, Operations
+- **Domains**: Technology, Automotive, Manufacturing
+- **Difficulties**: Medium, Hard
+
 ## 🎨 Styling
 
-The application uses a custom dark theme with Tailwind CSS. The color palette includes:
+The application uses a modern dark theme with Tailwind CSS featuring:
 
-- **Dark 900-50**: Primary dark theme colors
-- **Emerald**: Primary accent color
-- **Blue, Purple, Orange, Cyan**: Domain-specific accent colors
+- **Dark Theme**: Professional dark color scheme optimized for extended use
+- **Responsive Design**: Mobile-first responsive layout
+- **Component Library**: Custom UI components with consistent styling
+- **Color Palette**: 
+  - Primary: Dark grays (900-50)
+  - Accent: Emerald for primary actions
+  - Domain Colors: Blue, Purple, Orange, Cyan for categorization
 
 ## 🤝 Contributing
 
