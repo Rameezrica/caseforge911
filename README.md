@@ -29,25 +29,30 @@ CaseForge provides access to practical, case-based learning across domains like:
 ## 🔧 Tech Stack
 
 ### Backend
-- **FastAPI** - Modern Python web framework
-- **MongoDB** - Document database for flexible data storage
-- **Motor** - Async MongoDB driver
+- **FastAPI** - Modern Python web framework with automatic API documentation
+- **Firebase Admin SDK** - Authentication and user management
+- **Supabase** - PostgreSQL database with real-time capabilities
 - **Pydantic** - Data validation and settings management
-- **uvicorn** - ASGI server
+- **uvicorn** - ASGI server for production-ready deployment
 
 ### Frontend  
-- **React** - Component-based UI library
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Fast build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **Axios** - HTTP client for API communication
+- **React 18** - Component-based UI library with hooks
+- **TypeScript** - Type-safe JavaScript for better development experience
+- **Vite** - Lightning-fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework for rapid styling
+- **React Router** - Declarative client-side routing
+- **Firebase SDK** - Client-side authentication integration
+
+### Authentication & Database
+- **Firebase Authentication** - Secure user authentication with email/password
+- **Supabase Database** - PostgreSQL database for data persistence
+- **Protected Routes** - Role-based access control for users and admins
 
 ### Development & Deployment
-- **Supervisor** - Process management
-- **Yarn** - Package management
-- **ESLint** - Code linting
-- **PostCSS** - CSS processing
+- **Supervisor** - Process management for production deployment
+- **Yarn** - Fast and reliable package management
+- **ESLint** - Code linting and formatting
+- **PostCSS** - CSS processing and optimization
 
 ## 🚀 Getting Started
 
