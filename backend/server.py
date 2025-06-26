@@ -5,67 +5,61 @@ from typing import List, Optional, Dict, Any
 import uvicorn
 import os
 from datetime import datetime
-from dotenv import load_dotenv
 from supabase import create_client, Client
 import firebase_admin
 from firebase_admin import credentials, auth
 import json
 import uuid
 
-# Load environment variables
-load_dotenv()
-
 # Initialize FastAPI app
 app = FastAPI(title="CaseForge API", version="2.0.0")
+
+# Hardcoded configuration - no .env files
+FRONTEND_URLS = ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"]
+SUPABASE_URL = "https://powiznguqswirrhxsbpm.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvd2l6bmd1cXN3aXJyaHhzYnBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5NjM0NDQsImV4cCI6MjA2NTUzOTQ0NH0.86q2D4eMlvS9WTDrzdWXmkoFHeQtKQ-K4AN15-5gXG4"
+SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvd2l6bmd1cXN3aXJyaHhzYnBtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTk2MzQ0NCwiZXhwIjoyMDY1NTM5NDQ0fQ.Pt3lSqXx5eRq25rWWbeKxsjsal96w9GG4Ok5TNh_FRQ"
+ADMIN_EMAIL = "rameezuddinmohammed61@gmail.com"
+
+# Firebase configuration
+FIREBASE_CONFIG = {
+    "apiKey": "AIzaSyDjJTOdsvjaa90z53RYkFB-wVyzPz-9sG4",
+    "authDomain": "scenariocat-fb81d.firebaseapp.com",
+    "projectId": "scenariocat-fb81d",
+    "storageBucket": "scenariocat-fb81d.firebasestorage.app",
+    "messagingSenderId": "142415481422",
+    "appId": "1:142415481422:web:4d1673fbe3e38014fe911f"
+}
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("FRONTEND_URLS", "http://localhost:3000,http://localhost:5173").split(","),
+    allow_origins=FRONTEND_URLS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Supabase configuration
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-
 # Create Supabase clients
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-admin_supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-
-# Firebase configuration
-FIREBASE_CONFIG = {
-    "apiKey": os.getenv("FIREBASE_API_KEY"),
-    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
-    "projectId": os.getenv("FIREBASE_PROJECT_ID"),
-    "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
-    "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID"),
-    "appId": os.getenv("FIREBASE_APP_ID")
-}
+try:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+    admin_supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    print("✅ Supabase clients initialized successfully")
+except Exception as e:
+    print(f"❌ Supabase initialization failed: {e}")
+    supabase = None
+    admin_supabase = None
 
 # Initialize Firebase Admin SDK
 def initialize_firebase():
     """Initialize Firebase Admin SDK"""
     try:
         if not firebase_admin._apps:
-            # Try to use service account key first
-            service_account_key = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY")
-            
-            if service_account_key:
-                # Parse the service account key from environment
-                service_account_info = json.loads(service_account_key)
-                cred = credentials.Certificate(service_account_info)
-                firebase_admin.initialize_app(cred)
-                print("✅ Firebase Admin initialized with service account")
-            else:
-                # Fallback to minimal config for development
-                firebase_admin.initialize_app(options={
-                    'projectId': FIREBASE_CONFIG["projectId"]
-                })
-                print("✅ Firebase Admin initialized with project ID only")
+            # Initialize with minimal config for development
+            firebase_admin.initialize_app(options={
+                'projectId': FIREBASE_CONFIG["projectId"]
+            })
+            print("✅ Firebase Admin initialized successfully")
         return True
     except Exception as e:
         print(f"❌ Firebase Admin initialization failed: {e}")
@@ -73,9 +67,6 @@ def initialize_firebase():
 
 # Initialize Firebase
 firebase_initialized = initialize_firebase()
-
-# Admin email
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "rameezuddinmohammed61@gmail.com")
 
 # Pydantic models
 class Problem(BaseModel):
@@ -152,6 +143,9 @@ async def get_current_user(request: Request):
 async def get_or_create_user_profile(firebase_user: Dict[str, Any]) -> Dict[str, Any]:
     """Get or create user profile in Supabase"""
     try:
+        if admin_supabase is None:
+            raise Exception("Supabase not initialized")
+            
         # Check if user exists in Supabase
         result = admin_supabase.table("users").select("*").eq("firebase_uid", firebase_user["uid"]).execute()
         
@@ -212,7 +206,9 @@ async def health_check():
         "timestamp": datetime.now(), 
         "auth": "firebase",
         "database": "supabase",
-        "version": "2.0.0"
+        "version": "2.0.0",
+        "firebase_initialized": firebase_initialized,
+        "supabase_initialized": admin_supabase is not None
     }
 
 # User Routes
@@ -225,6 +221,16 @@ async def get_current_user_profile(current_user=Depends(get_current_user)):
 async def get_user_progress(current_user=Depends(get_current_user)):
     """Get user progress and statistics"""
     try:
+        if admin_supabase is None:
+            return {
+                "total_problems_solved": 0,
+                "total_score": 0,
+                "current_streak": 0,
+                "longest_streak": 0,
+                "problems_by_difficulty": {"easy": 0, "medium": 0, "hard": 0},
+                "recent_activity": []
+            }
+            
         # Get user's solutions from Supabase
         solutions_result = admin_supabase.table("solutions").select("*").eq("user_id", current_user["id"]).execute()
         solutions = solutions_result.data or []
@@ -267,6 +273,8 @@ async def get_user_progress(current_user=Depends(get_current_user)):
 async def get_user_solutions(current_user=Depends(get_current_user)):
     """Get user's solutions"""
     try:
+        if admin_supabase is None:
+            return []
         result = admin_supabase.table("solutions").select("*").eq("user_id", current_user["id"]).execute()
         return result.data or []
     except Exception as e:
@@ -283,6 +291,8 @@ async def get_problems(
 ):
     """Get all problems with optional filtering"""
     try:
+        if admin_supabase is None:
+            return []
         query = admin_supabase.table("problems").select("*")
         
         if category:
@@ -302,6 +312,8 @@ async def get_problems(
 async def get_problem(problem_id: str):
     """Get a specific problem by ID"""
     try:
+        if admin_supabase is None:
+            raise HTTPException(status_code=500, detail="Database not available")
         result = admin_supabase.table("problems").select("*").eq("id", problem_id).execute()
         if not result.data:
             raise HTTPException(status_code=404, detail="Problem not found")
@@ -316,6 +328,9 @@ async def get_problem(problem_id: str):
 async def get_categories():
     """Get available categories and domains"""
     try:
+        if admin_supabase is None:
+            return {"categories": [], "domains": [], "difficulties": []}
+            
         # Get unique categories
         categories_result = admin_supabase.table("problems").select("category").execute()
         categories = list(set(item["category"] for item in categories_result.data or []))
@@ -341,6 +356,14 @@ async def get_categories():
 async def get_stats():
     """Get platform statistics"""
     try:
+        if admin_supabase is None:
+            return {
+                "total_problems": 0,
+                "total_users": 0,
+                "problems_solved_today": 0,
+                "active_users": 0
+            }
+            
         # Get total problems
         problems_result = admin_supabase.table("problems").select("id", count="exact").execute()
         total_problems = problems_result.count or 0
@@ -372,6 +395,8 @@ async def get_stats():
 async def get_daily_challenge():
     """Get today's daily challenge"""
     try:
+        if admin_supabase is None:
+            raise HTTPException(status_code=500, detail="Database not available")
         result = admin_supabase.table("problems").select("*").limit(1).execute()
         if not result.data:
             raise HTTPException(status_code=404, detail="No daily challenge available")
@@ -386,6 +411,9 @@ async def get_daily_challenge():
 async def submit_solution(solution: Solution, current_user=Depends(get_current_user)):
     """Submit a solution for a problem"""
     try:
+        if admin_supabase is None:
+            raise HTTPException(status_code=500, detail="Database not available")
+            
         solution_data = {
             "id": str(uuid.uuid4()),
             "problem_id": solution.problem_id,
@@ -407,6 +435,15 @@ async def submit_solution(solution: Solution, current_user=Depends(get_current_u
 async def get_admin_dashboard(admin_user=Depends(get_admin_user)):
     """Get admin dashboard data"""
     try:
+        if admin_supabase is None:
+            return {
+                "total_problems": 0,
+                "total_users": 0,
+                "total_solutions": 0,
+                "active_competitions": 0,
+                "recent_activity": []
+            }
+            
         # Get counts
         problems_result = admin_supabase.table("problems").select("id", count="exact").execute()
         users_result = admin_supabase.table("users").select("id", count="exact").execute()
@@ -441,6 +478,14 @@ async def get_admin_users(
 ):
     """Get all users for admin management"""
     try:
+        if admin_supabase is None:
+            return {
+                "users": [],
+                "total": 0,
+                "page": page,
+                "limit": limit
+            }
+            
         offset = (page - 1) * limit
         result = admin_supabase.table("users").select("*").range(offset, offset + limit - 1).execute()
         
@@ -466,6 +511,8 @@ async def get_admin_users(
 async def get_admin_problems(admin_user=Depends(get_admin_user)):
     """Get all problems for admin management"""
     try:
+        if admin_supabase is None:
+            return []
         result = admin_supabase.table("problems").select("*").execute()
         return result.data or []
     except Exception as e:
@@ -476,6 +523,9 @@ async def get_admin_problems(admin_user=Depends(get_admin_user)):
 async def create_problem(problem: Problem, admin_user=Depends(get_admin_user)):
     """Create a new problem"""
     try:
+        if admin_supabase is None:
+            raise HTTPException(status_code=500, detail="Database not available")
+            
         problem_data = {
             "id": str(uuid.uuid4()),
             "title": problem.title,
@@ -503,6 +553,9 @@ async def update_problem(
 ):
     """Update an existing problem"""
     try:
+        if admin_supabase is None:
+            raise HTTPException(status_code=500, detail="Database not available")
+            
         problem_data = {
             "title": problem.title,
             "description": problem.description,
@@ -528,6 +581,8 @@ async def update_problem(
 async def delete_problem(problem_id: str, admin_user=Depends(get_admin_user)):
     """Delete a problem"""
     try:
+        if admin_supabase is None:
+            raise HTTPException(status_code=500, detail="Database not available")
         result = admin_supabase.table("problems").delete().eq("id", problem_id).execute()
         return {"message": f"Problem {problem_id} deleted successfully"}
     except Exception as e:
@@ -538,6 +593,9 @@ async def delete_problem(problem_id: str, admin_user=Depends(get_admin_user)):
 async def get_admin_solutions(admin_user=Depends(get_admin_user)):
     """Get all submitted solutions for admin review"""
     try:
+        if admin_supabase is None:
+            return {"solutions": [], "total": 0}
+            
         # Get solutions with problem details
         solutions_result = admin_supabase.table("solutions").select("*, problems(title, difficulty)").execute()
         
@@ -564,6 +622,9 @@ async def get_admin_solutions(admin_user=Depends(get_admin_user)):
 async def get_problem_solutions(problem_id: str, admin_user=Depends(get_admin_user)):
     """Get all solutions for a specific problem"""
     try:
+        if admin_supabase is None:
+            raise HTTPException(status_code=500, detail="Database not available")
+            
         # Get problem details
         problem_result = admin_supabase.table("problems").select("*").eq("id", problem_id).execute()
         if not problem_result.data:
