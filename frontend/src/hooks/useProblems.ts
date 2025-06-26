@@ -9,7 +9,7 @@ export const useProblems = (filters?: {
   category?: string;
   limit?: number;
 }) => {
-  const result = useApiWithFallback(
+  const result = useApiWithFallback<Problem[]>(
     () => apiService.getProblems(filters),
     mockProblems,
     [filters?.domain, filters?.difficulty, filters?.category, filters?.limit]
