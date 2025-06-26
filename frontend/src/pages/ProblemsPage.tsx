@@ -283,7 +283,9 @@ const ProblemsPage: React.FC = () => {
               <div>
                 <h3 className="text-sm font-medium text-foreground mb-3">Categories</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {Object.entries(categories).map(([category, config]) => (
+                  {Object.entries(categories).filter(([category]) => 
+                    availableCategories.length === 0 || availableCategories.includes(category)
+                  ).map(([category, config]) => (
                     <div key={category}>
                       <Button
                         variant={selectedCategory === category ? "secondary" : "outline"}
