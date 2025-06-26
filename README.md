@@ -219,6 +219,33 @@ The application uses a modern dark theme with Tailwind CSS featuring:
   - Accent: Emerald for primary actions
   - Domain Colors: Blue, Purple, Orange, Cyan for categorization
 
+## 🛠️ Development
+
+### Running in Development Mode
+```bash
+# Backend with hot reload
+cd backend && uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+
+# Frontend with hot reload
+yarn dev --host 0.0.0.0 --port 3000
+```
+
+### Testing
+```bash
+# Test admin authentication
+python test_admin.py
+
+# Test API endpoints
+curl http://localhost:8001/api/health
+```
+
+### Common Issues & Solutions
+
+1. **Frontend won't start**: Ensure all dependencies are installed with `yarn install`
+2. **Backend errors**: Check that all Python packages are installed with `pip install -r requirements.txt`
+3. **Authentication issues**: Verify Firebase configuration in both frontend and backend
+4. **Port conflicts**: The frontend may start on port 3001, 3002, or 3003 if 3000 is occupied
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -233,8 +260,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🔗 Links
 
-- **Live Demo**: [CaseForge Platform](https://caseforge911.vercel.app)
-- **Documentation**: [API Docs](http://localhost:8001/docs)
+- **API Documentation**: http://localhost:8001/docs (when running locally)
+- **Admin Panel**: http://localhost:3000/admin/login
+- **Frontend**: http://localhost:3000
 
 ---
 
