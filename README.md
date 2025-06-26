@@ -117,21 +117,32 @@ CaseForge provides access to practical, case-based learning across domains like:
 ```
 caseforge/
 ├── backend/                 # FastAPI backend
-│   ├── server.py           # Main application file
+│   ├── server.py           # Main application file with hardcoded config
 │   ├── requirements.txt    # Python dependencies
-│   └── .env               # Backend environment variables
+│   ├── firebase_config.py  # Firebase admin configuration
+│   ├── create_admin_user.py # Admin user creation script
+│   └── init_supabase.py    # Supabase initialization
 ├── src/                    # React frontend source
 │   ├── components/        # Reusable UI components
+│   │   ├── auth/         # Authentication components
+│   │   ├── admin/        # Admin panel components
+│   │   └── layout/       # Layout components
 │   ├── pages/            # Page components
+│   │   ├── auth/         # Authentication pages
+│   │   └── admin/        # Admin pages
 │   ├── hooks/            # Custom React hooks
 │   ├── services/         # API service layer
 │   ├── context/          # React context providers
-│   └── constants/        # Application constants
-├── public/                # Static assets
-├── package.json          # Frontend dependencies
-├── vite.config.ts        # Vite configuration
-├── tailwind.config.js    # Tailwind CSS configuration
-└── README.md            # Project documentation
+│   │   ├── AuthContext.tsx      # User authentication context
+│   │   └── AdminAuthContext.tsx # Admin authentication context
+│   ├── lib/              # Utility libraries
+│   │   └── firebase.ts   # Firebase client configuration
+│   └── types/            # TypeScript type definitions
+├── public/               # Static assets
+├── package.json         # Frontend dependencies
+├── vite.config.ts       # Vite configuration
+├── tailwind.config.js   # Tailwind CSS configuration
+└── README.md           # Project documentation
 ```
 
 ## 🧪 API Endpoints
