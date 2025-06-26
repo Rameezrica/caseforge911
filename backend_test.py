@@ -248,23 +248,8 @@ class CaseForgeAuthTester:
         return self.tests_passed == self.tests_run
 
 def main():
-    # Get the API URL from the frontend .env file
-    api_base_url = None
-    try:
-        with open('/app/.env', 'r') as f:
-            for line in f:
-                if line.startswith('VITE_API_BASE_URL='):
-                    api_base_url = line.strip().split('=')[1]
-                    break
-    except Exception as e:
-        print(f"Error reading .env file: {e}")
-    
-    # Use the API URL from environment or default to http://localhost:8001/api
-    api_url = api_base_url or "/api"
-    
-    # If the API URL is relative, use the full URL
-    if api_url.startswith('/'):
-        api_url = f"http://localhost:8001{api_url}"
+    # Use the API URL from the backend server
+    api_url = "http://localhost:8001/api"
     
     print(f"Testing CaseForge Authentication API at: {api_url}")
     tester = CaseForgeAuthTester(api_url)
