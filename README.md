@@ -18,11 +18,13 @@ CaseForge provides access to practical, case-based learning across domains like:
 ## ⚙️ Features
 
 - **📝 Solve Case Problems**: Tackle realistic, data-backed business challenges from top companies
+- **🔐 User Authentication**: Secure Firebase-based authentication system
+- **👑 Admin Panel**: Comprehensive admin dashboard for content management
+- **📊 Progress Tracking**: Monitor your progress across difficulty levels and domains
+- **💡 Solution Submission**: Submit and track your case study solutions
 - **🎯 Daily Challenges**: Fresh problems every day to maintain your practice streak
-- **📊 Practice by Domain**: Focused learning paths for different business functions
-- **🏆 Skill Tracking**: Monitor your progress across difficulty levels and domains
-- **📈 Study Plans**: Structured learning journeys for career goals
-- **🌟 Community**: Connect with other learners and share solutions
+- **🌟 Community Features**: Connect with other learners and share insights
+- **📈 Analytics Dashboard**: Detailed insights for both users and administrators
 
 ## 🔧 Tech Stack
 
