@@ -150,14 +150,14 @@ const ProblemsPage: React.FC = () => {
         result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case 'popular':
-        result.sort((a, b) => b.solvedCount - a.solvedCount);
+        result.sort((a, b) => (b.solvedCount || 0) - (a.solvedCount || 0));
         break;
       case 'difficulty':
         const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
         result.sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
         break;
       case 'time':
-        result.sort((a, b) => a.timeLimit - b.timeLimit);
+        result.sort((a, b) => (a.timeLimit || 60) - (b.timeLimit || 60));
         break;
     }
     
