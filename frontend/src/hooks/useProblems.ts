@@ -1,6 +1,7 @@
 import { apiService } from '../services/api';
 import { useApiWithFallback } from './useApiWithFallback';
 import { problems as mockProblems } from '../data/mockData';
+import { Problem } from '../types';
 
 export const useProblems = (filters?: {
   domain?: string;
