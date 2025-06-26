@@ -27,7 +27,7 @@ export const useProblems = (filters?: {
 export const useProblem = (id: string) => {
   const mockProblem = mockProblems.find(p => p.id === id);
   
-  const result = useApiWithFallback(
+  const result = useApiWithFallback<Problem>(
     () => apiService.getProblem(id),
     mockProblem,
     [id]
