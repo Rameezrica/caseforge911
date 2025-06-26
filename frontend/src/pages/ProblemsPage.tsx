@@ -52,7 +52,7 @@ const ProblemsPage: React.FC = () => {
   }, []);
 
   const categories = {
-    'Strategy & Consulting': {
+    'Strategy': {
       subcategories: [
         'Market Analysis',
         'Growth Strategy', 
@@ -62,17 +62,17 @@ const ProblemsPage: React.FC = () => {
       ],
       icon: <Briefcase className="h-5 w-5" />
     },
-    'Finance & Investment': {
+    'Marketing': {
       subcategories: [
-        'Financial Modeling',
-        'Investment Analysis',
-        'Corporate Finance', 
-        'Personal Finance',
-        'Quantitative Finance'
+        'Customer Segmentation',
+        'Pricing Strategy',
+        'Campaign Optimization',
+        'Brand Strategy',
+        'Digital Marketing'
       ],
-      icon: <BarChart className="h-5 w-5" />
+      icon: <TrendingUp className="h-5 w-5" />
     },
-    'Operations & Supply Chain': {
+    'Operations': {
       subcategories: [
         'Supply Chain Optimization',
         'Process Improvement',
@@ -82,15 +82,15 @@ const ProblemsPage: React.FC = () => {
       ],
       icon: <Settings className="h-5 w-5" />
     },
-    'Marketing & Growth': {
+    'Finance': {
       subcategories: [
-        'Customer Segmentation',
-        'Pricing Strategy',
-        'Campaign Optimization',
-        'Brand Strategy',
-        'Digital Marketing'
+        'Financial Modeling',
+        'Investment Analysis',
+        'Corporate Finance', 
+        'Personal Finance',
+        'Quantitative Finance'
       ],
-      icon: <TrendingUp className="h-5 w-5" />
+      icon: <BarChart className="h-5 w-5" />
     },
     'Data Analytics': {
       subcategories: [
@@ -104,7 +104,7 @@ const ProblemsPage: React.FC = () => {
     }
   };
 
-  const difficulties = ['Easy', 'Medium', 'Hard'];
+  const difficulties = availableDifficulties.length > 0 ? availableDifficulties : ['Easy', 'Medium', 'Hard'];
   const timeRanges = [30, 45, 60, 90, 120];
 
   useEffect(() => {
