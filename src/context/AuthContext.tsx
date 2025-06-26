@@ -10,8 +10,9 @@ import {
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+// Hardcoded configuration
+const API_BASE_URL = '/api';
+const ADMIN_EMAIL = 'rameezuddinmohammed61@gmail.com';
 
 // Types
 export interface UserProfile {
@@ -79,14 +80,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('Setting up Firebase auth state listener...');
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       console.log('Firebase auth state changed:', firebaseUser?.email);
       setIsLoading(true);
       
       if (firebaseUser) {
         try {
+          console.log('User authenticated, getting ID token...');
           // Get Firebase ID token
           const idToken = await firebaseUser.getIdToken();
+          console.log('Got Firebase ID token');
           
           // Store token for API calls
           localStorage.setItem('firebase_id_token', idToken);
@@ -102,6 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } else {
         // User signed out
+        console.log('User signed out');
         localStorage.removeItem('firebase_id_token');
         setUser(null);
         setIsAuthenticated(false);
@@ -117,6 +122,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loadUserDataWithFirebaseToken = async (idToken: string) => {
     try {
+      console.log('Loading user profile from backend...');
       // Get user profile from backend using Firebase token
       const profileResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
@@ -127,11 +133,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (profileResponse.ok) {
         const profile = await profileResponse.json();
+        console.log('User profile loaded:', profile);
         setUserProfile(profile);
       } else {
-        console.error('Failed to load user profile:', profileResponse.status);
+        console.error('Failed to load user profile:', profileResponse.status, await profileResponse.text());
       }
 
+      console.log('Loading user progress from backend...');
       // Get user progress from backend
       const progressResponse = await fetch(`${API_BASE_URL}/user/progress`, {
         headers: {
@@ -142,9 +150,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (progressResponse.ok) {
         const progress = await progressResponse.json();
+        console.log('User progress loaded:', progress);
         setUserProgress(progress);
       } else {
-        console.error('Failed to load user progress:', progressResponse.status);
+        console.error('Failed to load user progress:', progressResponse.status, await progressResponse.text());
       }
     } catch (error: any) {
       console.error('Failed to load user data with Firebase token:', error);
@@ -161,15 +170,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('Signing up user:', email);
 
       // Create user with Firebase
       const userCredential: UserCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('Firebase user created:', userCredential.user.uid);
       
       // Update the user's display name
       if (userCredential.user && (fullName || username)) {
         await updateProfile(userCredential.user, {
           displayName: fullName || username
         });
+        console.log('User display name updated');
       }
 
       // The onAuthStateChanged listener will handle the rest
@@ -187,9 +199,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('Signing in user:', email);
 
       // Sign in with Firebase
       await signInWithEmailAndPassword(auth, email, password);
+      console.log('Firebase sign in successful');
       
       // The onAuthStateChanged listener will handle the rest
       return true;
@@ -205,6 +219,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async (): Promise<void> => {
     try {
       setError(null);
+      console.log('Signing out user...');
       
       // Sign out from Firebase
       await firebaseSignOut(auth);
@@ -213,6 +228,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.removeItem('firebase_id_token');
       
       // The onAuthStateChanged listener will handle clearing state
+      console.log('Sign out successful');
     } catch (error: any) {
       console.error('Sign out error:', error);
       // Even if sign out fails, clear local state
@@ -228,6 +244,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) return;
     
     try {
+      console.log('Refreshing user data...');
       const idToken = await user.getIdToken(true); // Force refresh
       localStorage.setItem('firebase_id_token', idToken);
       await loadUserDataWithFirebaseToken(idToken);

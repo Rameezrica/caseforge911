@@ -1,13 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
-// Try multiple possible API URLs for WebContainer compatibility
-const possibleApiUrls = [
-  import.meta.env.VITE_API_BASE_URL || '/api',
-  'http://localhost:8001/api',
-  '/api'
-];
-
-let API_BASE_URL = possibleApiUrls[0];
+// Hardcoded API configuration
+const API_BASE_URL = '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -17,34 +11,13 @@ const api = axios.create({
   },
 });
 
-// Function to test API connectivity and switch URLs if needed
-const testApiConnectivity = async () => {
-  for (const url of possibleApiUrls) {
-    try {
-      const testApi = axios.create({
-        baseURL: url,
-        timeout: 5000,
-      });
-      await testApi.get('/health');
-      console.log(`✅ API accessible at: ${url}`);
-      API_BASE_URL = url;
-      api.defaults.baseURL = url;
-      return true;
-    } catch (error) {
-      console.log(`❌ API not accessible at: ${url}`);
-    }
-  }
-  return false;
-};
-
 api.interceptors.request.use(
   (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     
     // Add authentication headers
     const firebaseToken = localStorage.getItem('firebase_id_token');
-    const userToken = localStorage.getItem('caseforge_access_token');
-    const adminToken = localStorage.getItem('caseforge_admin_access_token');
+    const adminToken = localStorage.getItem('admin_firebase_id_token');
     
     // Prioritize admin token for admin routes
     if (config.url?.includes('/admin') && adminToken) {
@@ -52,9 +25,6 @@ api.interceptors.request.use(
     } else if (firebaseToken) {
       // Use Firebase ID token for authentication
       config.headers.Authorization = `Bearer ${firebaseToken}`;
-    } else if (userToken) {
-      // Fallback to old token system
-      config.headers.Authorization = `Bearer ${userToken}`;
     }
     
     return config;
@@ -74,13 +44,6 @@ api.interceptors.response.use(
     console.error('❌ API Response Error:', error);
     
     if (error.code === 'ERR_NETWORK') {
-      console.log('🔄 Network error detected, trying to find working API URL...');
-      const connected = await testApiConnectivity();
-      if (connected) {
-        console.log('🔄 Retrying request with new API URL...');
-        // Retry the original request with the new URL
-        return api.request(error.config!);
-      }
       throw new Error('❌ Unable to connect to the backend server. Please ensure the backend is running on port 8001.');
     }
     
@@ -93,6 +56,13 @@ api.interceptors.response.use(
       const message = error.response.data?.message || error.message;
       
       switch (status) {
+        case 401:
+          // Token expired or invalid - clear tokens
+          localStorage.removeItem('firebase_id_token');
+          localStorage.removeItem('admin_firebase_id_token');
+          throw new Error(`🔐 Authentication failed: ${message}`);
+        case 403:
+          throw new Error(`🚫 Access forbidden: ${message}`);
         case 404:
           throw new Error(`🔍 Resource not found: ${message}`);
         case 500:
@@ -146,9 +116,7 @@ export const checkServerHealth = async (): Promise<boolean> => {
     return true;
   } catch (error) {
     console.warn('❌ Server health check failed:', error);
-    // Try to find a working API URL
-    const connected = await testApiConnectivity();
-    return connected;
+    return false;
   }
 };
 
@@ -289,11 +257,4 @@ export const apiService = {
   }
 };
 
-// Initialize connectivity test on module load
-testApiConnectivity().then(connected => {
-  if (connected) {
-    console.log('🚀 API connectivity established');
-  } else {
-    console.warn('⚠️ No API connectivity found');
-  }
-});
+export default api;

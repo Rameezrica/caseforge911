@@ -7,8 +7,9 @@ import {
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+// Hardcoded configuration
+const API_BASE_URL = '/api';
+const ADMIN_EMAIL = 'rameezuddinmohammed61@gmail.com';
 
 interface AdminUser {
   id: string;
@@ -51,12 +52,14 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('Setting up Admin Firebase auth state listener...');
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log('Admin Firebase auth state changed:', user?.email);
       setIsLoading(true);
       
       if (user && user.email === ADMIN_EMAIL) {
         try {
+          console.log('Admin user authenticated, getting ID token...');
           // Get Firebase ID token
           const idToken = await user.getIdToken();
           
@@ -74,10 +77,12 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
         }
       } else if (user && user.email !== ADMIN_EMAIL) {
         // User is authenticated but not admin
+        console.log('Non-admin user tried to access admin area');
         setError('Admin access required');
         await firebaseSignOut(auth);
       } else {
         // User signed out
+        console.log('Admin user signed out');
         localStorage.removeItem('admin_firebase_id_token');
         setFirebaseUser(null);
         setAdminUser(null);
@@ -92,6 +97,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
   const loadAdminProfile = async (idToken: string) => {
     try {
+      console.log('Loading admin profile from backend...');
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${idToken}`,
@@ -101,12 +107,15 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
       if (response.ok) {
         const profile = await response.json();
+        console.log('Admin profile loaded:', profile);
         if (profile.is_admin) {
           setAdminUser(profile);
         } else {
           throw new Error('User is not an admin');
         }
       } else {
+        const errorText = await response.text();
+        console.error('Failed to load admin profile:', response.status, errorText);
         throw new Error('Failed to load admin profile');
       }
     } catch (error: any) {
@@ -119,6 +128,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     try {
       setIsLoading(true);
       setError(null);
+      console.log('Admin signing in:', email);
 
       // Check if email is admin email
       if (email !== ADMIN_EMAIL) {
@@ -127,6 +137,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
       // Sign in with Firebase
       await signInWithEmailAndPassword(auth, email, password);
+      console.log('Admin Firebase sign in successful');
       
       // The onAuthStateChanged listener will handle the rest
       return true;
@@ -142,6 +153,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   const signOut = async (): Promise<void> => {
     try {
       setError(null);
+      console.log('Admin signing out...');
       
       // Sign out from Firebase
       await firebaseSignOut(auth);
@@ -150,6 +162,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       localStorage.removeItem('admin_firebase_id_token');
       
       // The onAuthStateChanged listener will handle clearing state
+      console.log('Admin sign out successful');
     } catch (error: any) {
       console.error('Admin sign out error:', error);
       // Even if sign out fails, clear local state
