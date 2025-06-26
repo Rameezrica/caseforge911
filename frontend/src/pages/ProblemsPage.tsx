@@ -27,9 +27,29 @@ const ProblemsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [timeRange, setTimeRange] = useState<number | null>(null);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availableDifficulties, setAvailableDifficulties] = useState<string[]>([]);
 
   const { problems, loading } = useProblems();
   const [filteredProblems, setFilteredProblems] = useState(problems);
+
+  // Load categories and difficulties from backend
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoriesData = await apiService.getCategories();
+        setAvailableCategories(categoriesData.categories || []);
+        setAvailableDifficulties(categoriesData.difficulties || []);
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+        // Fallback to default categories
+        setAvailableCategories(['Strategy', 'Marketing', 'Operations', 'Finance']);
+        setAvailableDifficulties(['Easy', 'Medium', 'Hard']);
+      }
+    };
+    
+    loadCategories();
+  }, []);
 
   const categories = {
     'Strategy & Consulting': {
