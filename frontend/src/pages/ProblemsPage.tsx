@@ -138,6 +138,7 @@ const ProblemsPage: React.FC = () => {
       const term = searchTerm.toLowerCase();
       result = result.filter(problem => 
         problem.title.toLowerCase().includes(term) || 
+        problem.company?.toLowerCase().includes(term) || 
         problem.companyContext?.toLowerCase().includes(term) || 
         problem.description.toLowerCase().includes(term) ||
         problem.tags?.some(tag => tag.toLowerCase().includes(term))
