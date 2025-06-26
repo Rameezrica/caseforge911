@@ -1,11 +1,14 @@
 import axios, { AxiosError } from 'axios';
+import { BackendProblem, transformBackendProblem, Problem } from '../types';
 
-// Hardcoded API configuration
-const API_BASE_URL = '/api';
+// Get backend URL from environment variable
+const API_BASE_URL = import.meta.env.REACT_APP_BACKEND_URL ? 
+  `${import.meta.env.REACT_APP_BACKEND_URL}/api` : 
+  '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -76,20 +79,6 @@ api.interceptors.response.use(
   }
 );
 
-export interface Problem {
-  id: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  category: string;
-  domain: string;
-  company?: string;
-  time_limit?: number;
-  sample_framework?: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface PlatformStats {
   total_problems: number;
   total_solutions: number;
@@ -98,9 +87,9 @@ export interface PlatformStats {
 }
 
 interface CategoryInfo {
-  domain: string;
   categories: string[];
-  problem_count: number;
+  domains: string[];
+  difficulties: string[];
 }
 
 export interface DailyChallenge {
@@ -131,30 +120,36 @@ export const apiService = {
     difficulty?: string;
     category?: string;
     limit?: number;
-  }) {
+  }): Promise<Problem[]> {
     try {
       const response = await api.get('/problems', { params: filters });
-      return response.data as Problem[];
+      const backendProblems: BackendProblem[] = response.data;
+      
+      // Transform backend problems to frontend format
+      return backendProblems.map(transformBackendProblem);
     } catch (error) {
       console.error('Failed to fetch problems:', error);
       throw error;
     }
   },
 
-  async getProblem(id: string) {
+  async getProblem(id: string): Promise<Problem> {
     try {
       const response = await api.get(`/problems/${id}`);
-      return response.data as Problem;
+      const backendProblem: BackendProblem = response.data;
+      
+      // Transform backend problem to frontend format
+      return transformBackendProblem(backendProblem);
     } catch (error) {
       console.error(`Failed to fetch problem ${id}:`, error);
       throw error;
     }
   },
 
-  async getCategories() {
+  async getCategories(): Promise<CategoryInfo> {
     try {
       const response = await api.get('/categories');
-      return response.data as CategoryInfo[];
+      return response.data as CategoryInfo;
     } catch (error) {
       console.error('Failed to fetch categories:', error);
       throw error;
@@ -174,7 +169,14 @@ export const apiService = {
   async getDailyChallenge() {
     try {
       const response = await api.get('/daily-challenge');
-      return response.data as DailyChallenge;
+      const backendData = response.data;
+      
+      // Transform the problem in daily challenge
+      if (backendData.problem) {
+        backendData.problem = transformBackendProblem(backendData.problem);
+      }
+      
+      return backendData as DailyChallenge;
     } catch (error) {
       console.error('Failed to fetch daily challenge:', error);
       throw error;
@@ -219,7 +221,10 @@ export const apiService = {
   async getAdminProblems() {
     try {
       const response = await api.get('/admin/problems');
-      return response.data;
+      const backendProblems: BackendProblem[] = response.data;
+      
+      // Transform backend problems to frontend format
+      return backendProblems.map(transformBackendProblem);
     } catch (error) {
       console.error('Failed to fetch admin problems:', error);
       throw error;
