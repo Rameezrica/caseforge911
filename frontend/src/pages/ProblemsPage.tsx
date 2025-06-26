@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProblems } from '../hooks/useProblems';
+import { apiService } from '../services/api';
 import ProblemCard from '../components/common/ProblemCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
