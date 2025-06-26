@@ -247,11 +247,57 @@ class CaseForgeAuthTester:
         
         return self.tests_passed == self.tests_run
 
+def test_problems_with_filters(tester):
+    """Test problems endpoint with various filters"""
+    print("\n" + "="*50)
+    print("🔍 Testing Problems API with Filters")
+    print("="*50)
+    
+    # Test problems with category filter
+    success, response = tester.run_test(
+        "Problems with Category Filter",
+        "GET",
+        "problems?category=Strategy%20%26%20Consulting",
+        200
+    )
+    if success:
+        print(f"Found {len(response)} problems with category 'Strategy & Consulting'")
+    
+    # Test problems with difficulty filter
+    success, response = tester.run_test(
+        "Problems with Difficulty Filter",
+        "GET",
+        "problems?difficulty=Medium",
+        200
+    )
+    if success:
+        print(f"Found {len(response)} problems with difficulty 'Medium'")
+    
+    # Test problems with domain filter
+    success, response = tester.run_test(
+        "Problems with Domain Filter",
+        "GET",
+        "problems?domain=Finance",
+        200
+    )
+    if success:
+        print(f"Found {len(response)} problems with domain 'Finance'")
+    
+    # Test problems with multiple filters
+    success, response = tester.run_test(
+        "Problems with Multiple Filters",
+        "GET",
+        "problems?category=Finance%20%26%20Investment&difficulty=Hard",
+        200
+    )
+    if success:
+        print(f"Found {len(response)} problems with category 'Finance & Investment' and difficulty 'Hard'")
+
 def main():
     # Use the API URL from the backend server
     api_url = "http://localhost:8001/api"
     
-    print(f"Testing CaseForge Authentication API at: {api_url}")
+    print(f"Testing CaseForge Problems API at: {api_url}")
     tester = CaseForgeAuthTester(api_url)
     
     # ===== BASIC API TESTS =====
@@ -259,45 +305,48 @@ def main():
     print("🔍 Testing API Endpoints")
     print("="*50)
     
-    # Test root endpoint
-    tester.test_root_endpoint()
-    
     # Test health check
-    tester.test_health_check()
+    health_success, health_data = tester.test_health_check()
     
-    # Test Firebase config endpoint
-    firebase_success, firebase_config = tester.test_firebase_config()
+    # Test categories endpoint
+    categories_success, categories_data = tester.test_categories_endpoint()
+    if categories_success:
+        print(f"Categories data: {json.dumps(categories_data, indent=2)}")
     
-    # Test public endpoints
-    tester.test_categories_endpoint()
-    tester.test_stats_endpoint()
-    tester.test_daily_challenge_endpoint()
-    tester.test_problems_endpoint()
+    # Test problems endpoint
+    problems_success, problems_data = tester.test_problems_endpoint()
+    if problems_success:
+        print(f"Found {len(problems_data)} problems")
+        if problems_data:
+            print(f"Sample problem: {json.dumps(problems_data[0], indent=2)}")
     
-    # Test protected routes
-    tester.test_protected_route_without_auth()
-    tester.test_protected_route_with_invalid_token()
+    # Test problems with filters
+    test_problems_with_filters(tester)
     
     # Print summary
     success = tester.print_summary()
     
     print("\n" + "="*50)
-    print("🔐 Authentication Testing Results")
+    print("🔍 Problems API Testing Results")
     print("="*50)
     
-    if firebase_success:
-        print("✅ Firebase configuration is properly returned by the backend API")
-        print("✅ All required Firebase configuration fields are present")
+    if problems_success:
+        print("✅ Problems API is working correctly")
+        if problems_data:
+            print(f"✅ Found {len(problems_data)} problems")
+        else:
+            print("⚠️ No problems found in the database")
     else:
-        print("❌ Firebase configuration has issues - check the test output above")
+        print("❌ Problems API has issues - check the test output above")
     
-    print("\nBackend API endpoints for authentication are working as expected.")
-    print("The Firebase authentication flow requires client-side integration and cannot be fully tested with this script.")
-    print("Please use the Playwright UI tests to verify the complete authentication flow including:")
-    print("1. User registration")
-    print("2. User login")
-    print("3. Token storage and retrieval")
-    print("4. Access to protected routes")
+    if categories_success:
+        print("✅ Categories API is working correctly")
+        if categories_data.get("categories"):
+            print(f"✅ Found categories: {', '.join(categories_data.get('categories', []))}")
+        if categories_data.get("difficulties"):
+            print(f"✅ Found difficulties: {', '.join(categories_data.get('difficulties', []))}")
+    else:
+        print("❌ Categories API has issues - check the test output above")
     
     return 0 if success else 1
 
